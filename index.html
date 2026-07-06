@@ -3,927 +3,681 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Layout Builder — เครื่องมือจัดหน้าเว็บ (Drag & Drop)</title>
+<title>Layout Builder — Programmer Edition</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-  :root{
-    --bg:#0a0e14;
-    --bg-panel:#10151c;
-    --bg-panel-alt:#161d27;
-    --border:#232b38;
-    --border-soft:#1a212c;
-    --text:#c8d3f5;
-    --text-dim:#5c6773;
-    --blue:#7aa2f7;
-    --green:#9ece6a;
-    --orange:#e0af68;
-    --pink:#bb9af7;
-    --red:#f7768e;
-    --cyan:#7dcfff;
-  }
-  * { margin:0; padding:0; box-sizing:border-box; }
-  body {
-    font-family:'JetBrains Mono','Fira Code',monospace;
-    background: var(--bg);
-    color: var(--text);
-    min-height:100vh;
-  }
-  ::-webkit-scrollbar { width:10px; height:10px; }
-  ::-webkit-scrollbar-track { background:var(--bg-panel); }
-  ::-webkit-scrollbar-thumb { background:var(--border); border-radius:6px; }
-  ::-webkit-scrollbar-thumb:hover { background:var(--text-dim); }
+/* ═══════════════════════════════════════════
+   Catppuccin Mocha — Programmer Theme
+   ═══════════════════════════════════════════ */
+:root {
+  --crust:#11111b; --mantle:#181825; --base:#1e1e2e;
+  --surface0:#313244; --surface1:#45475a; --surface2:#585b70;
+  --overlay0:#6c7086; --overlay1:#7f849c; --subtext:#a6adc8; --text:#cdd6f4;
+  --rosewater:#f5e0dc; --flamingo:#f2cdcd; --pink:#f5c2e7; --mauve:#cba6f7;
+  --red:#f38ba8; --maroon:#eba0ac; --peach:#fab387; --yellow:#f9e2af;
+  --green:#a6e3a1; --teal:#94e2d5; --sky:#89dceb; --sapphire:#74c7ec;
+  --blue:#89b4fa; --lavender:#b4befe;
+  --radius:8px; --radius-sm:5px; --radius-xs:3px;
+  --font-mono:'JetBrains Mono',monospace;
+  --font-ui:'Inter','JetBrains Mono',sans-serif;
+  --transition:0.2s cubic-bezier(.4,0,.2,1);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;overflow:hidden;}
+body{font-family:var(--font-mono);background:var(--crust);color:var(--text);font-size:13px;}
+::-webkit-scrollbar{width:8px;height:8px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--surface0);border-radius:4px;}
+::-webkit-scrollbar-thumb:hover{background:var(--surface1);}
+::selection{background:var(--surface1);color:var(--text);}
 
-  /* ---------- Top bar ---------- */
-  .topbar {
-    display:flex; justify-content:space-between; align-items:center;
-    padding: 10px 20px; background: var(--bg-panel);
-    border-bottom: 1px solid var(--border);
-    flex-wrap: wrap; gap:10px;
-  }
-  .topbar-left { display:flex; align-items:center; gap:14px; }
-  .traffic { display:flex; gap:6px; }
-  .traffic .dot { width:11px; height:11px; border-radius:50%; display:inline-block; }
-  .traffic .dot.red { background:var(--red); }
-  .traffic .dot.yellow { background:var(--orange); }
-  .traffic .dot.green { background:var(--green); }
-  .traffic.small .dot { width:9px; height:9px; }
-  .filename { color:var(--text-dim); font-size:0.85rem; }
-  .filename b { color:var(--blue); }
-  .cursor { display:inline-block; color:var(--cyan); animation: blink 1s step-end infinite; margin-left:2px; }
-  @keyframes blink { 50% { opacity:0; } }
-  .topbar-right { display:flex; align-items:center; gap:14px; }
-  .counter { font-size:0.8rem; color:var(--text-dim); }
-  .counter b { color:var(--green); }
-  .btn-ghost {
-    background:transparent; border:1px solid var(--border); color:var(--text-dim);
-    padding:6px 12px; border-radius:6px; font-family:inherit; font-size:0.78rem; cursor:pointer;
-  }
-  .btn-ghost:hover { border-color:var(--red); color:var(--red); }
+/* ── 顶部渐变线 ── */
+.top-accent{height:2px;background:linear-gradient(90deg,var(--blue),var(--mauve),var(--pink),var(--peach),var(--yellow),var(--green),var(--teal),var(--sapphire),var(--blue));background-size:300% 100%;animation:gradFlow 10s linear infinite;flex-shrink:0;}
+@keyframes gradFlow{0%{background-position:0% 50%}100%{background-position:300% 50%}}
 
-  /* ---------- Layout grid ---------- */
-  .layout {
-    display:grid;
-    grid-template-columns: 240px 1fr 360px;
-    gap: 14px;
-    padding: 16px;
-    align-items:start;
-  }
-  @media (max-width: 1000px) { .layout { grid-template-columns: 1fr; } }
+/* ── 主布局 ── */
+.app{display:flex;height:calc(100% - 2px);overflow:hidden;}
 
-  .panel {
-    background: var(--bg-panel);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 14px;
-  }
-  .panel h2 {
-    font-size:0.78rem; color:var(--text-dim); margin-bottom:10px;
-    text-transform:none; letter-spacing:0.3px; font-weight:600;
-  }
-  .group-label {
-    font-size:0.72rem; color:var(--pink); margin:14px 0 6px; letter-spacing:0.3px;
-  }
-  .group-label:first-of-type { margin-top:0; }
+/* ═══════════════════════════
+   Activity Bar (最左)
+   ═══════════════════════════ */
+.activity-bar{width:48px;background:var(--mantle);border-right:1px solid var(--surface0);display:flex;flex-direction:column;align-items:center;padding:6px 0;flex-shrink:0;gap:2px;z-index:10;}
+.ab-logo{width:32px;height:32px;border-radius:var(--radius-sm);background:linear-gradient(135deg,var(--blue),var(--mauve));display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;color:var(--crust);margin-bottom:10px;cursor:default;letter-spacing:-1px;}
+.ab-sep{width:24px;height:1px;background:var(--surface0);margin:6px 0;}
+.ab-btn{width:40px;height:40px;border:none;background:transparent;color:var(--overlay0);border-radius:var(--radius-sm);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:var(--transition);position:relative;}
+.ab-btn:hover{color:var(--text);background:var(--surface0);}
+.ab-btn.active{color:var(--text);}
+.ab-btn.active::before{content:'';position:absolute;left:0;top:8px;bottom:8px;width:2px;background:var(--blue);border-radius:0 2px 2px 0;}
+.ab-btn svg{width:22px;height:22px;stroke-width:1.5;fill:none;stroke:currentColor;}
+.ab-bottom{margin-top:auto;display:flex;flex-direction:column;align-items:center;gap:2px;padding-bottom:4px;}
 
-  /* ---------- Palette ---------- */
-  .palette-item {
-    background: var(--bg-panel-alt);
-    border: 1px solid var(--border-soft);
-    border-radius: 6px;
-    padding: 8px 10px;
-    margin-bottom: 6px;
-    cursor: grab;
-    font-size: 0.8rem;
-    display:flex; align-items:center; gap:8px;
-    transition: 0.15s;
-    color: var(--text);
-  }
-  .palette-item:hover { background:#1c2531; transform: translateX(3px); }
-  .palette-item.layout-type { border-left: 3px solid var(--blue); }
-  .palette-item.content-type { border-left: 3px solid var(--orange); }
-  .palette-item .ico { font-size:1rem; }
+/* ═══════════════════════════
+   Sidebar (组件面板)
+   ═══════════════════════════ */
+.sidebar{width:248px;background:var(--base);border-right:1px solid var(--surface0);display:flex;flex-direction:column;flex-shrink:0;overflow:hidden;transition:width 0.3s ease,opacity 0.2s ease;}
+.sidebar.collapsed{width:0;opacity:0;pointer-events:none;}
+.sidebar-head{padding:12px 14px 8px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.sidebar-title{font-size:0.68rem;text-transform:uppercase;letter-spacing:1.5px;color:var(--overlay1);font-weight:600;}
+.sidebar-actions{display:flex;gap:4px;}
+.sidebar-actions button{background:transparent;border:1px solid var(--surface0);color:var(--overlay0);width:24px;height:24px;border-radius:var(--radius-xs);cursor:pointer;font-size:0.75rem;display:flex;align-items:center;justify-content:center;transition:var(--transition);}
+.sidebar-actions button:hover{color:var(--red);border-color:var(--red);background:rgba(243,139,168,0.08);}
+.sidebar-body{flex:1;overflow-y:auto;overflow-x:hidden;padding:0 6px 12px;}
 
-  /* ---------- Canvas panel (browser mockup) ---------- */
-  .canvas-panel { padding:0; overflow:hidden; }
-  .browser-bar {
-    display:flex; align-items:center; gap:10px;
-    padding:10px 14px; background:var(--bg-panel-alt); border-bottom:1px solid var(--border);
-  }
-  .url-bar {
-    flex:1; background:var(--bg); border:1px solid var(--border); border-radius:20px;
-    padding:5px 12px; font-size:0.75rem; color:var(--text-dim);
-  }
-  .btn-icon {
-    background:transparent; border:1px solid var(--border); color:var(--text-dim);
-    width:26px; height:26px; border-radius:6px; cursor:pointer; font-size:0.9rem;
-  }
-  .btn-icon:hover { color:var(--cyan); border-color:var(--cyan); }
-  .canvas-hint {
-    font-size:0.74rem; color:var(--text-dim); padding:10px 14px 0; line-height:1.5;
-  }
-  .canvas-wrap-inner { padding:14px; }
-  #canvas {
-    background: #ffffff;
-    color:#111;
-    border-radius: 6px;
-    min-height: 460px;
-    padding: 14px;
-    display:flex;
-    flex-direction:column;
-    gap:10px;
-    margin:14px;
-    border: 2px dashed #94a3b8;
-  }
-  #canvas.dropzone-hover { border-color:#4ade80; background:#f0fdf4; }
-  .placeholder { color:#94a3b8; text-align:center; margin:180px 0; font-size:0.85rem; font-family:'JetBrains Mono',monospace; }
-  .empty-hint {
-    color:#94a3b8; text-align:center; font-size:0.75rem;
-    border:1px dashed #cbd5e1; border-radius:6px; padding:14px;
-    min-height:30px;
-  }
+/* ── 树形组件列表 ── */
+.tree-cat{margin-bottom:2px;}
+.tree-cat-head{display:flex;align-items:center;gap:6px;padding:5px 8px;border-radius:var(--radius-xs);cursor:pointer;user-select:none;transition:var(--transition);font-size:0.72rem;font-weight:600;letter-spacing:0.3px;}
+.tree-cat-head:hover{background:var(--surface0);}
+.tree-cat-head .arrow{font-size:0.6rem;color:var(--overlay0);transition:transform 0.25s ease;display:inline-block;width:10px;text-align:center;}
+.tree-cat.collapsed .arrow{transform:rotate(0deg);}
+.tree-cat:not(.collapsed) .arrow{transform:rotate(90deg);}
+.tree-cat-head .folder{font-size:0.85rem;}
+.tree-cat-head .cat-name{color:var(--subtext);}
+.tree-items{display:grid;grid-template-rows:1fr;transition:grid-template-rows 0.3s ease;}
+.tree-cat.collapsed .tree-items{grid-template-rows:0fr;}
+.tree-items-inner{overflow:hidden;}
+.tree-item{display:flex;align-items:center;gap:8px;padding:5px 8px 5px 26px;border-radius:var(--radius-xs);cursor:grab;font-size:0.78rem;color:var(--subtext);transition:var(--transition);border:1px solid transparent;position:relative;}
+.tree-item:hover{background:var(--surface0);color:var(--text);border-color:var(--surface0);}
+.tree-item:active{cursor:grabbing;transform:scale(0.97);}
+.tree-item .t-icon{font-size:0.9rem;flex-shrink:0;width:18px;text-align:center;}
+.tree-item.layout-t::before{content:'';position:absolute;left:14px;top:0;bottom:0;width:2px;background:var(--sapphire);border-radius:2px;opacity:0.6;}
+.tree-item.content-t::before{content:'';position:absolute;left:14px;top:0;bottom:0;width:2px;background:var(--peach);border-radius:2px;opacity:0.6;}
 
-  .comp-node { position:relative; }
-  .comp-node.dragging { opacity:0.35; }
+/* ═══════════════════════════
+   Main Area (中间画布)
+   ═══════════════════════════ */
+.main-area{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0;}
 
-  .comp-node.leaf {
-    border:1px dashed #cbd5e1;
-    border-radius:6px;
-    padding:10px 30px 10px 10px;
-    cursor:grab;
-    background:#f8fafc;
-  }
-  .comp-header { background:#4f46e5; color:#fff; padding:14px; border-radius:6px; font-weight:bold; }
-  .comp-nav { background:#1e293b; color:#fff; padding:10px; border-radius:6px; display:flex; gap:14px; flex-wrap:wrap; }
-  .comp-hero { background:linear-gradient(120deg,#818cf8,#c084fc); color:#fff; padding:22px; border-radius:6px; text-align:center; }
-  .comp-hero h2 { margin-bottom:6px; font-size:1.05rem; }
-  .comp-button button { background:#f59e0b; color:#111; border:none; padding:8px 18px; border-radius:6px; font-weight:bold; cursor:default; }
-  .comp-image img { width:100%; border-radius:6px; display:block; }
-  .comp-card { background:#fff; border:1px solid #e2e8f0; border-radius:8px; padding:12px; box-shadow:0 2px 6px #0001; }
-  .comp-input input { width:100%; padding:8px; border-radius:6px; border:1px solid #cbd5e1; }
-  .comp-textarea textarea { width:100%; padding:8px; border-radius:6px; border:1px solid #cbd5e1; font-family:inherit; resize:vertical; }
-  .comp-text p { color:#334155; font-size:0.92rem; }
-  .comp-footer { background:#111827; color:#9ca3af; text-align:center; padding:10px; border-radius:6px; font-size:0.85rem; }
-  .comp-link { padding:6px 0; }
-  .comp-link a { color:#2563eb; text-decoration:underline; font-weight:bold; font-size:0.95rem; }
-  .comp-list ul { padding-left:20px; }
-  .comp-list li { margin:4px 0; color:#334155; font-size:0.9rem; }
-  .comp-table table { width:100%; border-collapse:collapse; font-size:0.82rem; }
-  .comp-table th, .comp-table td { border:1px solid #cbd5e1; padding:6px 8px; text-align:left; }
-  .comp-table th { background:#e2e8f0; color:#1e293b; }
-  .comp-video .video-box {
-    background:#111827; color:#fff; border-radius:6px; padding:26px;
-    text-align:center; font-size:1.6rem;
-  }
-  .comp-video .video-box small { display:block; font-size:0.7rem; color:#94a3b8; margin-top:6px; }
-  .comp-divider hr { border:none; border-top:2px solid #cbd5e1; margin:8px 0; }
-  .comp-quote blockquote { border-left:4px solid #94a3b8; padding:10px 14px; font-style:italic; color:#334155; background:#f8fafc; border-radius:0 6px 6px 0; }
-  .comp-quote cite { display:block; margin-top:6px; font-size:0.8rem; color:#64748b; font-style:normal; }
-  .comp-badge .badge { display:inline-block; background:#e0e7ff; color:#4338ca; padding:4px 10px; border-radius:20px; font-size:0.78rem; font-weight:bold; margin-right:6px; }
-  .comp-badge .badge-alt { background:#dcfce7; color:#15803d; }
-  .comp-checkbox label { display:flex; align-items:center; gap:8px; font-size:0.9rem; color:#334155; }
-  .comp-select select { width:100%; padding:8px; border-radius:6px; border:1px solid #cbd5e1; }
-  .comp-code pre { background:#0f172a; color:#7dd3fc; padding:10px; border-radius:6px; font-size:0.78rem; overflow:auto; margin:0; }
-  .comp-code code { font-family:'Fira Code','JetBrains Mono',monospace; }
-  .fake-input, .fake-textarea, .fake-select {
-    width:100%; padding:8px; border-radius:6px; border:1px solid #cbd5e1;
-    background:#fff; color:#94a3b8; font-size:0.9rem; font-family:inherit;
-  }
-  .fake-textarea { min-height:56px; display:block; }
-  .fake-select { display:flex; align-items:center; justify-content:space-between; color:#334155; }
+/* ── Tab Bar ── */
+.tab-bar{display:flex;align-items:stretch;background:var(--mantle);border-bottom:1px solid var(--surface0);flex-shrink:0;height:36px;padding:0 8px;}
+.tab{display:flex;align-items:center;gap:6px;padding:0 14px;font-size:0.75rem;color:var(--overlay0);cursor:default;border-bottom:2px solid transparent;transition:var(--transition);position:relative;}
+.tab.active{color:var(--text);border-bottom-color:var(--blue);background:var(--base);margin-bottom:-1px;}
+.tab .tab-icon{font-size:0.8rem;}
+.tab .tab-mod{width:6px;height:6px;border-radius:50%;background:var(--peach);display:none;}
+.tab .tab-close{margin-left:6px;width:16px;height:16px;border-radius:var(--radius-xs);display:flex;align-items:center;justify-content:center;font-size:0.7rem;color:var(--overlay0);opacity:0;transition:var(--transition);}
+.tab:hover .tab-close{opacity:1;}
+.tab .tab-close:hover{background:var(--surface1);color:var(--text);}
 
-  /* ---------- Editable text ---------- */
-  .editable {
-    outline:none; cursor:text; -webkit-user-drag:none; user-drag:none;
-    border-radius:3px; padding:0 2px;
-  }
-  .editable:hover { background:rgba(99,102,241,0.10); }
-  .editable:focus { background:rgba(99,102,241,0.16); box-shadow:0 0 0 1px #6366f1; }
+/* ── Browser Chrome ── */
+.browser-chrome{display:flex;align-items:center;gap:10px;padding:8px 14px;background:var(--base);border-bottom:1px solid var(--surface0);flex-shrink:0;}
+.chrome-dots{display:flex;gap:6px;}
+.chrome-dot{width:10px;height:10px;border-radius:50%;}
+.chrome-dot.r{background:var(--red);}
+.chrome-dot.y{background:var(--yellow);}
+.chrome-dot.g{background:var(--green);}
+.chrome-url{flex:1;background:var(--mantle);border:1px solid var(--surface0);border-radius:20px;padding:5px 14px;font-size:0.72rem;color:var(--overlay0);display:flex;align-items:center;gap:6px;transition:border-color var(--transition);}
+.chrome-url:hover{border-color:var(--surface1);}
+.chrome-url .lock{color:var(--green);font-size:0.7rem;}
+.chrome-btn{background:transparent;border:1px solid var(--surface0);color:var(--overlay0);width:26px;height:26px;border-radius:var(--radius-sm);cursor:pointer;font-size:0.85rem;display:flex;align-items:center;justify-content:center;transition:var(--transition);}
+.chrome-btn:hover{color:var(--sky);border-color:var(--sky);background:rgba(137,220,235,0.06);}
 
-  /* container (layout) components */
-  .comp-node.container {
-    border-radius:8px;
-    padding:8px;
-    margin-bottom:2px;
-  }
-  .node-label {
-    display:flex; align-items:center; justify-content:space-between;
-    font-size:0.72rem; font-weight:bold; padding:4px 8px; border-radius:5px;
-    margin-bottom:8px; color:#fff; font-family:'JetBrains Mono',monospace;
-  }
-  .node-section { border:2px dashed #94a3b8; background:#f1f5f9; }
-  .node-section .node-label { background:#64748b; }
-  .node-row { border:2px dashed #38bdf8; background:#f0f9ff; }
-  .node-row .node-label { background:#0ea5e9; }
-  .node-col { border:2px dashed #a78bfa; background:#faf5ff; }
-  .node-col .node-label { background:#8b5cf6; }
-  .node-grid2 { border:2px dashed #fb923c; background:#fff7ed; }
-  .node-grid2 .node-label { background:#f97316; }
-  .node-grid3 { border:2px dashed #34d399; background:#ecfdf5; }
-  .node-grid3 .node-label { background:#10b981; }
+/* ── Canvas Container ── */
+.canvas-wrap{flex:1;overflow:auto;background-color:var(--mantle);background-image:radial-gradient(var(--surface0) 0.8px,transparent 0.8px);background-size:18px 18px;padding:24px;display:flex;justify-content:center;align-items:flex-start;}
+#canvas{background:#ffffff;color:#1e293b;border-radius:var(--radius);min-height:500px;width:100%;max-width:860px;padding:16px;display:flex;flex-direction:column;gap:10px;border:2px dashed var(--surface1);transition:border-color 0.3s ease,background 0.3s ease,box-shadow 0.3s ease;box-shadow:0 4px 24px rgba(0,0,0,0.3);}
+#canvas.dropzone-hover{border-color:var(--green);background:rgba(166,227,161,0.03);box-shadow:0 0 0 4px rgba(166,227,161,0.08),0 4px 24px rgba(0,0,0,0.3);}
+.canvas-placeholder{color:#94a3b8;text-align:center;margin:200px 0;font-size:0.82rem;font-family:var(--font-mono);line-height:1.8;}
+.canvas-placeholder span{color:var(--overlay0);font-size:0.72rem;}
+.empty-hint{color:#94a3b8;text-align:center;font-size:0.72rem;border:1px dashed #cbd5e1;border-radius:6px;padding:14px;min-height:32px;font-family:var(--font-mono);}
 
-  .dropzone { min-height: 30px; }
-  .dropzone.dropzone-hover { outline: 2px solid #22c55e; outline-offset:2px; border-radius:6px; }
-  .node-row > .dropzone, .node-grid2 > .dropzone, .node-grid3 > .dropzone { display:flex; flex-wrap:wrap; gap:10px; }
-  .node-row > .dropzone > .comp-node { flex:1; min-width:120px; }
-  .node-grid2 > .dropzone { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
-  .node-grid3 > .dropzone { display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; }
-  .node-col > .dropzone, .node-section > .dropzone { display:flex; flex-direction:column; gap:10px; }
+/* ── Canvas内组件 ── */
+.comp-node{position:relative;transition:opacity 0.15s ease,transform 0.15s ease;}
+.comp-node.dragging{opacity:0.3;transform:scale(0.97);}
+.comp-node.leaf{border:1px dashed #e2e8f0;border-radius:var(--radius-sm);padding:10px 32px 10px 10px;cursor:grab;background:#fafbfc;transition:box-shadow 0.2s ease,border-color 0.2s ease;}
+.comp-node.leaf:hover{border-color:#cbd5e1;box-shadow:0 2px 8px rgba(0,0,0,0.06);}
+.comp-header{background:linear-gradient(135deg,#4f46e5,#6366f1);color:#fff;padding:16px 20px;border-radius:var(--radius-sm);font-weight:700;font-size:1.05rem;letter-spacing:-0.3px;}
+.comp-nav{background:#0f172a;color:#e2e8f0;padding:10px 16px;border-radius:var(--radius-sm);display:flex;gap:20px;flex-wrap:wrap;font-size:0.9rem;}
+.comp-nav a{color:#94a3b8;text-decoration:none;transition:color 0.2s;}
+.comp-hero{background:linear-gradient(135deg,#818cf8 0%,#c084fc 50%,#f472b6 100%);color:#fff;padding:32px 28px;border-radius:var(--radius);text-align:center;}
+.comp-hero h2{margin-bottom:8px;font-size:1.3rem;font-weight:800;letter-spacing:-0.5px;}
+.comp-hero p{opacity:0.9;font-size:0.95rem;}
+.comp-button button{background:linear-gradient(135deg,#f59e0b,#f97316);color:#fff;border:none;padding:10px 24px;border-radius:var(--radius-sm);font-weight:700;cursor:default;font-size:0.9rem;box-shadow:0 2px 8px rgba(245,158,11,0.3);}
+.comp-image img{width:100%;border-radius:var(--radius-sm);display:block;}
+.comp-card{background:#fff;border:1px solid #e2e8f0;border-radius:var(--radius);padding:16px;box-shadow:0 1px 3px rgba(0,0,0,0.04);transition:box-shadow 0.2s;}
+.comp-card:hover{box-shadow:0 4px 12px rgba(0,0,0,0.08);}
+.comp-card h3{margin-bottom:6px;font-size:1rem;color:#1e293b;}
+.comp-card p{color:#64748b;font-size:0.88rem;}
+.comp-text p{color:#334155;font-size:0.92rem;line-height:1.6;}
+.comp-footer{background:#0f172a;color:#64748b;text-align:center;padding:14px;border-radius:var(--radius-sm);font-size:0.82rem;}
+.comp-link a{color:#4f46e5;text-decoration:none;font-weight:600;border-bottom:2px solid rgba(79,70,229,0.2);padding-bottom:1px;transition:border-color 0.2s;}
+.comp-link a:hover{border-color:#4f46e5;}
+.comp-list ul{padding-left:20px;color:#334155;font-size:0.9rem;}
+.comp-list li{margin:4px 0;}
+.comp-table table{width:100%;border-collapse:collapse;font-size:0.82rem;}
+.comp-table th,.comp-table td{border:1px solid #e2e8f0;padding:8px 12px;text-align:left;}
+.comp-table th{background:#f1f5f9;color:#1e293b;font-weight:600;}
+.comp-video .video-box{background:#0f172a;color:#fff;border-radius:var(--radius-sm);padding:32px;text-align:center;font-size:1.8rem;}
+.comp-video .video-box small{display:block;font-size:0.72rem;color:#64748b;margin-top:8px;}
+.comp-divider hr{border:none;border-top:2px solid #e2e8f0;margin:8px 0;}
+.comp-quote blockquote{border-left:4px solid #818cf8;padding:14px 18px;font-style:italic;color:#334155;background:#f8fafc;border-radius:0 var(--radius-sm) var(--radius-sm) 0;}
+.comp-quote cite{display:block;margin-top:8px;font-size:0.8rem;color:#64748b;font-style:normal;}
+.comp-badge .badge{display:inline-block;padding:4px 12px;border-radius:20px;font-size:0.75rem;font-weight:700;margin-right:6px;}
+.comp-badge .badge:nth-child(1){background:#e0e7ff;color:#4338ca;}
+.comp-badge .badge:nth-child(2){background:#dcfce7;color:#15803d;}
+.comp-checkbox label{display:flex;align-items:center;gap:8px;font-size:0.9rem;color:#334155;}
+.fake-input,.fake-textarea,.fake-select{width:100%;padding:9px 12px;border-radius:var(--radius-sm);border:1px solid #e2e8f0;background:#fff;color:#94a3b8;font-size:0.88rem;font-family:var(--font-ui);}
+.fake-textarea{min-height:60px;display:block;}
+.fake-select{display:flex;align-items:center;justify-content:space-between;color:#64748b;}
+.comp-code pre{background:#0f172a;color:#7dd3fc;padding:14px;border-radius:var(--radius-sm);font-size:0.78rem;overflow:auto;margin:0;line-height:1.6;}
+.comp-code code{font-family:var(--font-mono);}
 
-  .del-btn {
-    position:absolute; top:4px; right:4px;
-    background:#ef4444; color:#fff; border:none;
-    width:20px; height:20px; border-radius:50%;
-    cursor:pointer; font-size:0.7rem; line-height:1; z-index:5;
-  }
-  .node-label .del-btn { position:static; }
+/* ── Editable ── */
+.editable{outline:none;cursor:text;-webkit-user-drag:none;user-drag:none;border-radius:var(--radius-xs);padding:0 3px;transition:background 0.15s,box-shadow 0.15s;}
+.editable:hover{background:rgba(99,102,241,0.06);}
+.editable:focus{background:rgba(99,102,241,0.1);box-shadow:0 0 0 2px rgba(99,102,241,0.2);}
 
-  /* ---------- Inspector panel ---------- */
-  .tip-box {
-    background:var(--bg-panel-alt); border-left:3px solid var(--cyan); border-radius:6px;
-    padding:10px; font-size:0.78rem; margin-bottom:12px; min-height:50px;
-    line-height:1.55; color:var(--text);
-  }
-  .tip-box b { color:var(--cyan); }
-  .tip-box code { color:var(--pink); background:#000c14; padding:1px 5px; border-radius:4px; }
-  .tip-box pre {
-    margin-top:6px; background:#050a10; color:var(--green); padding:6px;
-    border-radius:4px; font-size:0.68rem; white-space:pre-wrap; word-break:break-word;
-  }
+/* ── Layout Containers in Canvas ── */
+.comp-node.container{border-radius:var(--radius);padding:8px;margin-bottom:2px;}
+.node-label{display:flex;align-items:center;justify-content:space-between;font-size:0.68rem;font-weight:700;padding:4px 10px;border-radius:var(--radius-xs);margin-bottom:8px;color:#fff;font-family:var(--font-mono);letter-spacing:0.3px;text-transform:uppercase;}
+.node-section{border:2px dashed #94a3b8;background:#f8fafc;}
+.node-section .node-label{background:#64748b;}
+.node-row{border:2px dashed #38bdf8;background:#f0f9ff;}
+.node-row .node-label{background:#0ea5e9;}
+.node-col{border:2px dashed #a78bfa;background:#faf5ff;}
+.node-col .node-label{background:#8b5cf6;}
+.node-grid2{border:2px dashed #fb923c;background:#fff7ed;}
+.node-grid2 .node-label{background:#f97316;}
+.node-grid3{border:2px dashed #34d399;background:#ecfdf5;}
+.node-grid3 .node-label{background:#10b981;}
+.dropzone{min-height:32px;}
+.dropzone.dropzone-hover{outline:2px solid var(--green);outline-offset:2px;border-radius:6px;background:rgba(166,227,161,0.04)!important;}
+.node-row>.dropzone,.node-grid2>.dropzone,.node-grid3>.dropzone{display:flex;flex-wrap:wrap;gap:10px;}
+.node-row>.dropzone>.comp-node{flex:1;min-width:120px;}
+.node-grid2>.dropzone{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.node-grid3>.dropzone{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;}
+.node-col>.dropzone,.node-section>.dropzone{display:flex;flex-direction:column;gap:10px;}
+.del-btn{position:absolute;top:5px;right:5px;background:var(--red);color:#fff;border:none;width:20px;height:20px;border-radius:50%;cursor:pointer;font-size:0.65rem;line-height:1;z-index:5;opacity:0;transition:opacity 0.15s,transform 0.15s;transform:scale(0.8);}
+.comp-node:hover .del-btn{opacity:1;transform:scale(1);}
+.del-btn:hover{background:#e11d48;transform:scale(1.1)!important;}
+.node-label .del-btn{position:static;opacity:1;transform:none;width:18px;height:18px;font-size:0.6rem;}
+.node-label .del-btn:hover{transform:scale(1.1)!important;}
 
-  .guide-btn {
-    margin-bottom:14px; width:100%; background:var(--bg-panel-alt); color:var(--orange);
-    border:1px solid var(--border); padding:9px; border-radius:6px; cursor:pointer;
-    font-weight:600; font-size:0.8rem; font-family:inherit;
-  }
-  .guide-btn:hover { border-color:var(--orange); }
+/* ═══════════════════════════
+   Right Panel (Inspector + Code)
+   ═══════════════════════════ */
+.right-panel{width:380px;background:var(--base);border-left:1px solid var(--surface0);display:flex;flex-direction:column;flex-shrink:0;overflow:hidden;}
+.rp-section{display:flex;flex-direction:column;overflow:hidden;}
+.rp-section.inspector{flex:0 0 auto;max-height:45%;}
+.rp-section.code-output{flex:1;min-height:0;}
+.rp-head{padding:10px 14px 8px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--surface0);flex-shrink:0;}
+.rp-title{font-size:0.68rem;text-transform:uppercase;letter-spacing:1.2px;color:var(--overlay1);font-weight:600;display:flex;align-items:center;gap:6px;}
+.rp-title .dot{width:6px;height:6px;border-radius:50%;}
+.rp-body{overflow-y:auto;padding:10px 12px;}
+.rp-divider{height:1px;background:var(--surface0);flex-shrink:0;}
 
-  .modal-overlay {
-    position:fixed; inset:0; background:rgba(0,0,0,0.7);
-    display:none; align-items:center; justify-content:center; z-index:1000; padding:20px;
-  }
-  .modal-overlay.show { display:flex; }
-  .modal-box {
-    background:var(--bg-panel); border:1px solid var(--border); border-radius:10px;
-    padding:20px; max-width:720px; max-height:82vh; overflow:auto; width:100%;
-  }
-  .modal-box h2 { color:var(--orange); margin-bottom:14px; font-size:1rem; }
-  .guide-item { background:var(--bg-panel-alt); border-radius:8px; padding:12px; margin-bottom:10px; font-size:0.82rem; line-height:1.55; }
-  .guide-item b { color:var(--cyan); }
-  .guide-item code { color:var(--pink); background:#000c14; padding:1px 5px; border-radius:4px; }
-  .guide-item pre {
-    background:#050a10; color:var(--green); padding:8px; border-radius:6px;
-    margin-top:6px; font-size:0.7rem; white-space:pre-wrap; word-break:break-word;
-  }
-  .modal-close {
-    margin-top:6px; width:100%; background:var(--red); color:#1a0508; border:none;
-    padding:10px; border-radius:8px; cursor:pointer; font-weight:700; font-family:inherit;
-  }
+/* ── Tip Box ── */
+.tip-box{background:var(--mantle);border:1px solid var(--surface0);border-radius:var(--radius-sm);padding:12px;font-size:0.75rem;line-height:1.6;color:var(--subtext);min-height:48px;}
+.tip-box b{color:var(--blue);}
+.tip-box code{color:var(--mauve);background:var(--surface0);padding:1px 5px;border-radius:var(--radius-xs);font-size:0.72rem;}
+.tip-box pre{margin-top:8px;background:var(--crust);color:var(--green);padding:8px 10px;border-radius:var(--radius-xs);font-size:0.66rem;white-space:pre-wrap;word-break:break-word;border:1px solid var(--surface0);line-height:1.5;}
 
-  /* ---------- Code editor ---------- */
-  .lang-tag { font-size:0.65rem; color:var(--bg); background:var(--orange); padding:1px 6px; border-radius:4px; margin-left:6px; vertical-align:middle; }
-  .code-editor {
-    background:#080b10; border:1px solid var(--border); border-radius:6px;
-    max-height:340px; overflow:auto; font-size:0.72rem; line-height:1.6;
-  }
-  .code-editor .line { display:flex; padding:0 8px; }
-  .code-editor .line:hover { background:#0d121a; }
-  .code-editor .ln { color:#3b4252; width:30px; text-align:right; margin-right:10px; user-select:none; flex-shrink:0; }
-  .code-editor .code { white-space:pre-wrap; word-break:break-word; color:var(--text); }
-  .code-editor .code.muted { color:var(--text-dim); }
-  .tok-tag { color:var(--red); }
-  .tok-attr { color:var(--orange); }
-  .tok-string { color:var(--green); }
-  .tok-comment { color:var(--text-dim); font-style:italic; }
+/* ── Guide Button ── */
+.guide-btn{margin-bottom:10px;width:100%;background:var(--mantle);color:var(--peach);border:1px solid var(--surface0);padding:8px;border-radius:var(--radius-sm);cursor:pointer;font-weight:600;font-size:0.75rem;font-family:var(--font-mono);transition:var(--transition);display:flex;align-items:center;justify-content:center;gap:6px;}
+.guide-btn:hover{border-color:var(--peach);background:rgba(250,179,135,0.06);}
 
-  .copy-btn {
-    margin-top:8px; width:100%; background:var(--blue); color:#0a0e14; border:none;
-    padding:9px; border-radius:6px; cursor:pointer; font-weight:700; font-family:inherit;
-  }
-  .copy-btn.copied { background:var(--green); }
+/* ── Code Editor ── */
+.code-editor{background:var(--crust);border:1px solid var(--surface0);border-radius:var(--radius-sm);font-size:0.68rem;line-height:1.65;overflow:auto;flex:1;min-height:0;}
+.code-editor .line{display:flex;padding:0 8px;}
+.code-editor .line:hover{background:rgba(49,50,68,0.4);}
+.code-editor .ln{color:var(--surface1);width:32px;text-align:right;margin-right:12px;user-select:none;flex-shrink:0;font-size:0.65rem;}
+.code-editor .code{white-space:pre-wrap;word-break:break-word;color:var(--text);}
+.code-editor .code.muted{color:var(--surface1);}
+.tok-tag{color:var(--blue);}
+.tok-attr{color:var(--peach);}
+.tok-string{color:var(--green);}
+.tok-comment{color:var(--overlay0);font-style:italic;}
+.tok-doctype{color:var(--mauve);}
 
-  .download-btn {
-    margin-top:6px; width:100%; background:var(--green); color:#052e16; border:none;
-    padding:9px; border-radius:6px; cursor:pointer; font-weight:700; font-family:inherit;
-  }
-  .download-btn:hover { opacity:0.9; }
+/* ── Buttons ── */
+.btn-copy{margin-top:8px;width:100%;background:var(--blue);color:var(--crust);border:none;padding:9px;border-radius:var(--radius-sm);cursor:pointer;font-weight:700;font-family:var(--font-mono);font-size:0.78rem;transition:var(--transition);display:flex;align-items:center;justify-content:center;gap:6px;}
+.btn-copy:hover{filter:brightness(1.1);transform:translateY(-1px);}
+.btn-copy:active{transform:translateY(0);}
+.btn-copy.copied{background:var(--green);}
+.btn-download{margin-top:6px;width:100%;background:var(--surface0);color:var(--green);border:1px solid var(--surface1);padding:9px;border-radius:var(--radius-sm);cursor:pointer;font-weight:700;font-family:var(--font-mono);font-size:0.78rem;transition:var(--transition);display:flex;align-items:center;justify-content:center;gap:6px;}
+.btn-download:hover{background:var(--surface1);border-color:var(--green);transform:translateY(-1px);}
+.btn-download:active{transform:translateY(0);}
 
-  .toast {
-    position:fixed; top:20px; right:20px; background:var(--green); color:#052e16;
-    padding:12px 20px; border-radius:8px; font-weight:bold; opacity:0;
-    transform:translateY(-10px); transition:0.3s; z-index:999; font-size:0.85rem;
-  }
-  .toast.show { opacity:1; transform:translateY(0); }
+/* ═══════════════════════════
+   Status Bar
+   ═══════════════════════════ */
+.status-bar{height:24px;background:var(--surface0);display:flex;align-items:center;justify-content:space-between;padding:0 12px;font-size:0.68rem;color:var(--overlay1);flex-shrink:0;border-top:1px solid var(--surface1);}
+.sb-left,.sb-right{display:flex;align-items:center;gap:2px;}
+.sb-item{padding:0 8px;height:24px;display:flex;align-items:center;gap:5px;cursor:default;transition:var(--transition);border-radius:0;}
+.sb-item:hover{background:var(--surface1);}
+.sb-branch{color:var(--mauve);font-weight:600;}
+.sb-errors{color:var(--red);}
+.sb-warn{color:var(--yellow);}
+.sb-accent{background:var(--blue);color:var(--crust);font-weight:600;}
+.sb-accent:hover{background:var(--sapphire)!important;}
+.sb-count{color:var(--green);font-weight:600;}
 
-  /* ---------- Emoji menu ---------- */
-  .emoji-hint {
-    background:var(--bg-panel-alt); border-left:3px solid var(--pink); border-radius:6px;
-    padding:10px; font-size:0.78rem; margin-bottom:14px; line-height:1.55; color:var(--text);
-  }
-  .emoji-grid { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:14px; }
-  .emoji-btn {
-    font-size:1.25rem; background:var(--bg-panel-alt); border:1px solid var(--border-soft);
-    border-radius:6px; width:38px; height:38px; display:flex; align-items:center;
-    justify-content:center; cursor:pointer;
-  }
-  .emoji-btn:hover { background:#1c2531; border-color:var(--cyan); transform:scale(1.08); }
+/* ═══════════════════════════
+   Modals
+   ═══════════════════════════ */
+.modal-overlay{position:fixed;inset:0;background:rgba(17,17,27,0.85);backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;z-index:1000;padding:24px;opacity:0;transition:opacity 0.25s ease;}
+.modal-overlay.show{display:flex;opacity:1;}
+.modal-box{background:var(--base);border:1px solid var(--surface0);border-radius:12px;padding:24px;max-width:760px;max-height:82vh;overflow:auto;width:100%;box-shadow:0 20px 60px rgba(0,0,0,0.5);transform:translateY(10px);transition:transform 0.25s ease;}
+.modal-overlay.show .modal-box{transform:translateY(0);}
+.modal-box h2{color:var(--peach);margin-bottom:16px;font-size:1rem;font-weight:700;display:flex;align-items:center;gap:8px;}
+.guide-item{background:var(--mantle);border:1px solid var(--surface0);border-radius:var(--radius-sm);padding:14px;margin-bottom:10px;font-size:0.78rem;line-height:1.6;}
+.guide-item b{color:var(--blue);}
+.guide-item code{color:var(--mauve);background:var(--surface0);padding:1px 5px;border-radius:var(--radius-xs);font-size:0.72rem;}
+.guide-item pre{background:var(--crust);color:var(--green);padding:10px;border-radius:var(--radius-xs);margin-top:8px;font-size:0.68rem;white-space:pre-wrap;word-break:break-word;border:1px solid var(--surface0);line-height:1.5;}
+.modal-close{margin-top:12px;width:100%;background:var(--red);color:var(--crust);border:none;padding:10px;border-radius:var(--radius-sm);cursor:pointer;font-weight:700;font-family:var(--font-mono);font-size:0.82rem;transition:var(--transition);}
+.modal-close:hover{filter:brightness(1.1);}
+
+/* ── Emoji Modal ── */
+.emoji-hint{background:var(--mantle);border:1px solid var(--surface0);border-radius:var(--radius-sm);padding:12px;font-size:0.75rem;margin-bottom:14px;line-height:1.6;color:var(--subtext);}
+.emoji-grid{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px;}
+.emoji-btn{font-size:1.2rem;background:var(--mantle);border:1px solid var(--surface0);border-radius:var(--radius-sm);width:38px;height:38px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:var(--transition);}
+.emoji-btn:hover{background:var(--surface0);border-color:var(--sky);transform:scale(1.12);}
+
+/* ── Toast ── */
+.toast{position:fixed;bottom:40px;right:20px;background:var(--surface1);color:var(--text);padding:10px 18px;border-radius:var(--radius-sm);font-weight:600;opacity:0;transform:translateY(8px) scale(0.96);transition:all 0.3s cubic-bezier(.4,0,.2,1);z-index:999;font-size:0.8rem;box-shadow:0 8px 24px rgba(0,0,0,0.3);border:1px solid var(--surface2);display:flex;align-items:center;gap:8px;}
+.toast.show{opacity:1;transform:translateY(0) scale(1);}
+.toast.success{border-left:3px solid var(--green);}
+.toast.warning{border-left:3px solid var(--yellow);}
+
+/* ── Responsive ── */
+@media(max-width:1100px){
+  .right-panel{width:320px;}
+  .sidebar{width:200px;}
+}
+@media(max-width:900px){
+  .app{flex-wrap:wrap;}
+  .activity-bar{width:100%;flex-direction:row;height:40px;padding:0 8px;overflow-x:auto;border-right:none;border-bottom:1px solid var(--surface0);}
+  .ab-logo{margin-bottom:0;margin-right:8px;}
+  .ab-sep{width:1px;height:20px;margin:0 4px;}
+  .ab-bottom{margin-top:0;margin-left:auto;flex-direction:row;}
+  .sidebar,.right-panel{width:100%;max-height:40vh;border:none;border-bottom:1px solid var(--surface0);}
+  .main-area{min-height:300px;}
+}
 </style>
 </head>
 <body>
 
-<div class="topbar">
-  <div class="topbar-left">
-    <span class="traffic"><span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span></span>
-    <span class="filename">~/<b>layout-builder</b>.html<span class="cursor">▊</span></span>
+<!-- 顶部渐变线 -->
+<div class="top-accent"></div>
+
+<div class="app">
+
+  <!-- ═══ Activity Bar ═══ -->
+  <div class="activity-bar">
+    <div class="ab-logo">LB</div>
+    <button class="ab-btn active" id="abPalette" title="Components">
+      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+    </button>
+    <button class="ab-btn" id="abEmoji" title="Insert Emoji">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9" stroke-width="2.5" stroke-linecap="round"/><line x1="15" y1="9" x2="15.01" y2="9" stroke-width="2.5" stroke-linecap="round"/></svg>
+    </button>
+    <button class="ab-btn" id="abGuide" title="Documentation">
+      <svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/><line x1="8" y1="7" x2="16" y2="7"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+    </button>
+    <div class="ab-sep"></div>
+    <div class="ab-bottom">
+      <button class="ab-btn" id="abDownload" title="Download index.html">
+        <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      </button>
+    </div>
   </div>
-  <div class="topbar-right">
-    <span class="counter">elements: <b id="elCount">0</b></span>
-    <button class="btn-ghost" id="emojiMenuBtn">😀 แทรกอีโมจิ</button>
-    <button class="btn-ghost" id="clearBtn">🗑 ล้างพื้นที่ทำงาน</button>
+
+  <!-- ═══ Sidebar ═══ -->
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-head">
+      <span class="sidebar-title">Explorer</span>
+      <div class="sidebar-actions">
+        <button id="clearBtn" title="Clear All">🗑</button>
+      </div>
+    </div>
+    <div class="sidebar-body">
+
+      <div class="tree-cat" id="catLayout">
+        <div class="tree-cat-head">
+          <span class="arrow">▸</span>
+          <span class="folder">📁</span>
+          <span class="cat-name">layout/</span>
+        </div>
+        <div class="tree-items"><div class="tree-items-inner">
+          <div class="tree-item layout-t" draggable="true" data-type="section"><span class="t-icon">📦</span>Section</div>
+          <div class="tree-item layout-t" draggable="true" data-type="row"><span class="t-icon">↔</span>Row</div>
+          <div class="tree-item layout-t" draggable="true" data-type="col"><span class="t-icon">↕</span>Column</div>
+          <div class="tree-item layout-t" draggable="true" data-type="grid2"><span class="t-icon">▦</span>Grid 2-col</div>
+          <div class="tree-item layout-t" draggable="true" data-type="grid3"><span class="t-icon">▦</span>Grid 3-col</div>
+        </div></div>
+      </div>
+
+      <div class="tree-cat" id="catContent">
+        <div class="tree-cat-head">
+          <span class="arrow">▸</span>
+          <span class="folder">📁</span>
+          <span class="cat-name">content/</span>
+        </div>
+        <div class="tree-items"><div class="tree-items-inner">
+          <div class="tree-item content-t" draggable="true" data-type="header"><span class="t-icon">H</span>Header</div>
+          <div class="tree-item content-t" draggable="true" data-type="nav"><span class="t-icon">N</span>Navbar</div>
+          <div class="tree-item content-t" draggable="true" data-type="hero"><span class="t-icon">★</span>Hero Section</div>
+          <div class="tree-item content-t" draggable="true" data-type="button"><span class="t-icon"> Btn</span>Button</div>
+          <div class="tree-item content-t" draggable="true" data-type="image"><span class="t-icon">IMG</span>Image</div>
+          <div class="tree-item content-t" draggable="true" data-type="card"><span class="t-icon">Card</span>Card</div>
+          <div class="tree-item content-t" draggable="true" data-type="input"><span class="t-icon">In</span>Input Field</div>
+          <div class="tree-item content-t" draggable="true" data-type="textarea"><span class="t-icon">Ta</span>Textarea</div>
+          <div class="tree-item content-t" draggable="true" data-type="select"><span class="t-icon">Sel</span>Dropdown</div>
+          <div class="tree-item content-t" draggable="true" data-type="checkbox"><span class="t-icon">☑</span>Checkbox</div>
+          <div class="tree-item content-t" draggable="true" data-type="text"><span class="t-icon">T</span>Text</div>
+          <div class="tree-item content-t" draggable="true" data-type="link"><span class="t-icon">A</span>Link</div>
+          <div class="tree-item content-t" draggable="true" data-type="list"><span class="t-icon">Li</span>List</div>
+          <div class="tree-item content-t" draggable="true" data-type="table"><span class="t-icon">Tbl</span>Table</div>
+          <div class="tree-item content-t" draggable="true" data-type="video"><span class="t-icon">Vid</span>Video</div>
+          <div class="tree-item content-t" draggable="true" data-type="quote"><span class="t-icon">"</span>Blockquote</div>
+          <div class="tree-item content-t" draggable="true" data-type="badge"><span class="t-icon">Tag</span>Badge</div>
+          <div class="tree-item content-t" draggable="true" data-type="divider"><span class="t-icon">—</span>Divider</div>
+          <div class="tree-item content-t" draggable="true" data-type="codeblock"><span class="t-icon">&lt;/&gt;</span>Code Block</div>
+          <div class="tree-item content-t" draggable="true" data-type="footer"><span class="t-icon">F</span>Footer</div>
+        </div></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ═══ Main Area ═══ -->
+  <div class="main-area">
+    <div class="tab-bar">
+      <div class="tab active">
+        <span class="tab-icon">🌐</span>
+        <span>preview.html</span>
+        <span class="tab-mod"></span>
+      </div>
+    </div>
+    <div class="browser-chrome">
+      <div class="chrome-dots"><span class="chrome-dot r"></span><span class="chrome-dot y"></span><span class="chrome-dot g"></span></div>
+      <div class="chrome-url"><span class="lock">🔒</span> localhost:5500/index.html</div>
+      <button class="chrome-btn" id="refreshBtn" title="Refresh">⟳</button>
+    </div>
+    <div class="canvas-wrap">
+      <div id="canvas" class="dropzone" data-parent-id="root">
+        <div class="canvas-placeholder">// Drag components here<br><span>from the Explorer panel on the left</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ Right Panel ═══ -->
+  <div class="right-panel">
+    <div class="rp-section inspector">
+      <div class="rp-head">
+        <span class="rp-title"><span class="dot" style="background:var(--blue)"></span>Inspector</span>
+      </div>
+      <div class="rp-body" id="inspectorBody">
+        <div class="tip-box">Click a component on the canvas to view its HTML tag, usage guide, and UX tips. Click text directly to edit inline.</div>
+        <button class="guide-btn" id="guideBtn">📖 Open Tag Documentation</button>
+      </div>
+    </div>
+    <div class="rp-divider"></div>
+    <div class="rp-section code-output">
+      <div class="rp-head">
+        <span class="rp-title"><span class="dot" style="background:var(--green)"></span>Output — index.html</span>
+      </div>
+      <div class="rp-body" style="display:flex;flex-direction:column;gap:0;">
+        <div class="code-editor" id="codeEditor"></div>
+        <button class="btn-copy" id="copyBtn">📋 Copy Full HTML</button>
+        <button class="btn-download" id="downloadBtn2">💾 Download index.html</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Status Bar -->
+<div class="status-bar">
+  <div class="sb-left">
+    <span class="sb-item sb-branch">⎇ main</span>
+    <span class="sb-item sb-errors">⊘ 0</span>
+    <span class="sb-item sb-warn">⚠ 0</span>
+  </div>
+  <div class="sb-right">
+    <span class="sb-item">Elements: <span class="sb-count" id="elCount">0</span></span>
+    <span class="sb-item">UTF-8</span>
+    <span class="sb-item sb-accent">HTML</span>
   </div>
 </div>
 
-<div class="layout">
-
-  <!-- ซ้าย: คลังองค์ประกอบ -->
-  <div class="panel">
-    <h2>// คลังองค์ประกอบ</h2>
-    <div class="group-label">📁 layout/</div>
-    <div class="palette-item layout-type" draggable="true" data-type="section"><span class="ico">📦</span> Section</div>
-    <div class="palette-item layout-type" draggable="true" data-type="row"><span class="ico">↔️</span> Row (แนวนอน)</div>
-    <div class="palette-item layout-type" draggable="true" data-type="col"><span class="ico">↕️</span> Column (แนวตั้ง)</div>
-    <div class="palette-item layout-type" draggable="true" data-type="grid2"><span class="ico">▦</span> Grid 2 คอลัมน์</div>
-    <div class="palette-item layout-type" draggable="true" data-type="grid3"><span class="ico">▦</span> Grid 3 คอลัมน์</div>
-
-    <div class="group-label">📁 content/</div>
-    <div class="palette-item content-type" draggable="true" data-type="header"><span class="ico">🟪</span> Header</div>
-    <div class="palette-item content-type" draggable="true" data-type="nav"><span class="ico">📑</span> Navbar</div>
-    <div class="palette-item content-type" draggable="true" data-type="hero"><span class="ico">🌈</span> Hero Section</div>
-    <div class="palette-item content-type" draggable="true" data-type="button"><span class="ico">🔘</span> Button</div>
-    <div class="palette-item content-type" draggable="true" data-type="image"><span class="ico">🖼️</span> Image</div>
-    <div class="palette-item content-type" draggable="true" data-type="card"><span class="ico">🃏</span> Card</div>
-    <div class="palette-item content-type" draggable="true" data-type="input"><span class="ico">⌨️</span> Input Field</div>
-    <div class="palette-item content-type" draggable="true" data-type="textarea"><span class="ico">🗒️</span> Textarea</div>
-    <div class="palette-item content-type" draggable="true" data-type="select"><span class="ico">🔽</span> Dropdown</div>
-    <div class="palette-item content-type" draggable="true" data-type="checkbox"><span class="ico">☑️</span> Checkbox</div>
-    <div class="palette-item content-type" draggable="true" data-type="text"><span class="ico">📝</span> Text</div>
-    <div class="palette-item content-type" draggable="true" data-type="link"><span class="ico">🔗</span> Link</div>
-    <div class="palette-item content-type" draggable="true" data-type="list"><span class="ico">📋</span> List</div>
-    <div class="palette-item content-type" draggable="true" data-type="table"><span class="ico">📊</span> Table</div>
-    <div class="palette-item content-type" draggable="true" data-type="video"><span class="ico">🎬</span> Video</div>
-    <div class="palette-item content-type" draggable="true" data-type="quote"><span class="ico">💬</span> Blockquote</div>
-    <div class="palette-item content-type" draggable="true" data-type="badge"><span class="ico">🏷️</span> Badge</div>
-    <div class="palette-item content-type" draggable="true" data-type="divider"><span class="ico">➖</span> Divider</div>
-    <div class="palette-item content-type" draggable="true" data-type="codeblock"><span class="ico">💻</span> Code Block</div>
-    <div class="palette-item content-type" draggable="true" data-type="footer"><span class="ico">⬛</span> Footer</div>
-  </div>
-
-  <!-- กลาง: พื้นที่ออกแบบ (จำลอง browser) -->
-  <div class="panel canvas-panel">
-    <div class="browser-bar">
-      <span class="traffic small"><span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span></span>
-      <div class="url-bar">🔒 localhost:5500/index.html</div>
-      <button class="btn-icon" id="refreshBtn" title="รีเฟรชตัวอย่าง">⟳</button>
-    </div>
-    <div class="canvas-hint">// ลากกล่อง Layout (Row / Column / Grid) มาวางก่อน แล้วลากองค์ประกอบเนื้อหาไปวาง "ข้างใน" กล่องนั้น — คลิกที่ข้อความในองค์ประกอบเพื่อพิมพ์แก้ไขได้โดยตรง และใช้ปุ่ม "😀 แทรกอีโมจิ" ด้านบนเพื่อแทรกสัญลักษณ์ลงในข้อความ</div>
-    <div id="canvas" class="dropzone" data-parent-id="root">
-      <div class="placeholder">// ลากองค์ประกอบจากด้านซ้ายมาวางที่นี่</div>
-    </div>
-  </div>
-
-  <!-- ขวา: Inspector + Code -->
-  <div class="panel">
-    <h2>// Inspector</h2>
-    <div class="tip-box" id="tipBox">
-      💡 คลิกที่องค์ประกอบในพื้นที่ออกแบบ เพื่อดูคำอธิบายแท็ก HTML/CSS และคำแนะนำการใช้งาน — คลิกที่ตัวข้อความเองเพื่อพิมพ์แก้ไขได้เลย
-    </div>
-    <button class="guide-btn" id="guideBtn">📖 เปิด Docs แท็กทั้งหมด</button>
-
-    <h2>// Code Output <span class="lang-tag">index.html</span></h2>
-    <div class="code-editor" id="codeEditor"></div>
-    <button class="copy-btn" id="copyBtn">📋 คัดลอกโค้ด (ไฟล์ index.html เต็ม)</button>
-    <button class="download-btn" id="downloadBtn">💾 ดาวน์โหลดเป็น index.html</button>
-  </div>
-
-</div>
-
+<!-- Modals -->
 <div class="modal-overlay" id="guideModal">
   <div class="modal-box">
-    <h2>📖 Docs — แท็ก HTML/CSS ทั้งหมด</h2>
+    <h2>📖 Tag Documentation</h2>
     <div id="guideList"></div>
-    <button class="modal-close" id="closeGuide">ปิด</button>
+    <button class="modal-close" id="closeGuide">Close</button>
   </div>
 </div>
-
 <div class="modal-overlay" id="emojiModal">
   <div class="modal-box">
-    <h2>😀 เมนูอีโมจิ</h2>
-    <div class="emoji-hint">👉 วิธีใช้: คลิกที่ข้อความในพื้นที่ออกแบบเพื่อวางเคอร์เซอร์ในตำแหน่งที่ต้องการก่อน แล้วเปิดเมนูนี้ขึ้นมาคลิกอีโมจิที่ต้องการ ระบบจะแทรกให้ที่ตำแหน่งเคอร์เซอร์ล่าสุดโดยไม่ต้องปิดเมนู</div>
+    <h2>😀 Emoji Picker</h2>
+    <div class="emoji-hint">Click text on the canvas first to set cursor position, then click an emoji to insert it.</div>
     <div id="emojiGroups"></div>
-    <button class="modal-close" id="closeEmoji">ปิด</button>
+    <button class="modal-close" id="closeEmoji">Close</button>
   </div>
 </div>
-
 <div class="toast" id="toast"></div>
 
 <script>
-/* ========== นิยามองค์ประกอบเนื้อหา (leaf) ========== */
+/* ═══════════════════════════════════════════════
+   Content Templates
+   ═══════════════════════════════════════════════ */
 function editSpan(field, value) {
   return `<span class="editable" contenteditable="true" draggable="false" spellcheck="false" data-field="${field}">${escapeHtml(value)}</span>`;
 }
 
 const contentTemplates = {
-  header: { label:"Header", icon:"🟪", tag:"<header>",
-    when:"ใช้เพียง 1 ครั้งต่อหน้า วางไว้บนสุดของหน้าเว็บเสมอ ไม่ควรซ้อนไว้ในองค์ประกอบอื่น",
-    fields:{ title:"โลโก้ / ชื่อเว็บไซต์ของคุณ" },
-    render: (d) => `<div class="comp-header">${editSpan('title', d.title)}</div>`,
-    html: (d) => `  <header class="site-header">\n    <h1>${escapeHtml(d.title)}</h1>\n  </header>`,
-    tip: "Header ควรอยู่บนสุดของหน้าเสมอ ช่วยสร้าง Visual Hierarchy บอกผู้ใช้ว่ากำลังอยู่เว็บไซต์ไหน" },
-  nav: { label:"Navbar", icon:"📑", tag:"<nav>",
-    when:"ใช้เมื่อมีลิงก์เมนูสำหรับเดินทางไปหน้าอื่น ๆ มากกว่า 1 ลิงก์ มักวางไว้ในหรือใกล้ Header",
-    fields:{ item1:"หน้าแรก", item2:"เกี่ยวกับ", item3:"ติดต่อ" },
-    render: (d) => `<div class="comp-nav">${editSpan('item1',d.item1)}${editSpan('item2',d.item2)}${editSpan('item3',d.item3)}</div>`,
-    html: (d) => `  <nav class="site-nav">\n    <a href="#">${escapeHtml(d.item1)}</a>\n    <a href="#">${escapeHtml(d.item2)}</a>\n    <a href="#">${escapeHtml(d.item3)}</a>\n  </nav>`,
-    tip: "Navbar ช่วยให้ผู้ใช้เดินทางในเว็บไซต์ได้ง่าย ควรมีความสม่ำเสมอ (Consistency) ทุกหน้า" },
-  hero: { label:"Hero Section", icon:"🌈", tag:"<section>",
-    when:"ใช้เป็นพื้นที่นำเสนอข้อความหรือข้อเสนอหลักของหน้า มักวางไว้ถัดจาก Header ทันที",
-    fields:{ title:"ข้อความหลักที่ดึงดูดใจ", subtitle:"คำอธิบายสั้น ๆ เกี่ยวกับสิ่งที่คุณนำเสนอ" },
-    render: (d) => `<div class="comp-hero"><h2>${editSpan('title',d.title)}</h2><p>${editSpan('subtitle',d.subtitle)}</p></div>`,
-    html: (d) => `  <section class="hero">\n    <h2>${escapeHtml(d.title)}</h2>\n    <p>${escapeHtml(d.subtitle)}</p>\n  </section>`,
-    tip: "Hero Section คือจุดแรกที่ดึงดูดความสนใจ ควรใช้ตัวอักษรใหญ่ ชัดเจน และ Contrast สูง" },
-  button: { label:"Button", icon:"🔘", tag:"<button>",
-    when:"ใช้เมื่อต้องการให้ผู้ใช้กดเพื่อทำ action เช่น ส่งฟอร์ม ยืนยัน หรือไปยังหน้าอื่น",
-    fields:{ label:"คลิกที่นี่" },
-    render: (d) => `<div class="comp-button"><button>${editSpan('label',d.label)}</button></div>`,
-    html: (d) => `  <button class="btn">${escapeHtml(d.label)}</button>`,
-    tip: "ปุ่ม Call-to-Action ควรมีสีตัดกับพื้นหลัง (Contrast) เพื่อให้สายตาจับได้ทันที" },
-  image: { label:"Image", icon:"🖼️", tag:"<img>",
-    when:"ใช้แสดงรูปภาพ ต้องมี attribute alt เสมอ เพื่อการเข้าถึง (Accessibility) และ SEO",
-    fields:{ alt:"รูปภาพตัวอย่าง" },
-    render: (d) => `<div class="comp-image"><img src="https://via.placeholder.com/400x180?text=Image" alt="${escapeHtml(d.alt)}"><div style="text-align:center;font-size:0.75rem;color:#94a3b8;margin-top:4px;">alt: ${editSpan('alt',d.alt)}</div></div>`,
-    html: (d) => `  <img src="https://via.placeholder.com/600x300" alt="${escapeHtml(d.alt)}" style="max-width:100%;border-radius:8px;">`,
-    tip: "รูปภาพช่วยสื่อสารเร็วกว่าข้อความ แต่ต้องมี alt text เพื่อ Accessibility เสมอ" },
-  card: { label:"Card", icon:"🃏", tag:'<div class="card">',
-    when:"ใช้จัดกลุ่มเนื้อหาที่เกี่ยวข้องกันไว้ในกรอบเดียว เช่น การ์ดสินค้า การ์ดโปรไฟล์ นิยมวางหลายใบใน Grid",
-    fields:{ title:"หัวข้อการ์ด", text:"รายละเอียดสั้น ๆ ของการ์ดนี้" },
-    render: (d) => `<div class="comp-card"><h3>${editSpan('title',d.title)}</h3><p>${editSpan('text',d.text)}</p></div>`,
-    html: (d) => `  <div class="card">\n    <h3>${escapeHtml(d.title)}</h3>\n    <p>${escapeHtml(d.text)}</p>\n  </div>`,
-    tip: "Card ใช้จัดกลุ่มข้อมูลที่เกี่ยวข้องกัน ช่วยให้ผู้ใช้สแกนเนื้อหาได้ง่าย (Chunking) — ลองวาง Card หลายใบใน Grid ดูสิ!" },
-  input: { label:"Input Field", icon:"⌨️", tag:"<input>",
-    when:"ใช้รับข้อมูลจากผู้ใช้ เช่น ชื่อผู้ใช้ รหัสผ่าน ควรระบุ type ให้ตรงกับข้อมูล (text, email, password)",
-    fields:{ placeholder:"กรอกข้อมูล..." },
-    render: (d) => `<div class="comp-input"><div class="fake-input">${editSpan('placeholder',d.placeholder)}</div></div>`,
-    html: (d) => `  <input type="text" placeholder="${escapeHtml(d.placeholder)}">`,
-    tip: "ช่องกรอกข้อมูลควรมี placeholder หรือ label ที่ชัดเจน บอกผู้ใช้ว่าต้องพิมพ์อะไร" },
-  textarea: { label:"Textarea", icon:"🗒️", tag:"<textarea>",
-    when:"ใช้รับข้อความยาวหลายบรรทัดจากผู้ใช้ เช่น ข้อความรีวิว คอมเมนต์ หรือรายละเอียดเพิ่มเติม ต่างจาก input ที่รับได้บรรทัดเดียว",
-    fields:{ placeholder:"พิมพ์ข้อความหลายบรรทัด..." },
-    render: (d) => `<div class="comp-textarea"><div class="fake-textarea">${editSpan('placeholder',d.placeholder)}</div></div>`,
-    html: (d) => `  <textarea rows="4" placeholder="${escapeHtml(d.placeholder)}"></textarea>`,
-    tip: "ควรกำหนด rows ให้พอเหมาะกับเนื้อหา และมี placeholder บอกผู้ใช้ว่าต้องกรอกอะไร" },
-  select: { label:"Dropdown", icon:"🔽", tag:"<select>",
-    when:"ใช้ให้ผู้ใช้เลือกตัวเลือกเดียวจากรายการที่กำหนดไว้ เหมาะกับกรณีที่มีตัวเลือกจำนวนมาก",
-    fields:{ opt1:"เลือกตัวเลือก...", opt2:"ตัวเลือกที่ 1" },
-    render: (d) => `<div class="comp-select"><div class="fake-select">${editSpan('opt1',d.opt1)} <span>▾</span></div></div>`,
-    html: (d) => `  <select>\n    <option>${escapeHtml(d.opt1)}</option>\n    <option>${escapeHtml(d.opt2)}</option>\n  </select>`,
-    tip: "เหมาะกับตัวเลือกมากกว่า 5 รายการขึ้นไป ถ้าน้อยกว่านั้นควรใช้ radio button เพื่อให้เห็นทุกตัวเลือกพร้อมกัน" },
-  checkbox: { label:"Checkbox", icon:"☑️", tag:"<input type=\"checkbox\">",
-    when:"ใช้ให้ผู้ใช้เลือกได้หลายตัวเลือก หรือกดยอมรับเงื่อนไขการใช้งาน",
-    fields:{ label:"ยอมรับเงื่อนไขการใช้งาน" },
-    render: (d) => `<div class="comp-checkbox"><label><input type="checkbox" disabled> ${editSpan('label',d.label)}</label></div>`,
-    html: (d) => `  <label>\n    <input type="checkbox">\n    ${escapeHtml(d.label)}\n  </label>`,
-    tip: "ควรใส่ label ที่คลิกได้ครอบคู่กับ checkbox เสมอ เพื่อเพิ่มพื้นที่คลิกให้ใหญ่ขึ้น (Touch Target)" },
-  text: { label:"Text", icon:"📝", tag:"<p>",
-    when:"ใช้แสดงข้อความบรรยายทั่วไปที่ไม่ใช่หัวข้อหลัก เช่น คำอธิบาย เนื้อหาย่อหน้า",
-    fields:{ content:"ข้อความอธิบายทั่วไปที่สามารถพิมพ์แก้ไขได้" },
-    render: (d) => `<div class="comp-text"><p>${editSpan('content',d.content)}</p></div>`,
-    html: (d) => `  <p>${escapeHtml(d.content)}</p>`,
-    tip: "ข้อความควรมี Line Height และขนาดตัวอักษรที่อ่านง่าย ไม่ต่ำกว่า 16px บนเว็บ" },
-  link: { label:"Link", icon:"🔗", tag:"<a>",
-    when:"ใช้เมื่อต้องการเชื่อมไปยังหน้าอื่น เว็บไซต์อื่น หรือตำแหน่งอื่นในหน้าเดียวกัน ต้องมี attribute href เสมอ",
-    fields:{ label:"ลิงก์ตัวอย่าง คลิกที่นี่" },
-    render: (d) => `<div class="comp-link"><a href="#">${editSpan('label',d.label)}</a></div>`,
-    html: (d) => `  <a href="#">${escapeHtml(d.label)}</a>`,
-    tip: "ลิงก์ควรมีสีหรือขีดเส้นใต้ให้แตกต่างจากข้อความทั่วไป เพื่อให้ผู้ใช้รู้ว่าคลิกได้ (Affordance)" },
-  list: { label:"List", icon:"📋", tag:"<ul><li>",
-    when:"ใช้แสดงข้อมูลที่เป็นรายการ เช่น สรรพคุณสินค้า ขั้นตอนการทำงาน หรือเมนูอาหาร",
-    fields:{ item1:"รายการที่ 1", item2:"รายการที่ 2", item3:"รายการที่ 3" },
-    render: (d) => `<div class="comp-list"><ul><li>${editSpan('item1',d.item1)}</li><li>${editSpan('item2',d.item2)}</li><li>${editSpan('item3',d.item3)}</li></ul></div>`,
-    html: (d) => `  <ul>\n    <li>${escapeHtml(d.item1)}</li>\n    <li>${escapeHtml(d.item2)}</li>\n    <li>${escapeHtml(d.item3)}</li>\n  </ul>`,
-    tip: "List ช่วยแบ่งข้อมูลเป็นก้อนเล็ก ๆ อ่านง่ายกว่าเขียนเป็นพารากราฟยาว ๆ" },
-  table: { label:"Table", icon:"📊", tag:"<table>",
-    when:"ใช้แสดงข้อมูลที่เป็นแถว-คอลัมน์ เช่น ราคาสินค้า ตารางเปรียบเทียบ ไม่ควรใช้ Table จัด Layout ทั่วไปของหน้าเว็บ",
-    fields:{ h1:"หัวข้อ 1", h2:"หัวข้อ 2", c1:"ข้อมูล 1", c2:"ข้อมูล 2", c3:"ข้อมูล 3", c4:"ข้อมูล 4" },
-    render: (d) => `<div class="comp-table"><table><tr><th>${editSpan('h1',d.h1)}</th><th>${editSpan('h2',d.h2)}</th></tr><tr><td>${editSpan('c1',d.c1)}</td><td>${editSpan('c2',d.c2)}</td></tr><tr><td>${editSpan('c3',d.c3)}</td><td>${editSpan('c4',d.c4)}</td></tr></table></div>`,
-    html: (d) => `  <table>\n    <tr>\n      <th>${escapeHtml(d.h1)}</th>\n      <th>${escapeHtml(d.h2)}</th>\n    </tr>\n    <tr>\n      <td>${escapeHtml(d.c1)}</td>\n      <td>${escapeHtml(d.c2)}</td>\n    </tr>\n    <tr>\n      <td>${escapeHtml(d.c3)}</td>\n      <td>${escapeHtml(d.c4)}</td>\n    </tr>\n  </table>`,
-    tip: "Table เหมาะกับข้อมูลเชิงตารางเท่านั้น อย่าใช้ Table จัดโครงหน้าเว็บทั้งหน้าแบบสมัยก่อน ให้ใช้ Grid/Flexbox แทน" },
-  video: { label:"Video", icon:"🎬", tag:"<video>",
-    when:"ใช้แสดงวิดีโอ เช่น คลิปสาธิตสินค้าหรือวิดีโอแนะนำ ควรมี attribute controls ให้ผู้ใช้กดเล่น/หยุดเองได้",
-    fields:{ caption:"วิดีโอตัวอย่าง (คลิกเล่น)" },
-    render: (d) => `<div class="comp-video"><div class="video-box">▶️<small>${editSpan('caption',d.caption)}</small></div></div>`,
-    html: (d) => `  <video controls width="100%" style="border-radius:8px;">\n    <source src="video.mp4" type="video/mp4">\n    ${escapeHtml(d.caption)}\n  </video>`,
-    tip: "วิดีโอควรมีขนาดไฟล์ที่เหมาะสมและปุ่มควบคุม (controls) เสมอ เพื่อให้ผู้ใช้ควบคุมการเล่นเองได้" },
-  quote: { label:"Blockquote", icon:"💬", tag:"<blockquote>",
-    when:"ใช้แสดงคำพูดอ้างอิง เช่น รีวิวจากลูกค้า หรือคำคมที่ยกมาจากแหล่งอื่น",
-    fields:{ quote:"ข้อความอ้างอิงหรือคำรีวิวจากลูกค้า", cite:"ชื่อผู้พูด" },
-    render: (d) => `<div class="comp-quote"><blockquote>"${editSpan('quote',d.quote)}"<cite>— ${editSpan('cite',d.cite)}</cite></blockquote></div>`,
-    html: (d) => `  <blockquote>\n    "${escapeHtml(d.quote)}"\n    <cite>— ${escapeHtml(d.cite)}</cite>\n  </blockquote>`,
-    tip: "ควรใส่ <cite> ระบุที่มาของคำพูดเสมอ เพื่อความน่าเชื่อถือ" },
-  badge: { label:"Badge", icon:"🏷️", tag:'<span class="badge">',
-    when:"ใช้แสดงสถานะหรือป้ายกำกับสั้น ๆ เช่น 'ใหม่' 'ลดราคา' 'หมด' ติดไว้กับเนื้อหาอื่น",
-    fields:{ label1:"ใหม่", label2:"แนะนำ" },
-    render: (d) => `<div class="comp-badge"><span class="badge">${editSpan('label1',d.label1)}</span><span class="badge badge-alt">${editSpan('label2',d.label2)}</span></div>`,
-    html: (d) => `  <span class="badge">${escapeHtml(d.label1)}</span>\n  <span class="badge badge-alt">${escapeHtml(d.label2)}</span>`,
-    tip: "Badge ควรมีสีที่โดดเด่นแต่ไม่รบกวนเนื้อหาหลัก และใช้ข้อความที่สั้นที่สุด" },
-  divider: { label:"Divider", icon:"➖", tag:"<hr>",
-    when:"ใช้แบ่งเนื้อหาออกเป็นส่วน ๆ ด้วยเส้นแบ่งแนวนอน เหมาะกับการแยกเนื้อหาที่ไม่เกี่ยวข้องกันออกจากกัน",
-    render: () => `<div class="comp-divider"><hr></div>`,
-    html: () => `  <hr>`,
-    tip: "เส้นแบ่งช่วยสร้าง Visual Separation แต่ไม่ควรใช้มากเกินไป เพราะจะทำให้หน้าเว็บดูรก" },
-  codeblock: { label:"Code Block", icon:"💻", tag:"<pre><code>",
-    when:"ใช้แสดงตัวอย่างโค้ดในหน้าเว็บ เช่น เว็บไซต์สอนโปรแกรมมิ่ง หรือ Documentation ประกอบเนื้อหา",
-    fields:{ code:'<div class="hello">Hello World</div>' },
-    render: (d) => `<div class="comp-code"><pre><code class="editable" contenteditable="true" draggable="false" spellcheck="false" data-field="code">${escapeHtml(d.code)}</code></pre></div>`,
-    html: (d) => `  <pre><code>${escapeHtml(d.code)}</code></pre>`,
-    tip: "ควรใช้ฟอนต์แบบ monospace และมี syntax highlighting เพื่อให้อ่านโค้ดง่ายขึ้น" },
-  footer: { label:"Footer", icon:"⬛", tag:"<footer>",
-    when:"ใช้เพียง 1 ครั้งต่อหน้า วางไว้ล่างสุดของหน้าเสมอ มักมีข้อมูลติดต่อหรือลิงก์ลิขสิทธิ์",
-    fields:{ content:"© 2026 บริษัทของคุณ | ติดต่อเรา" },
-    render: (d) => `<div class="comp-footer">${editSpan('content',d.content)}</div>`,
-    html: (d) => `  <footer>\n    <p>${escapeHtml(d.content)}</p>\n  </footer>`,
-    tip: "Footer ควรมีข้อมูลติดต่อ/ลิงก์สำคัญ เป็นจุดสิ้นสุดที่ทำให้ผู้ใช้รู้ว่าหมดหน้าแล้ว" }
+  header:{label:"Header",icon:"H",tag:"<header>",when:"Use once per page, placed at the very top. Contains logo or site name.",fields:{title:"Your Website Name"},render:d=>`<div class="comp-header">${editSpan('title',d.title)}</div>`,html:d=>`  <header class="site-header">\n    <h1>${escapeHtml(d.title)}</h1>\n  </header>`,tip:"Header establishes visual hierarchy — tells users which site they're on."},
+  nav:{label:"Navbar",icon:"N",tag:"<nav>",when:"Use when you have 2+ navigation links. Usually placed inside or near the header.",fields:{item1:"Home",item2:"About",item3:"Contact"},render:d=>`<div class="comp-nav"><a href="#">${editSpan('item1',d.item1)}</a><a href="#">${editSpan('item2',d.item2)}</a><a href="#">${editSpan('item3',d.item3)}</a></div>`,html:d=>`  <nav class="site-nav">\n    <a href="#">${escapeHtml(d.item1)}</a>\n    <a href="#">${escapeHtml(d.item2)}</a>\n    <a href="#">${escapeHtml(d.item3)}</a>\n  </nav>`,tip:"Keep nav consistent across all pages for wayfinding."},
+  hero:{label:"Hero Section",icon:"★",tag:"<section>",when:"Primary message area, placed right after the header. First thing users see.",fields:{title:"Main Headline Here",subtitle:"A short description of what you offer"},render:d=>`<div class="comp-hero"><h2>${editSpan('title',d.title)}</h2><p>${editSpan('subtitle',d.subtitle)}</p></div>`,html:d=>`  <section class="hero">\n    <h2>${escapeHtml(d.title)}</h2>\n    <p>${escapeHtml(d.subtitle)}</p>\n  </section>`,tip:"Use large bold text with high contrast. This is your conversion moment."},
+  button:{label:"Button",icon:"Btn",tag:"<button>",when:"Triggers an action: submit form, confirm, navigate.",fields:{label:"Click Here"},render:d=>`<div class="comp-button"><button>${editSpan('label',d.label)}</button></div>`,html:d=>`  <button class="btn">${escapeHtml(d.label)}</button>`,tip:"CTA buttons should contrast with background. Make them impossible to miss."},
+  image:{label:"Image",icon:"IMG",tag:"<img>",when:"Displays an image. Always include alt text for accessibility and SEO.",fields:{alt:"Example image"},render:d=>`<div class="comp-image"><img src="https://picsum.photos/seed/layout42/600/280" alt="${escapeHtml(d.alt)}"><div style="text-align:center;font-size:0.7rem;color:#94a3b8;margin-top:4px;">alt: ${editSpan('alt',d.alt)}</div></div>`,html:d=>`  <img src="https://picsum.photos/seed/layout42/800/400" alt="${escapeHtml(d.alt)}" style="max-width:100%;border-radius:8px;">`,tip:"Images communicate faster than text. Always add alt text."},
+  card:{label:"Card",icon:"Card",tag:"<div class=\"card\">",when:"Groups related content in a bordered box. Ideal for product cards, profiles.",fields:{title:"Card Title",text:"Short description of this card."},render:d=>`<div class="comp-card"><h3>${editSpan('title',d.title)}</h3><p>${editSpan('text',d.text)}</p></div>`,html:d=>`  <div class="card">\n    <h3>${escapeHtml(d.title)}</h3>\n    <p>${escapeHtml(d.text)}</p>\n  </div>`,tip:"Cards enable chunking — place multiple cards in a Grid for scanning."},
+  input:{label:"Input Field",icon:"In",tag:"<input>",when:"Receives single-line user input: name, email, password.",fields:{placeholder:"Enter text..."},render:d=>`<div style="padding:4px 0;"><div class="fake-input">${editSpan('placeholder',d.placeholder)}</div></div>`,html:d=>`  <input type="text" placeholder="${escapeHtml(d.placeholder)}">`,tip:"Always pair with a visible label or clear placeholder."},
+  textarea:{label:"Textarea",icon:"Ta",tag:"<textarea>",when:"Multi-line input: reviews, comments, descriptions.",fields:{placeholder:"Type multiple lines..."},render:d=>`<div style="padding:4px 0;"><div class="fake-textarea">${editSpan('placeholder',d.placeholder)}</div></div>`,html:d=>`  <textarea rows="4" placeholder="${escapeHtml(d.placeholder)}"></textarea>`,tip:"Set appropriate rows. Provide placeholder guidance."},
+  select:{label:"Dropdown",icon:"Sel",tag:"<select>",when:"Single selection from predefined options. Best for 5+ choices.",fields:{opt1:"Choose...",opt2:"Option 1"},render:d=>`<div style="padding:4px 0;"><div class="fake-select">${editSpan('opt1',d.opt1)} <span>▾</span></div></div>`,html:d=>`  <select>\n    <option>${escapeHtml(d.opt1)}</option>\n    <option>${escapeHtml(d.opt2)}</option>\n  </select>`,tip:"For fewer than 5 options, consider radio buttons instead."},
+  checkbox:{label:"Checkbox",icon:"☑",tag:"<input type=\"checkbox\">",when:"Multi-select or terms acceptance.",fields:{label:"Accept terms and conditions"},render:d=>`<div class="comp-checkbox"><label><input type="checkbox" disabled> ${editSpan('label',d.label)}</label></div>`,html:d=>`  <label>\n    <input type="checkbox">\n    ${escapeHtml(d.label)}\n  </label>`,tip:"Wrap in a clickable label to increase touch target size."},
+  text:{label:"Text",icon:"T",tag:"<p>",when:"General paragraph text, descriptions, explanations.",fields:{content:"Editable paragraph text goes here."},render:d=>`<div class="comp-text"><p>${editSpan('content',d.content)}</p></div>`,html:d=>`  <p>${escapeHtml(d.content)}</p>`,tip:"Keep line-height at 1.6+ and font-size ≥ 16px for readability."},
+  link:{label:"Link",icon:"A",tag:"<a>",when:"Navigates to another page, site, or anchor. Requires href.",fields:{label:"Example link — click here"},render:d=>`<div class="comp-link"><a href="#">${editSpan('label',d.label)}</a></div>`,html:d=>`  <a href="#">${escapeHtml(d.label)}</a>`,tip:"Links should look different from plain text — use color or underline (affordance)."},
+  list:{label:"List",icon:"Li",tag:"<ul><li>",when:"Enumerated information: features, steps, menu items.",fields:{item1:"Item 1",item2:"Item 2",item3:"Item 3"},render:d=>`<div class="comp-list"><ul><li>${editSpan('item1',d.item1)}</li><li>${editSpan('item2',d.item2)}</li><li>${editSpan('item3',d.item3)}</li></ul></div>`,html:d=>`  <ul>\n    <li>${escapeHtml(d.item1)}</li>\n    <li>${escapeHtml(d.item2)}</li>\n    <li>${escapeHtml(d.item3)}</li>\n  </ul>`,tip:"Lists chunk information into scannable pieces."},
+  table:{label:"Table",icon:"Tbl",tag:"<table>",when:"Tabular data: pricing, comparisons. Never use for page layout.",fields:{h1:"Column 1",h2:"Column 2",c1:"Data 1",c2:"Data 2",c3:"Data 3",c4:"Data 4"},render:d=>`<div class="comp-table"><table><tr><th>${editSpan('h1',d.h1)}</th><th>${editSpan('h2',d.h2)}</th></tr><tr><td>${editSpan('c1',d.c1)}</td><td>${editSpan('c2',d.c2)}</td></tr><tr><td>${editSpan('c3',d.c3)}</td><td>${editSpan('c4',d.c4)}</td></tr></table></div>`,html:d=>`  <table>\n    <tr>\n      <th>${escapeHtml(d.h1)}</th>\n      <th>${escapeHtml(d.h2)}</th>\n    </tr>\n    <tr>\n      <td>${escapeHtml(d.c1)}</td>\n      <td>${escapeHtml(d.c2)}</td>\n    </tr>\n    <tr>\n      <td>${escapeHtml(d.c3)}</td>\n      <td>${escapeHtml(d.c4)}</td>\n    </tr>\n  </table>`,tip:"Tables are for data only. Use Grid/Flexbox for layout."},
+  video:{label:"Video",icon:"Vid",tag:"<video>",when:"Embedded video. Always include controls attribute.",fields:{caption:"Video placeholder"},render:d=>`<div class="comp-video"><div class="video-box">▶<small>${editSpan('caption',d.caption)}</small></div></div>`,html:d=>`  <video controls width="100%" style="border-radius:8px;">\n    <source src="video.mp4" type="video/mp4">\n    ${escapeHtml(d.caption)}\n  </video>`,tip:"Always provide controls. Optimize file size for web."},
+  quote:{label:"Blockquote",icon:"\"",tag:"<blockquote>",when:"Quoted text: testimonials, citations, reviews.",fields:{quote:"Quoted text from a customer or source",cite:"Author name"},render:d=>`<div class="comp-quote"><blockquote>"${editSpan('quote',d.quote)}"<cite>— ${editSpan('cite',d.cite)}</cite></blockquote></div>`,html:d=>`  <blockquote>\n    "${escapeHtml(d.quote)}"\n    <cite>— ${escapeHtml(d.cite)}</cite>\n  </blockquote>`,tip:"Always include <cite> for credibility."},
+  badge:{label:"Badge",icon:"Tag",tag:"<span class=\"badge\">",when:"Short status labels: 'New', 'Sale', 'Sold out'.",fields:{label1:"New",label2:"Recommended"},render:d=>`<div class="comp-badge"><span class="badge">${editSpan('label1',d.label1)}</span><span class="badge">${editSpan('label2',d.label2)}</span></div>`,html:d=>`  <span class="badge">${escapeHtml(d.label1)}</span>\n  <span class="badge badge-alt">${escapeHtml(d.label2)}</span>`,tip:"Keep badge text extremely short. Use contrasting colors."},
+  divider:{label:"Divider",icon:"—",tag:"<hr>",when:"Visual separator between unrelated content sections.",render:()=>`<div class="comp-divider"><hr></div>`,html:()=>`  <hr>`,tip:"Use sparingly — too many dividers create visual noise."},
+  codeblock:{label:"Code Block",icon:"</>",tag:"<pre><code>",when:"Displays code snippets. Use monospace font + syntax highlighting.",fields:{code:'<div class="hello">Hello World</div>'},render:d=>`<div class="comp-code"><pre><code class="editable" contenteditable="true" draggable="false" spellcheck="false" data-field="code">${escapeHtml(d.code)}</code></pre></div>`,html:d=>`  <pre><code>${escapeHtml(d.code)}</code></pre>`,tip:"Monospace font + syntax highlighting dramatically improve readability."},
+  footer:{label:"Footer",icon:"F",tag:"<footer>",when:"Once per page, at the very bottom. Contact info, copyright.",fields:{content:"© 2026 Your Company | Contact Us"},render:d=>`<div class="comp-footer">${editSpan('content',d.content)}</div>`,html:d=>`  <footer>\n    <p>${escapeHtml(d.content)}</p>\n  </footer>`,tip:"Signals end-of-page. Include essential links and legal info."}
 };
 
-/* ========== นิยามกล่อง Layout (container) ========== */
-const containerTemplates = {
-  section: { label:"Section", icon:"📦", cssClass:"layout-section", tag:'<section>',
-    when:"ใช้แบ่งเนื้อหาของหน้าเว็บออกเป็นส่วน ๆ อย่างมีระเบียบ เช่น ส่วนแนะนำ ส่วนสินค้า ส่วนติดต่อ",
-    html: () => '  <section class="layout-section">\n    <!-- เนื้อหาข้างใน Section -->\n  </section>',
-    tip:"Section ใช้แบ่งเนื้อหาเป็นส่วน ๆ ช่วยสร้างระเบียบและ Whitespace ให้หน้าเว็บอ่านง่ายขึ้น" },
-  row: { label:"Row (แนวนอน)", icon:"↔️", cssClass:"layout-row", tag:'<div class="layout-row">',
-    when:"ใช้เมื่อต้องการให้องค์ประกอบเรียงกันแนวนอน เช่น แถบเมนู กลุ่มปุ่ม การ์ดเรียงแถวเดียว",
-    html: () => '  <div class="layout-row">\n    <!-- องค์ประกอบเรียงแนวนอน -->\n  </div>',
-    tip:"Row จัดองค์ประกอบเรียงกันแนวนอนด้วย Flexbox (display:flex; flex-direction:row) เหมาะกับเมนูหรือกลุ่มปุ่ม" },
-  col: { label:"Column (แนวตั้ง)", icon:"↕️", cssClass:"layout-col", tag:'<div class="layout-col">',
-    when:"ใช้เมื่อต้องการให้องค์ประกอบเรียงต่อกันแนวตั้ง เช่น ฟอร์มกรอกข้อมูล ลิสต์ข้อความ",
-    html: () => '  <div class="layout-col">\n    <!-- องค์ประกอบเรียงแนวตั้ง -->\n  </div>',
-    tip:"Column จัดองค์ประกอบเรียงต่อกันแนวตั้งด้วย Flexbox column เหมาะกับการจัดกลุ่มฟอร์มหรือข้อความ" },
-  grid2: { label:"Grid 2 คอลัมน์", icon:"▦", cssClass:"layout-grid2", tag:'<div class="layout-grid2">',
-    when:"ใช้จัดวางเนื้อหาเป็นตาราง 2 คอลัมน์เท่ากัน เหมาะกับการวาง Card สินค้าให้เป็นระเบียบ",
-    html: () => '  <div class="layout-grid2">\n    <!-- Card หรือองค์ประกอบในตาราง 2 คอลัมน์ -->\n  </div>',
-    tip:"CSS Grid แบ่งพื้นที่เป็น 2 คอลัมน์เท่ากัน เหมาะกับการวาง Card สินค้าให้เป็นระเบียบ" },
-  grid3: { label:"Grid 3 คอลัมน์", icon:"▦", cssClass:"layout-grid3", tag:'<div class="layout-grid3">',
-    when:"ใช้จัดวางเนื้อหาเป็นตาราง 3 คอลัมน์เท่ากัน เหมาะกับหน้ารวมสินค้าหรือแสดง Card จำนวนมาก",
-    html: () => '  <div class="layout-grid3">\n    <!-- Card หรือองค์ประกอบในตาราง 3 คอลัมน์ -->\n  </div>',
-    tip:"CSS Grid 3 คอลัมน์เหมาะกับการแสดง Card จำนวนมากในหน้าเดียว เช่น หน้ารวมสินค้า" }
+/* ═══════════════════════════════════════════════
+   Container Templates
+   ═══════════════════════════════════════════════ */
+const containerTemplates={
+  section:{label:"Section",icon:"📦",cssClass:"layout-section",tag:"<section>",when:"Divides page into logical sections with padding and border.",html:()=>'  <section class="layout-section">\n    <!-- content -->\n  </section>',tip:"Sections create whitespace and visual rhythm."},
+  row:{label:"Row",icon:"↔",cssClass:"layout-row",tag:"<div class=\"layout-row\">",when:"Horizontal arrangement: menus, button groups, card rows.",html:()=>'  <div class="layout-row">\n    <!-- horizontal items -->\n  </div>',tip:"Flexbox row — ideal for side-by-side layouts."},
+  col:{label:"Column",icon:"↕",cssClass:"layout-col",tag:"<div class=\"layout-col\">",when:"Vertical stacking: forms, text blocks, step sequences.",html:()=>'  <div class="layout-col">\n    <!-- stacked items -->\n  </div>',tip:"Flexbox column — natural vertical flow."},
+  grid2:{label:"Grid 2-col",icon:"▦",cssClass:"layout-grid2",tag:"<div class=\"layout-grid2\">",when:"2-column grid: product pairs, feature comparisons.",html:()=>'  <div class="layout-grid2">\n    <!-- 2-column content -->\n  </div>',tip:"CSS Grid 2-col — perfect for card layouts."},
+  grid3:{label:"Grid 3-col",icon:"Ħ",cssClass:"layout-grid3",tag:"<div class=\"layout-grid3\">",when:"3-column grid: product catalogs, feature grids.",html:()=>'  <div class="layout-grid3">\n    <!-- 3-column content -->\n  </div>',tip:"CSS Grid 3-col — great for showcasing many items."}
 };
 
-const containerTypes = Object.keys(containerTemplates);
-const containerDirection = { root:'vertical', section:'vertical', col:'vertical', row:'horizontal', grid2:'horizontal', grid3:'horizontal' };
+const containerTypes=Object.keys(containerTemplates);
+const containerDirection={root:'vertical',section:'vertical',col:'vertical',row:'horizontal',grid2:'horizontal',grid3:'horizontal'};
+function getTemplate(type){return containerTemplates[type]||contentTemplates[type];}
 
-function getTemplate(type) { return containerTemplates[type] || contentTemplates[type]; }
+/* ═══════════════════════════════════════════════
+   State
+   ═══════════════════════════════════════════════ */
+let idCounter=0;
+const tree={id:'root',type:'root',children:[]};
+let draggedId=null;
+let rawCodeText='';
 
-/* ========== สถานะเครื่องมือ ========== */
-let idCounter = 0;
-const tree = { id:'root', type:'root', children:[] };
-let draggedId = null;
+const canvas=document.getElementById('canvas');
+const elCount=document.getElementById('elCount');
+const codeEditor=document.getElementById('codeEditor');
+const copyBtn=document.getElementById('copyBtn');
+const downloadBtn2=document.getElementById('downloadBtn2');
+const tipBox=document.querySelector('.tip-box');
+const toast=document.getElementById('toast');
+const guideBtn=document.getElementById('guideBtn');
+const guideModal=document.getElementById('guideModal');
+const guideList=document.getElementById('guideList');
+const closeGuide=document.getElementById('closeGuide');
+const clearBtn=document.getElementById('clearBtn');
+const refreshBtn=document.getElementById('refreshBtn');
 
-const canvas = document.getElementById('canvas');
-const elCount = document.getElementById('elCount');
-const codeEditor = document.getElementById('codeEditor');
-const copyBtn = document.getElementById('copyBtn');
-const downloadBtn = document.getElementById('downloadBtn');
-const tipBox = document.getElementById('tipBox');
-const toast = document.getElementById('toast');
-const guideBtn = document.getElementById('guideBtn');
-const guideModal = document.getElementById('guideModal');
-const guideList = document.getElementById('guideList');
-const closeGuide = document.getElementById('closeGuide');
-const clearBtn = document.getElementById('clearBtn');
-const refreshBtn = document.getElementById('refreshBtn');
-let rawCodeText = '';
+/* ═══════════════════════════════════════════════
+   Tree Operations
+   ═══════════════════════════════════════════════ */
+function createNode(type){idCounter++;const n={id:'n'+idCounter,type};if(containerTypes.includes(type))n.children=[];else{const t=contentTemplates[type];n.data=t&&t.fields?{...t.fields}:{};}return n;}
+function findNode(id,node=tree){if(node.id===id)return node;if(node.children)for(const c of node.children){const r=findNode(id,c);if(r)return r;}return null;}
+function findParentAndIndex(id,node=tree){if(node.children)for(let i=0;i<node.children.length;i++){if(node.children[i].id===id)return{parent:node,index:i};const r=findParentAndIndex(id,node.children[i]);if(r)return r;}return null;}
+function isDescendant(ancestorId,nodeId){const n=findNode(ancestorId);if(!n||!n.children)return false;for(const c of n.children)if(c.id===nodeId||isDescendant(c.id,nodeId))return true;return false;}
+function removeNodeById(id){const f=findParentAndIndex(id);if(f){f.parent.children.splice(f.index,1);renderAll();}}
+function countAll(n=tree){let c=0;if(n.children){c+=n.children.length;n.children.forEach(ch=>{c+=countAll(ch);});}return c;}
 
-/* ========== Drag จาก palette ========== */
-document.querySelectorAll('.palette-item[data-type]').forEach(item => {
-  if (!item.dataset.type) return;
-  item.addEventListener('dragstart', e => {
-    e.dataTransfer.setData('text/plain', JSON.stringify({ source:'palette', type:item.dataset.type }));
-  });
-});
-
-/* ========== helper: tree ========== */
-function createNode(type) {
-  idCounter++;
-  const node = { id:'n'+idCounter, type };
-  if (containerTypes.includes(type)) {
-    node.children = [];
-  } else {
-    const tpl = contentTemplates[type];
-    node.data = tpl && tpl.fields ? { ...tpl.fields } : {};
+/* ═══════════════════════════════════════════════
+   Render Canvas
+   ═══════════════════════════════════════════════ */
+function renderNode(node){
+  const tpl=getTemplate(node.type);
+  if(node.children){
+    const inner=node.children.length?node.children.map(renderNode).join(''):`<div class="empty-hint">Drop components here</div>`;
+    return `<div class="comp-node container node-${node.type}" draggable="true" data-id="${node.id}"><div class="node-label"><span>${tpl.icon} ${tpl.label}</span><button class="del-btn" data-del="${node.id}">✕</button></div><div class="dropzone" data-parent-id="${node.id}">${inner}</div></div>`;
   }
-  return node;
-}
-function findNode(id, node = tree) {
-  if (node.id === id) return node;
-  if (node.children) {
-    for (const c of node.children) { const r = findNode(id, c); if (r) return r; }
-  }
-  return null;
-}
-function findParentAndIndex(id, node = tree) {
-  if (node.children) {
-    for (let i = 0; i < node.children.length; i++) {
-      if (node.children[i].id === id) return { parent: node, index: i };
-      const r = findParentAndIndex(id, node.children[i]);
-      if (r) return r;
-    }
-  }
-  return null;
-}
-function isDescendant(ancestorId, nodeId) {
-  const node = findNode(ancestorId);
-  if (!node || !node.children) return false;
-  for (const c of node.children) {
-    if (c.id === nodeId || isDescendant(c.id, nodeId)) return true;
-  }
-  return false;
-}
-function removeNodeById(id) {
-  const found = findParentAndIndex(id);
-  if (found) { found.parent.children.splice(found.index, 1); renderAll(); }
-}
-function countAllNodes(node = tree) {
-  let n = 0;
-  if (node.children) {
-    n += node.children.length;
-    node.children.forEach(c => { n += countAllNodes(c); });
-  }
-  return n;
+  return `<div class="comp-node leaf" draggable="true" data-id="${node.id}" data-type="${node.type}">${tpl.render(node.data||{})}<button class="del-btn" data-del="${node.id}">✕</button></div>`;
 }
 
-/* ========== render ========== */
-function renderNode(node) {
-  const tpl = getTemplate(node.type);
-  if (node.children) {
-    const childHtml = node.children.length
-      ? node.children.map(renderNode).join('')
-      : `<div class="empty-hint">วางองค์ประกอบที่นี่</div>`;
-    return `<div class="comp-node container node-${node.type}" draggable="true" data-id="${node.id}">
-        <div class="node-label"><span>${tpl.icon} ${tpl.label}</span><button class="del-btn" data-del="${node.id}">✕</button></div>
-        <div class="dropzone" data-parent-id="${node.id}">${childHtml}</div>
-      </div>`;
-  }
-  return `<div class="comp-node leaf" draggable="true" data-id="${node.id}" data-type="${node.type}">
-      ${tpl.render(node.data || {})}
-      <button class="del-btn" data-del="${node.id}">✕</button>
-    </div>`;
-}
-
-function renderAll() {
-  canvas.innerHTML = tree.children.length
-    ? tree.children.map(renderNode).join('')
-    : '<div class="placeholder">// ลากองค์ประกอบจากด้านซ้ายมาวางที่นี่</div>';
-  elCount.textContent = countAllNodes();
+function renderAll(){
+  canvas.innerHTML=tree.children.length?tree.children.map(renderNode).join(''):'<div class="canvas-placeholder">// Drag components here<br><span>from the Explorer panel on the left</span></div>';
+  elCount.textContent=countAll();
   updateCode();
 }
 
-/* ========== Drag & Drop ภายใน canvas ========== */
-canvas.addEventListener('dragstart', e => {
-  const el = e.target.closest('.comp-node');
-  if (!el) return;
-  draggedId = el.dataset.id;
-  e.dataTransfer.setData('text/plain', JSON.stringify({ source:'canvas', id: el.dataset.id }));
-  el.classList.add('dragging');
+/* ═══════════════════════════════════════════════
+   Drag & Drop
+   ═══════════════════════════════════════════════ */
+document.querySelectorAll('.tree-item[data-type]').forEach(item=>{
+  item.addEventListener('dragstart',e=>{e.dataTransfer.setData('text/plain',JSON.stringify({source:'palette',type:item.dataset.type}));});
 });
-canvas.addEventListener('dragend', e => {
-  const el = e.target.closest('.comp-node');
-  if (el) el.classList.remove('dragging');
-  draggedId = null;
-  document.querySelectorAll('.dropzone-hover').forEach(d => d.classList.remove('dropzone-hover'));
-});
-canvas.addEventListener('dragover', e => {
-  e.preventDefault();
-  document.querySelectorAll('.dropzone-hover').forEach(d => d.classList.remove('dropzone-hover'));
-  const dz = e.target.closest('.dropzone');
-  if (dz) dz.classList.add('dropzone-hover');
-});
-canvas.addEventListener('drop', e => {
-  e.preventDefault();
-  document.querySelectorAll('.dropzone-hover').forEach(d => d.classList.remove('dropzone-hover'));
-  const dz = e.target.closest('.dropzone');
-  if (!dz) return;
-  const parentId = dz.dataset.parentId;
-  const parentNode = findNode(parentId);
-  if (!parentNode) return;
-
-  let data;
-  try { data = JSON.parse(e.dataTransfer.getData('text/plain')); } catch (err) { return; }
-
-  const directItems = Array.from(dz.children).filter(c => c.classList.contains('comp-node'));
-  const direction = containerDirection[parentNode.type] || 'vertical';
-  let insertIndex = directItems.length;
-  for (let i = 0; i < directItems.length; i++) {
-    const rect = directItems[i].getBoundingClientRect();
-    if (direction === 'horizontal') {
-      if (e.clientX < rect.left + rect.width / 2) { insertIndex = i; break; }
-    } else {
-      if (e.clientY < rect.top + rect.height / 2) { insertIndex = i; break; }
-    }
-  }
-
-  if (data.source === 'palette') {
-    parentNode.children.splice(insertIndex, 0, createNode(data.type));
-  } else if (data.source === 'canvas') {
-    const dId = data.id;
-    if (dId === parentId || isDescendant(dId, parentId)) {
-      showToast('⚠️ ไม่สามารถวางองค์ประกอบไว้ในตัวเองได้');
-      return;
-    }
-    const found = findParentAndIndex(dId);
-    if (!found) return;
-    const [moved] = found.parent.children.splice(found.index, 1);
-    let idx = insertIndex;
-    if (found.parent.id === parentNode.id && found.index < insertIndex) idx -= 1;
-    parentNode.children.splice(idx, 0, moved);
+canvas.addEventListener('dragstart',e=>{const el=e.target.closest('.comp-node');if(!el)return;draggedId=el.dataset.id;e.dataTransfer.setData('text/plain',JSON.stringify({source:'canvas',id:el.dataset.id}));el.classList.add('dragging');});
+canvas.addEventListener('dragend',e=>{const el=e.target.closest('.comp-node');if(el)el.classList.remove('dragging');draggedId=null;document.querySelectorAll('.dropzone-hover').forEach(d=>d.classList.remove('dropzone-hover'));});
+canvas.addEventListener('dragover',e=>{e.preventDefault();document.querySelectorAll('.dropzone-hover').forEach(d=>d.classList.remove('dropzone-hover'));const dz=e.target.closest('.dropzone');if(dz)dz.classList.add('dropzone-hover');});
+canvas.addEventListener('drop',e=>{
+  e.preventDefault();document.querySelectorAll('.dropzone-hover').forEach(d=>d.classList.remove('dropzone-hover'));
+  const dz=e.target.closest('.dropzone');if(!dz)return;
+  const parentId=dz.dataset.parentId;const parentNode=findNode(parentId);if(!parentNode)return;
+  let data;try{data=JSON.parse(e.dataTransfer.getData('text/plain'));}catch(err){return;}
+  const directItems=Array.from(dz.children).filter(c=>c.classList.contains('comp-node'));
+  const dir=containerDirection[parentNode.type]||'vertical';
+  let insertIndex=directItems.length;
+  for(let i=0;i<directItems.length;i++){const r=directItems[i].getBoundingClientRect();if(dir==='horizontal'){if(e.clientX<r.left+r.width/2){insertIndex=i;break;}}else{if(e.clientY<r.top+r.height/2){insertIndex=i;break;}}}
+  if(data.source==='palette'){parentNode.children.splice(insertIndex,0,createNode(data.type));}
+  else if(data.source==='canvas'){
+    const dId=data.id;if(dId===parentId||isDescendant(dId,parentId)){showToast('Cannot nest inside itself','warning');return;}
+    const found=findParentAndIndex(dId);if(!found)return;const[moved]=found.parent.children.splice(found.index,1);
+    let idx=insertIndex;if(found.parent.id===parentNode.id&&found.index<insertIndex)idx-=1;parentNode.children.splice(idx,0,moved);
   }
   renderAll();
 });
 
-/* ========== คลิก: ลบ / ดูเคล็ดลับ ========== */
-canvas.addEventListener('click', e => {
-  const delBtn = e.target.closest('.del-btn');
-  if (delBtn) { e.stopPropagation(); removeNodeById(delBtn.dataset.del); return; }
-  const leaf = e.target.closest('.comp-node.leaf');
-  if (leaf) {
-    const node = findNode(leaf.dataset.id);
-    showTip(leaf.dataset.type, node ? node.data : null);
-    return;
-  }
-  const container = e.target.closest('.comp-node.container');
-  if (container) { showTip(container.className.match(/node-(\w+)/)[1]); }
+/* ═══════════════════════════════════════════════
+   Click: Delete / Inspect
+   ═══════════════════════════════════════════════ */
+canvas.addEventListener('click',e=>{
+  const del=e.target.closest('.del-btn');if(del){e.stopPropagation();removeNodeById(del.dataset.del);return;}
+  const leaf=e.target.closest('.comp-node.leaf');if(leaf){const n=findNode(leaf.dataset.id);showTip(leaf.dataset.type,n?n.data:null);return;}
+  const cont=e.target.closest('.comp-node.container');if(cont){const m=cont.className.match(/node-(\w+)/);if(m)showTip(m[1]);}
 });
 
-/* ========== พิมพ์แก้ไขข้อความ (contenteditable) ========== */
-let activeEditable = null;
-let savedRange = null;
-
-function saveSelection(e) {
-  const editable = e.target.closest && e.target.closest('.editable');
-  if (!editable) return;
-  activeEditable = editable;
-  const sel = window.getSelection();
-  if (sel && sel.rangeCount > 0) savedRange = sel.getRangeAt(0).cloneRange();
-}
-canvas.addEventListener('focusin', saveSelection);
-canvas.addEventListener('keyup', saveSelection);
-canvas.addEventListener('mouseup', saveSelection);
-
-canvas.addEventListener('input', e => {
-  const editable = e.target.closest('.editable');
-  if (!editable) return;
-  const nodeEl = editable.closest('.comp-node');
-  if (!nodeEl) return;
-  const node = findNode(nodeEl.dataset.id);
-  if (!node) return;
-  if (!node.data) node.data = {};
-  node.data[editable.dataset.field] = editable.textContent;
-  updateCode();
+/* ═══════════════════════════════════════════════
+   Editable Text
+   ═══════════════════════════════════════════════ */
+let activeEditable=null,savedRange=null;
+function saveSel(e){const ed=e.target.closest&&e.target.closest('.editable');if(!ed)return;activeEditable=ed;const s=window.getSelection();if(s&&s.rangeCount>0)savedRange=s.getRangeAt(0).cloneRange();}
+canvas.addEventListener('focusin',saveSel);canvas.addEventListener('keyup',saveSel);canvas.addEventListener('mouseup',saveSel);
+canvas.addEventListener('input',e=>{
+  const ed=e.target.closest('.editable');if(!ed)return;const nel=ed.closest('.comp-node');if(!nel)return;const n=findNode(nel.dataset.id);if(!n)return;if(!n.data)n.data={};n.data[ed.dataset.field]=ed.textContent;updateCode();
 });
 
-function escapeHtml(str) {
-  return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+function escapeHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+function showTip(type,data){
+  const tpl=getTemplate(type);if(!tpl)return;
+  const ex=tpl.html?tpl.html(data||tpl.fields||{}):'';
+  tipBox.innerHTML=`<div style="margin-bottom:6px;">${tpl.icon} <b>${tpl.label}</b> — <code>${escapeHtml(tpl.tag||'')}</code></div><div style="margin-bottom:4px;">📌 <b>When to use:</b> ${tpl.when||'-'}</div><div>💡 <b>UX Tip:</b> ${tpl.tip}</div>${ex?`<pre>${escapeHtml(ex)}</pre>`:''}`;
 }
 
-function showTip(type, data) {
-  const tpl = getTemplate(type);
-  if (!tpl) return;
-  const example = tpl.html ? tpl.html(data || tpl.fields || {}) : '';
-  tipBox.innerHTML = `
-    <div>${tpl.icon} <b>${tpl.label}</b> — แท็ก <code>${escapeHtml(tpl.tag || '')}</code></div>
-    <div style="margin-top:5px;">📌 <b>เมื่อไหร่ควรใช้:</b> ${tpl.when || '-'}</div>
-    <div style="margin-top:5px;">💡 <b>เคล็ดลับ UX:</b> ${tpl.tip}</div>
-    ${example ? `<pre>${escapeHtml(example)}</pre>` : ''}
-  `;
-}
+/* ═══════════════════════════════════════════════
+   Guide Modal
+   ═══════════════════════════════════════════════ */
+function buildGuide(){const all={...containerTemplates,...contentTemplates};guideList.innerHTML=Object.values(all).map(t=>{const ex=t.html?t.html(t.fields||{}):'';return `<div class="guide-item"><div>${t.icon} <b>${t.label}</b> — <code>${escapeHtml(t.tag||'')}</code></div><div style="margin-top:4px;">📌 <b>When:</b> ${t.when||'-'}</div><div style="margin-top:4px;">💡 ${t.tip}</div>${ex?`<pre>${escapeHtml(ex)}</pre>`:''}</div>`;}).join('');}
+guideBtn.addEventListener('click',()=>{buildGuide();guideModal.classList.add('show');});
+document.getElementById('abGuide').addEventListener('click',()=>{buildGuide();guideModal.classList.add('show');});
+closeGuide.addEventListener('click',()=>guideModal.classList.remove('show'));
+guideModal.addEventListener('click',e=>{if(e.target===guideModal)guideModal.classList.remove('show');});
 
-/* ========== คู่มือแท็กทั้งหมด ========== */
-function buildGuide() {
-  const all = { ...containerTemplates, ...contentTemplates };
-  guideList.innerHTML = Object.values(all).map(tpl => {
-    const example = tpl.html ? tpl.html(tpl.fields || {}) : '';
-    return `<div class="guide-item">
-      <div>${tpl.icon} <b>${tpl.label}</b> — แท็ก <code>${escapeHtml(tpl.tag || '')}</code></div>
-      <div style="margin-top:4px;">📌 <b>เมื่อไหร่ควรใช้:</b> ${tpl.when || '-'}</div>
-      <div style="margin-top:4px;">💡 <b>เคล็ดลับ:</b> ${tpl.tip}</div>
-      ${example ? `<pre>${escapeHtml(example)}</pre>` : ''}
-    </div>`;
-  }).join('');
-}
-guideBtn.addEventListener('click', () => { buildGuide(); guideModal.classList.add('show'); });
-closeGuide.addEventListener('click', () => guideModal.classList.remove('show'));
-guideModal.addEventListener('click', e => { if (e.target === guideModal) guideModal.classList.remove('show'); });
-
-/* ========== เมนูอีโมจิ ========== */
-const emojiMenuBtn = document.getElementById('emojiMenuBtn');
-const emojiModal = document.getElementById('emojiModal');
-const emojiGroups = document.getElementById('emojiGroups');
-const closeEmoji = document.getElementById('closeEmoji');
-
-const emojiCategories = {
-  "😀 หน้ายิ้ม / อารมณ์": ["😀","😃","😄","😁","😆","😅","😂","🙂","😉","😊","😍","🤩","🤔","😎","😴","😭","😡","👍","👎","👏","🙏","💪","✌️","🤝"],
-  "❤️ หัวใจ / สัญลักษณ์": ["❤️","🧡","💛","💚","💙","💜","🖤","🤍","💯","✅","❌","⭐","🌟","✨","🔥","💡","⚡","🎯","📌","🔔"],
-  "➡️ ลูกศร / UI": ["➡️","⬅️","⬆️","⬇️","↔️","↕️","🔄","▶️","⏸️","⏹️","🔍","🔗","📎","📋","📁","📂","🗂️","🧩"],
-  "💻 ธุรกิจ / เทคโนโลยี": ["💻","🖥️","📱","⌨️","🖱️","🛒","💳","📊","📈","📉","🗓️","⏰","🌐","🔒","🔓","📧","✉️","📞"],
-  "🌈 ธรรมชาติ / อื่น ๆ": ["🌈","☀️","🌙","🌸","🍀","🎉","🎁","🏆","🚀","📢","💬","🗨️","👋"]
+/* ═══════════════════════════════════════════════
+   Emoji Modal
+   ═══════════════════════════════════════════════ */
+const emojiModal=document.getElementById('emojiModal');
+const emojiGroups=document.getElementById('emojiGroups');
+const closeEmoji=document.getElementById('closeEmoji');
+const emojiCats={
+  "Smileys":["😀","😃","😄","😁","😆","😅","😂","🙂","😉","😊","😍","🤩","🤔","😎","😴","😭","😡","👍","👎","👏","🙏","💪","✌️","🤝","🫡"],
+  "Symbols":["❤️","🧡","💛","💚","💙","💜","🖤","🤍","💯","✅","❌","⭐","🌟","✨","🔥","💡","⚡","🎯","📌","🔔","⚠️"],
+  "Arrows / UI":["➡️","⬅️","⬆️","⬇️","↔️","↕️","🔄","▶️","⏸️","🔍","🔗","📎","📋","📁","📂","🗂️","🧩","📊","📈","📉"],
+  "Tech":["💻","🖥️","📱","⌨️","🖱️","🛒","💳","📊","📈","📉","🗓️","⏰","🌐","🔒","🔓","📧","✉️","📞","🚀","🎮"],
+  "Nature":["🌈","☀️","🌙","🌸","🍀","🎉","🎁","🏆","📢","💬","👋","🤖","🎯","🧠","🎨"]
 };
+function buildEmoji(){emojiGroups.innerHTML=Object.entries(emojiCats).map(([l,list])=>`<div style="font-size:0.7rem;color:var(--overlay0);margin:10px 0 6px;text-transform:uppercase;letter-spacing:1px;">${l}</div><div class="emoji-grid">${list.map(em=>`<button type="button" class="emoji-btn" data-emoji="${em}">${em}</button>`).join('')}</div>`).join('');}
+function insertEmoji(em){
+  if(activeEditable&&document.contains(activeEditable)){
+    activeEditable.focus();const sel=window.getSelection();
+    if(savedRange&&activeEditable.contains(savedRange.startContainer)){sel.removeAllRanges();sel.addRange(savedRange);}
+    else{const r=document.createRange();r.selectNodeContents(activeEditable);r.collapse(false);sel.removeAllRanges();sel.addRange(r);}
+    document.execCommand('insertText',false,em);if(sel.rangeCount>0)savedRange=sel.getRangeAt(0).cloneRange();
+    const nel=activeEditable.closest('.comp-node');if(nel){const n=findNode(nel.dataset.id);if(n){if(!n.data)n.data={};n.data[activeEditable.dataset.field]=activeEditable.textContent;updateCode();}}
+    showToast(`Inserted ${em}`,'success');
+  }else{navigator.clipboard.writeText(em).catch(()=>{});showToast('Click text on canvas first (emoji copied to clipboard)','warning');}
+}
+document.getElementById('abEmoji').addEventListener('click',()=>{buildEmoji();emojiModal.classList.add('show');});
+closeEmoji.addEventListener('click',()=>emojiModal.classList.remove('show'));
+emojiModal.addEventListener('click',e=>{if(e.target===emojiModal){emojiModal.classList.remove('show');return;}const b=e.target.closest('.emoji-btn');if(b)insertEmoji(b.dataset.emoji);});
 
-function buildEmojiMenu() {
-  emojiGroups.innerHTML = Object.entries(emojiCategories).map(([label, list]) => `
-    <div class="group-label">${label}</div>
-    <div class="emoji-grid">${list.map(em => `<button type="button" class="emoji-btn" data-emoji="${em}">${em}</button>`).join('')}</div>
-  `).join('');
+/* ═══════════════════════════════════════════════
+   Tree Category Toggle
+   ═══════════════════════════════════════════════ */
+document.querySelectorAll('.tree-cat-head').forEach(h=>{h.addEventListener('click',()=>h.parentElement.classList.toggle('collapsed'));});
+
+/* ═══════════════════════════════════════════════
+   Activity Bar
+   ═══════════════════════════════════════════════ */
+const sidebar=document.getElementById('sidebar');
+document.getElementById('abPalette').addEventListener('click',function(){sidebar.classList.toggle('collapsed');this.classList.toggle('active');});
+
+/* ═══════════════════════════════════════════════
+   Clear / Refresh
+   ═══════════════════════════════════════════════ */
+clearBtn.addEventListener('click',()=>{if(!tree.children.length)return;if(confirm('Clear all components? This cannot be undone.')){tree.children=[];renderAll();showToast('Workspace cleared','success');}});
+refreshBtn.addEventListener('click',()=>{renderAll();showToast('Preview refreshed','success');});
+
+/* ═══════════════════════════════════════════════
+   Generate Full index.html
+   ═══════════════════════════════════════════════ */
+function nodeToHtml(node,indent){
+  const tpl=getTemplate(node.type);
+  if(node.children){
+    const inner=node.children.length?node.children.map(c=>nodeToHtml(c,indent+'    ')).join('\n\n'):indent+'    <!-- place content here -->';
+    const tag=tpl.cssClass.startsWith('layout-section')?'section':'div';
+    return `${indent}<${tag} class="${tpl.cssClass}">\n${inner}\n${indent}</${tag}>`;
+  }
+  return tpl.html(node.data||tpl.fields||{}).split('\n').map(l=>indent+l.trimStart()).join('\n');
 }
 
-function insertEmoji(emoji) {
-  if (activeEditable && document.contains(activeEditable)) {
-    activeEditable.focus();
-    const sel = window.getSelection();
-    if (savedRange && activeEditable.contains(savedRange.startContainer)) {
-      sel.removeAllRanges();
-      sel.addRange(savedRange);
-    } else {
-      const r = document.createRange();
-      r.selectNodeContents(activeEditable);
-      r.collapse(false);
-      sel.removeAllRanges();
-      sel.addRange(r);
-    }
-    document.execCommand('insertText', false, emoji);
-    if (sel.rangeCount > 0) savedRange = sel.getRangeAt(0).cloneRange();
-    const nodeEl = activeEditable.closest('.comp-node');
-    if (nodeEl) {
-      const node = findNode(nodeEl.dataset.id);
-      if (node) {
-        if (!node.data) node.data = {};
-        node.data[activeEditable.dataset.field] = activeEditable.textContent;
-        updateCode();
-      }
-    }
-    showToast(`เพิ่ม ${emoji} แล้ว`);
-  } else {
-    navigator.clipboard.writeText(emoji).catch(() => {});
-    showToast('⚠️ กรุณาคลิกที่ข้อความในพื้นที่ออกแบบก่อน (คัดลอกอีโมจิไว้ในคลิปบอร์ดให้แล้ว)');
-  }
-}
-
-emojiMenuBtn.addEventListener('click', () => { buildEmojiMenu(); emojiModal.classList.add('show'); });
-closeEmoji.addEventListener('click', () => emojiModal.classList.remove('show'));
-emojiModal.addEventListener('click', e => {
-  if (e.target === emojiModal) { emojiModal.classList.remove('show'); return; }
-  const btn = e.target.closest('.emoji-btn');
-  if (btn) insertEmoji(btn.dataset.emoji);
-});
-
-/* ========== ล้างพื้นที่ทำงาน / รีเฟรช ========== */
-clearBtn.addEventListener('click', () => {
-  if (tree.children.length === 0) return;
-  if (confirm('ต้องการล้างพื้นที่ทำงานทั้งหมดหรือไม่? การกระทำนี้ไม่สามารถย้อนกลับได้')) {
-    tree.children = [];
-    renderAll();
-    showToast('🗑 ล้างพื้นที่ทำงานแล้ว');
-  }
-});
-refreshBtn.addEventListener('click', () => {
-  renderAll();
-  showToast('⟳ รีเฟรชตัวอย่างแล้ว');
-});
-
-/* ========================================================
-   สร้างโค้ด HTML เต็มรูปแบบ — ไฟล์ index.html สำเร็จรูป
-   ======================================================== */
-function nodeToHtml(node, indent) {
-  const tpl = getTemplate(node.type);
-  if (node.children) {
-    const inner = node.children.length
-      ? node.children.map(c => nodeToHtml(c, indent + '    ')).join('\n\n')
-      : indent + '    <!-- วางองค์ประกอบเพิ่มเติมที่นี่ -->';
-    return `${indent}<${tpl.cssClass.startsWith('layout-') ? 'div' : 'section'} class="${tpl.cssClass}">\n${inner}\n${indent}</${tpl.cssClass.startsWith('layout-') ? 'div' : 'section'}>`;
-  }
-  const raw = tpl.html(node.data || tpl.fields || {});
-  /* เอา indent เดิมออก แล้วเติม indent ใหม่ให้ตรงระดับ */
-  return raw.split('\n').map(l => indent + l.trimStart()).join('\n');
-}
-
-/* CSS สำหรับไฟล์ export ที่ครอบคลุมทุกคอมโพเนนต์ */
-function getExportCss() {
-  return `    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+function getExportCss(){return `    * { margin: 0; padding: 0; box-sizing: border-box; }
 
     body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
       color: #1e293b;
       line-height: 1.6;
       background: #f8fafc;
@@ -935,7 +689,6 @@ function getExportCss() {
       padding: 24px 16px;
     }
 
-    /* ---- Layout ---- */
     .layout-section {
       padding: 28px;
       margin-bottom: 16px;
@@ -970,227 +723,105 @@ function getExportCss() {
     }
 
     @media (max-width: 640px) {
-      .layout-grid2,
-      .layout-grid3 {
-        grid-template-columns: 1fr;
-      }
-      .layout-row {
-        flex-direction: column;
-      }
+      .layout-grid2, .layout-grid3 { grid-template-columns: 1fr; }
+      .layout-row { flex-direction: column; }
     }
 
-    /* ---- Header ---- */
     .site-header {
-      background: #4f46e5;
-      color: #ffffff;
+      background: linear-gradient(135deg, #4f46e5, #6366f1);
+      color: #fff;
       padding: 20px 24px;
       border-radius: 8px;
     }
+    .site-header h1 { font-size: 1.5rem; font-weight: 700; }
 
-    .site-header h1 {
-      font-size: 1.5rem;
-      font-weight: 700;
-    }
-
-    /* ---- Nav ---- */
     .site-nav {
-      background: #1e293b;
-      color: #ffffff;
+      background: #0f172a;
+      color: #fff;
       padding: 12px 20px;
       border-radius: 8px;
       display: flex;
       gap: 24px;
       flex-wrap: wrap;
     }
+    .site-nav a { color: #cbd5e1; text-decoration: none; transition: color 0.2s; }
+    .site-nav a:hover { color: #fff; }
 
-    .site-nav a {
-      color: #cbd5e1;
-      text-decoration: none;
-      font-size: 0.95rem;
-      transition: color 0.2s;
-    }
-
-    .site-nav a:hover {
-      color: #ffffff;
-    }
-
-    /* ---- Hero ---- */
     .hero {
-      background: linear-gradient(135deg, #818cf8, #c084fc);
-      color: #ffffff;
+      background: linear-gradient(135deg, #818cf8, #c084fc, #f472b6);
+      color: #fff;
       padding: 48px 28px;
       border-radius: 12px;
       text-align: center;
     }
+    .hero h2 { font-size: 1.8rem; margin-bottom: 10px; font-weight: 800; }
+    .hero p { font-size: 1.05rem; opacity: 0.92; max-width: 540px; margin: 0 auto; }
 
-    .hero h2 {
-      font-size: 1.8rem;
-      margin-bottom: 10px;
-      font-weight: 800;
-    }
-
-    .hero p {
-      font-size: 1.05rem;
-      opacity: 0.92;
-      max-width: 540px;
-      margin: 0 auto;
-    }
-
-    /* ---- Button ---- */
     .btn {
       display: inline-block;
-      background: #f59e0b;
-      color: #111827;
+      background: linear-gradient(135deg, #f59e0b, #f97316);
+      color: #fff;
       border: none;
       padding: 12px 28px;
       border-radius: 8px;
       font-weight: 700;
       font-size: 1rem;
       cursor: pointer;
-      transition: background 0.2s;
+      transition: transform 0.2s, box-shadow 0.2s;
     }
+    .btn:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(245,158,11,0.3); }
 
-    .btn:hover {
-      background: #d97706;
-    }
+    img { max-width: 100%; height: auto; border-radius: 8px; display: block; }
 
-    /* ---- Image ---- */
-    img {
-      max-width: 100%;
-      height: auto;
-      border-radius: 8px;
-      display: block;
-    }
-
-    /* ---- Card ---- */
     .card {
-      background: #ffffff;
+      background: #fff;
       border: 1px solid #e2e8f0;
       border-radius: 10px;
       padding: 20px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
       transition: box-shadow 0.2s;
     }
+    .card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+    .card h3 { margin-bottom: 8px; color: #1e293b; }
+    .card p { color: #64748b; font-size: 0.93rem; }
 
-    .card:hover {
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-    }
-
-    .card h3 {
-      margin-bottom: 8px;
-      color: #1e293b;
-      font-size: 1.1rem;
-    }
-
-    .card p {
-      color: #64748b;
-      font-size: 0.93rem;
-    }
-
-    /* ---- Form elements ---- */
-    input[type="text"],
-    input[type="email"],
-    input[type="password"],
-    textarea,
-    select {
+    input[type="text"], input[type="email"], textarea, select {
       width: 100%;
       padding: 10px 14px;
-      border: 1px solid #cbd5e1;
+      border: 1px solid #e2e8f0;
       border-radius: 8px;
       font-size: 0.95rem;
       font-family: inherit;
       transition: border-color 0.2s, box-shadow 0.2s;
-      background: #ffffff;
+      background: #fff;
       color: #1e293b;
     }
-
-    input[type="text"]:focus,
-    input[type="email"]:focus,
-    input[type="password"]:focus,
-    textarea:focus,
-    select:focus {
+    input:focus, textarea:focus, select:focus {
       outline: none;
       border-color: #6366f1;
-      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+      box-shadow: 0 0 0 3px rgba(99,102,241,0.12);
     }
+    textarea { resize: vertical; min-height: 90px; }
 
-    textarea {
-      resize: vertical;
-      min-height: 90px;
-    }
+    label { display: flex; align-items: center; gap: 8px; font-size: 0.95rem; color: #334155; cursor: pointer; }
 
-    label {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 0.95rem;
-      color: #334155;
-      cursor: pointer;
-    }
+    p { margin-bottom: 8px; color: #334155; }
 
-    /* ---- Text ---- */
-    p {
-      margin-bottom: 8px;
-      color: #334155;
-      font-size: 1rem;
-    }
+    a { color: #4f46e5; text-decoration: none; font-weight: 600; border-bottom: 2px solid rgba(79,70,229,0.15); padding-bottom: 1px; transition: border-color 0.2s; }
+    a:hover { border-color: #4f46e5; }
 
-    /* ---- Link ---- */
-    a {
-      color: #4f46e5;
-      text-decoration: underline;
-      font-weight: 600;
-    }
+    ul { padding-left: 24px; margin-bottom: 8px; }
+    li { margin: 5px 0; color: #334155; }
 
-    a:hover {
-      color: #3730a3;
-    }
+    table { width: 100%; border-collapse: collapse; font-size: 0.92rem; }
+    th, td { border: 1px solid #e2e8f0; padding: 10px 14px; text-align: left; }
+    th { background: #f1f5f9; color: #1e293b; font-weight: 600; }
+    tr:nth-child(even) td { background: #f8fafc; }
 
-    /* ---- List ---- */
-    ul {
-      padding-left: 24px;
-      margin-bottom: 8px;
-    }
+    video { border-radius: 8px; max-width: 100%; }
 
-    li {
-      margin: 5px 0;
-      color: #334155;
-      font-size: 0.95rem;
-    }
-
-    /* ---- Table ---- */
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-bottom: 8px;
-      font-size: 0.92rem;
-    }
-
-    th, td {
-      border: 1px solid #cbd5e1;
-      padding: 10px 14px;
-      text-align: left;
-    }
-
-    th {
-      background: #f1f5f9;
-      color: #1e293b;
-      font-weight: 600;
-    }
-
-    tr:nth-child(even) td {
-      background: #f8fafc;
-    }
-
-    /* ---- Video ---- */
-    video {
-      border-radius: 8px;
-      max-width: 100%;
-    }
-
-    /* ---- Blockquote ---- */
     blockquote {
-      border-left: 4px solid #94a3b8;
+      border-left: 4px solid #818cf8;
       padding: 16px 20px;
       font-style: italic;
       color: #334155;
@@ -1198,163 +829,70 @@ function getExportCss() {
       border-radius: 0 8px 8px 0;
       margin-bottom: 8px;
     }
+    blockquote cite { display: block; margin-top: 10px; font-size: 0.85rem; color: #64748b; font-style: normal; }
 
-    blockquote cite {
-      display: block;
-      margin-top: 10px;
-      font-size: 0.85rem;
-      color: #64748b;
-      font-style: normal;
-    }
+    .badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 700; margin-right: 6px; margin-bottom: 4px; background: #e0e7ff; color: #4338ca; }
+    .badge-alt { background: #dcfce7; color: #15803d; }
 
-    /* ---- Badge ---- */
-    .badge {
-      display: inline-block;
-      padding: 4px 12px;
-      border-radius: 20px;
-      font-size: 0.8rem;
-      font-weight: 700;
-      margin-right: 6px;
-      margin-bottom: 4px;
-      background: #e0e7ff;
-      color: #4338ca;
-    }
+    hr { border: none; border-top: 2px solid #e2e8f0; margin: 20px 0; }
 
-    .badge-alt {
-      background: #dcfce7;
-      color: #15803d;
-    }
+    pre { background: #0f172a; color: #7dd3fc; padding: 18px; border-radius: 8px; font-size: 0.85rem; overflow-x: auto; margin-bottom: 8px; }
+    pre code { font-family: 'Courier New', monospace; }
 
-    /* ---- Divider ---- */
-    hr {
-      border: none;
-      border-top: 2px solid #e2e8f0;
-      margin: 20px 0;
-    }
+    footer { background: #0f172a; color: #64748b; text-align: center; padding: 20px; border-radius: 8px; }
+    footer p { color: #64748b; margin: 0; }`;}
 
-    /* ---- Code Block ---- */
-    pre {
-      background: #0f172a;
-      color: #7dd3fc;
-      padding: 18px;
-      border-radius: 8px;
-      font-size: 0.85rem;
-      overflow-x: auto;
-      margin-bottom: 8px;
-    }
-
-    pre code {
-      font-family: 'Courier New', Courier, monospace;
-    }
-
-    /* ---- Footer ---- */
-    footer {
-      background: #111827;
-      color: #9ca3af;
-      text-align: center;
-      padding: 20px;
-      border-radius: 8px;
-      font-size: 0.9rem;
-    }
-
-    footer p {
-      color: #9ca3af;
-      margin: 0;
-    }`;
-}
-
-function highlightLine(line) {
-  let e = escapeHtml(line);
-  if (/^\s*&lt;!--/.test(e)) return `<span class="tok-comment">${e}</span>`;
-  /* ไล่สี doctype */
-  if (/^&lt;!DOCTYPE/i.test(e)) return `<span class="tok-tag">${e}</span>`;
-  e = e.replace(/(&lt;\/?)([a-zA-Z][a-zA-Z0-9]*)/g, (m, p1, p2) => `${p1}<span class="tok-tag">${p2}</span>`);
-  e = e.replace(/([a-zA-Z-]+)(=)("[^"]*")/g, (m, p1, p2, p3) => `<span class="tok-attr">${p1}</span>${p2}<span class="tok-string">${p3}</span>`);
-  e = e.replace(/(&gt;)/g, `<span class="tok-tag">$1</span>`);
+function highlightLine(line){
+  let e=escapeHtml(line);
+  if(/^\s*&lt;!--/.test(e))return`<span class="tok-comment">${e}</span>`;
+  if(/^&lt;!DOCTYPE/i.test(e))return`<span class="tok-doctype">${e}</span>`;
+  e=e.replace(/(&lt;\/?)([a-zA-Z][a-zA-Z0-9]*)/g,(m,p1,p2)=>`${p1}<span class="tok-tag">${p2}</span>`);
+  e=e.replace(/([a-zA-Z-]+)(=)("[^"]*")/g,(m,p1,p2,p3)=>`<span class="tok-attr">${p1}</span>${p2}<span class="tok-string">${p3}</span>`);
+  e=e.replace(/(&gt;)/g,`<span class="tok-tag">$1</span>`);
   return e;
 }
-
-function renderCodeEditor(code) {
-  const lines = code.split('\n');
-  codeEditor.innerHTML = lines.map((line, i) =>
-    `<div class="line"><span class="ln">${i + 1}</span><span class="code${line.trim() === '' ? ' muted' : ''}">${highlightLine(line) || '&nbsp;'}</span></div>`
-  ).join('');
+function renderCodeEditor(code){
+  const lines=code.split('\n');
+  codeEditor.innerHTML=lines.map((line,i)=>`<div class="line"><span class="ln">${i+1}</span><span class="code${line.trim()===''?' muted':''}">${highlightLine(line)||'&nbsp;'}</span></div>`).join('');
 }
 
-function updateCode() {
-  if (tree.children.length === 0) {
-    rawCodeText = `<!DOCTYPE html>
-<html lang="th">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>My Page</title>
-</head>
-<body>
-  <!-- ยังไม่มีองค์ประกอบ -->
-</body>
-</html>`;
-    renderCodeEditor(rawCodeText);
-    return;
+function updateCode(){
+  if(!tree.children.length){
+    rawCodeText=`<!DOCTYPE html>\n<html lang="th">\n<head>\n  <meta charset="UTF-8">\n  <meta name="viewport" content="width=device-width, initial-scale=1.0">\n  <title>My Page</title>\n</head>\n<body>\n  <!-- No components yet -->\n</body>\n</html>`;
+    renderCodeEditor(rawCodeText);return;
   }
-
-  const bodyContent = tree.children.map(c => nodeToHtml(c, '    ')).join('\n\n');
-  const css = getExportCss();
-
-  rawCodeText = `<!DOCTYPE html>
-<html lang="th">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>My Page</title>
-  <style>
- ${css}
-  </style>
-</head>
-<body>
-  <div class="page">
- ${bodyContent}
-  </div>
-</body>
-</html>`;
-
+  const body=tree.children.map(c=>nodeToHtml(c,'    ')).join('\n\n');
+  const css=getExportCss();
+  rawCodeText=`<!DOCTYPE html>\n<html lang="th">\n<head>\n  <meta charset="UTF-8">\n  <meta name="viewport" content="width=device-width, initial-scale=1.0">\n  <title>My Page</title>\n  <style>\n${css}\n  </style>\n</head>\n<body>\n  <div class="page">\n${body}\n  </div>\n</body>\n</html>`;
   renderCodeEditor(rawCodeText);
 }
 
-/* ========== คัดลอกโค้ด ========== */
-copyBtn.addEventListener('click', () => {
-  navigator.clipboard.writeText(rawCodeText).then(() => {
-    copyBtn.textContent = '✅ คัดลอก index.html แล้ว!';
-    copyBtn.classList.add('copied');
-    setTimeout(() => { copyBtn.textContent = '📋 คัดลอกโค้ด (ไฟล์ index.html เต็ม)'; copyBtn.classList.remove('copied'); }, 2000);
+/* ═══════════════════════════════════════════════
+   Copy / Download
+   ═══════════════════════════════════════════════ */
+copyBtn.addEventListener('click',()=>{
+  navigator.clipboard.writeText(rawCodeText).then(()=>{
+    copyBtn.innerHTML='✅ Copied!';copyBtn.classList.add('copied');
+    setTimeout(()=>{copyBtn.innerHTML='📋 Copy Full HTML';copyBtn.classList.remove('copied');},2000);
   });
 });
+function doDownload(){
+  if(!tree.children.length){showToast('No components to download','warning');return;}
+  const blob=new Blob([rawCodeText],{type:'text/html;charset=utf-8'});
+  const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='index.html';document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);showToast('Downloaded index.html','success');
+}
+downloadBtn2.addEventListener('click',doDownload);
+document.getElementById('abDownload').addEventListener('click',doDownload);
 
-/* ========== ดาวน์โหลดเป็นไฟล์ ========== */
-downloadBtn.addEventListener('click', () => {
-  if (tree.children.length === 0) {
-    showToast('⚠️ ยังไม่มีองค์ประกอบให้ดาวน์โหลด');
-    return;
-  }
-  const blob = new Blob([rawCodeText], { type: 'text/html;charset=utf-8' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = 'index.html';
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
-  showToast('💾 ดาวน์โหลด index.html สำเร็จแล้ว');
-});
-
-function showToast(msg) {
-  toast.textContent = msg;
-  toast.classList.add('show');
-  setTimeout(() => toast.classList.remove('show'), 2500);
+function showToast(msg,type='success'){
+  toast.textContent=msg;toast.className='toast '+type;
+  requestAnimationFrame(()=>{toast.classList.add('show');});
+  setTimeout(()=>toast.classList.remove('show'),2500);
 }
 
-/* ========== เริ่มต้นเครื่องมือ ========== */
+/* ═══════════════════════════════════════════════
+   Init
+   ═══════════════════════════════════════════════ */
 renderAll();
 </script>
 </body>
