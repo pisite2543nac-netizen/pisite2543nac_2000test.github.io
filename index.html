@@ -192,7 +192,7 @@
   .fake-textarea { min-height:56px; display:block; }
   .fake-select { display:flex; align-items:center; justify-content:space-between; color:#334155; }
 
-  /* ---------- Editable text (คลิกเพื่อพิมพ์ข้อความ) ---------- */
+  /* ---------- Editable text ---------- */
   .editable {
     outline:none; cursor:text; -webkit-user-drag:none; user-drag:none;
     border-radius:3px; padding:0 2px;
@@ -284,11 +284,11 @@
   .lang-tag { font-size:0.65rem; color:var(--bg); background:var(--orange); padding:1px 6px; border-radius:4px; margin-left:6px; vertical-align:middle; }
   .code-editor {
     background:#080b10; border:1px solid var(--border); border-radius:6px;
-    max-height:280px; overflow:auto; font-size:0.72rem; line-height:1.6;
+    max-height:340px; overflow:auto; font-size:0.72rem; line-height:1.6;
   }
   .code-editor .line { display:flex; padding:0 8px; }
   .code-editor .line:hover { background:#0d121a; }
-  .code-editor .ln { color:#3b4252; width:26px; text-align:right; margin-right:10px; user-select:none; flex-shrink:0; }
+  .code-editor .ln { color:#3b4252; width:30px; text-align:right; margin-right:10px; user-select:none; flex-shrink:0; }
   .code-editor .code { white-space:pre-wrap; word-break:break-word; color:var(--text); }
   .code-editor .code.muted { color:var(--text-dim); }
   .tok-tag { color:var(--red); }
@@ -301,6 +301,12 @@
     padding:9px; border-radius:6px; cursor:pointer; font-weight:700; font-family:inherit;
   }
   .copy-btn.copied { background:var(--green); }
+
+  .download-btn {
+    margin-top:6px; width:100%; background:var(--green); color:#052e16; border:none;
+    padding:9px; border-radius:6px; cursor:pointer; font-weight:700; font-family:inherit;
+  }
+  .download-btn:hover { opacity:0.9; }
 
   .toast {
     position:fixed; top:20px; right:20px; background:var(--green); color:#052e16;
@@ -393,9 +399,10 @@
     </div>
     <button class="guide-btn" id="guideBtn">📖 เปิด Docs แท็กทั้งหมด</button>
 
-    <h2>// Code Output <span class="lang-tag">html</span></h2>
+    <h2>// Code Output <span class="lang-tag">index.html</span></h2>
     <div class="code-editor" id="codeEditor"></div>
-    <button class="copy-btn" id="copyBtn">📋 คัดลอกโค้ด</button>
+    <button class="copy-btn" id="copyBtn">📋 คัดลอกโค้ด (ไฟล์ index.html เต็ม)</button>
+    <button class="download-btn" id="downloadBtn">💾 ดาวน์โหลดเป็น index.html</button>
   </div>
 
 </div>
@@ -420,7 +427,7 @@
 <div class="toast" id="toast"></div>
 
 <script>
-// ---------- นิยามองค์ประกอบเนื้อหา (leaf) ----------
+/* ========== นิยามองค์ประกอบเนื้อหา (leaf) ========== */
 function editSpan(field, value) {
   return `<span class="editable" contenteditable="true" draggable="false" spellcheck="false" data-field="${field}">${escapeHtml(value)}</span>`;
 }
@@ -430,144 +437,144 @@ const contentTemplates = {
     when:"ใช้เพียง 1 ครั้งต่อหน้า วางไว้บนสุดของหน้าเว็บเสมอ ไม่ควรซ้อนไว้ในองค์ประกอบอื่น",
     fields:{ title:"โลโก้ / ชื่อเว็บไซต์ของคุณ" },
     render: (d) => `<div class="comp-header">${editSpan('title', d.title)}</div>`,
-    html: (d) => `<header class="site-header">\n  <h1>${escapeHtml(d.title)}</h1>\n</header>`,
+    html: (d) => `  <header class="site-header">\n    <h1>${escapeHtml(d.title)}</h1>\n  </header>`,
     tip: "Header ควรอยู่บนสุดของหน้าเสมอ ช่วยสร้าง Visual Hierarchy บอกผู้ใช้ว่ากำลังอยู่เว็บไซต์ไหน" },
   nav: { label:"Navbar", icon:"📑", tag:"<nav>",
     when:"ใช้เมื่อมีลิงก์เมนูสำหรับเดินทางไปหน้าอื่น ๆ มากกว่า 1 ลิงก์ มักวางไว้ในหรือใกล้ Header",
     fields:{ item1:"หน้าแรก", item2:"เกี่ยวกับ", item3:"ติดต่อ" },
     render: (d) => `<div class="comp-nav">${editSpan('item1',d.item1)}${editSpan('item2',d.item2)}${editSpan('item3',d.item3)}</div>`,
-    html: (d) => `<nav class="site-nav">\n  <a href="#">${escapeHtml(d.item1)}</a>\n  <a href="#">${escapeHtml(d.item2)}</a>\n  <a href="#">${escapeHtml(d.item3)}</a>\n</nav>`,
+    html: (d) => `  <nav class="site-nav">\n    <a href="#">${escapeHtml(d.item1)}</a>\n    <a href="#">${escapeHtml(d.item2)}</a>\n    <a href="#">${escapeHtml(d.item3)}</a>\n  </nav>`,
     tip: "Navbar ช่วยให้ผู้ใช้เดินทางในเว็บไซต์ได้ง่าย ควรมีความสม่ำเสมอ (Consistency) ทุกหน้า" },
   hero: { label:"Hero Section", icon:"🌈", tag:"<section>",
     when:"ใช้เป็นพื้นที่นำเสนอข้อความหรือข้อเสนอหลักของหน้า มักวางไว้ถัดจาก Header ทันที",
     fields:{ title:"ข้อความหลักที่ดึงดูดใจ", subtitle:"คำอธิบายสั้น ๆ เกี่ยวกับสิ่งที่คุณนำเสนอ" },
     render: (d) => `<div class="comp-hero"><h2>${editSpan('title',d.title)}</h2><p>${editSpan('subtitle',d.subtitle)}</p></div>`,
-    html: (d) => `<section class="hero">\n  <h2>${escapeHtml(d.title)}</h2>\n  <p>${escapeHtml(d.subtitle)}</p>\n</section>`,
+    html: (d) => `  <section class="hero">\n    <h2>${escapeHtml(d.title)}</h2>\n    <p>${escapeHtml(d.subtitle)}</p>\n  </section>`,
     tip: "Hero Section คือจุดแรกที่ดึงดูดความสนใจ ควรใช้ตัวอักษรใหญ่ ชัดเจน และ Contrast สูง" },
   button: { label:"Button", icon:"🔘", tag:"<button>",
     when:"ใช้เมื่อต้องการให้ผู้ใช้กดเพื่อทำ action เช่น ส่งฟอร์ม ยืนยัน หรือไปยังหน้าอื่น",
     fields:{ label:"คลิกที่นี่" },
     render: (d) => `<div class="comp-button"><button>${editSpan('label',d.label)}</button></div>`,
-    html: (d) => `<button class="btn">${escapeHtml(d.label)}</button>`,
+    html: (d) => `  <button class="btn">${escapeHtml(d.label)}</button>`,
     tip: "ปุ่ม Call-to-Action ควรมีสีตัดกับพื้นหลัง (Contrast) เพื่อให้สายตาจับได้ทันที" },
   image: { label:"Image", icon:"🖼️", tag:"<img>",
     when:"ใช้แสดงรูปภาพ ต้องมี attribute alt เสมอ เพื่อการเข้าถึง (Accessibility) และ SEO",
     fields:{ alt:"รูปภาพตัวอย่าง" },
     render: (d) => `<div class="comp-image"><img src="https://via.placeholder.com/400x180?text=Image" alt="${escapeHtml(d.alt)}"><div style="text-align:center;font-size:0.75rem;color:#94a3b8;margin-top:4px;">alt: ${editSpan('alt',d.alt)}</div></div>`,
-    html: (d) => `<img src="https://via.placeholder.com/600x300" alt="${escapeHtml(d.alt)}">`,
+    html: (d) => `  <img src="https://via.placeholder.com/600x300" alt="${escapeHtml(d.alt)}" style="max-width:100%;border-radius:8px;">`,
     tip: "รูปภาพช่วยสื่อสารเร็วกว่าข้อความ แต่ต้องมี alt text เพื่อ Accessibility เสมอ" },
   card: { label:"Card", icon:"🃏", tag:'<div class="card">',
     when:"ใช้จัดกลุ่มเนื้อหาที่เกี่ยวข้องกันไว้ในกรอบเดียว เช่น การ์ดสินค้า การ์ดโปรไฟล์ นิยมวางหลายใบใน Grid",
     fields:{ title:"หัวข้อการ์ด", text:"รายละเอียดสั้น ๆ ของการ์ดนี้" },
     render: (d) => `<div class="comp-card"><h3>${editSpan('title',d.title)}</h3><p>${editSpan('text',d.text)}</p></div>`,
-    html: (d) => `<div class="card">\n  <h3>${escapeHtml(d.title)}</h3>\n  <p>${escapeHtml(d.text)}</p>\n</div>`,
+    html: (d) => `  <div class="card">\n    <h3>${escapeHtml(d.title)}</h3>\n    <p>${escapeHtml(d.text)}</p>\n  </div>`,
     tip: "Card ใช้จัดกลุ่มข้อมูลที่เกี่ยวข้องกัน ช่วยให้ผู้ใช้สแกนเนื้อหาได้ง่าย (Chunking) — ลองวาง Card หลายใบใน Grid ดูสิ!" },
   input: { label:"Input Field", icon:"⌨️", tag:"<input>",
     when:"ใช้รับข้อมูลจากผู้ใช้ เช่น ชื่อผู้ใช้ รหัสผ่าน ควรระบุ type ให้ตรงกับข้อมูล (text, email, password)",
     fields:{ placeholder:"กรอกข้อมูล..." },
     render: (d) => `<div class="comp-input"><div class="fake-input">${editSpan('placeholder',d.placeholder)}</div></div>`,
-    html: (d) => `<input type="text" placeholder="${escapeHtml(d.placeholder)}">`,
+    html: (d) => `  <input type="text" placeholder="${escapeHtml(d.placeholder)}">`,
     tip: "ช่องกรอกข้อมูลควรมี placeholder หรือ label ที่ชัดเจน บอกผู้ใช้ว่าต้องพิมพ์อะไร" },
   textarea: { label:"Textarea", icon:"🗒️", tag:"<textarea>",
     when:"ใช้รับข้อความยาวหลายบรรทัดจากผู้ใช้ เช่น ข้อความรีวิว คอมเมนต์ หรือรายละเอียดเพิ่มเติม ต่างจาก input ที่รับได้บรรทัดเดียว",
     fields:{ placeholder:"พิมพ์ข้อความหลายบรรทัด..." },
     render: (d) => `<div class="comp-textarea"><div class="fake-textarea">${editSpan('placeholder',d.placeholder)}</div></div>`,
-    html: (d) => `<textarea rows="4" placeholder="${escapeHtml(d.placeholder)}"></textarea>`,
+    html: (d) => `  <textarea rows="4" placeholder="${escapeHtml(d.placeholder)}"></textarea>`,
     tip: "ควรกำหนด rows ให้พอเหมาะกับเนื้อหา และมี placeholder บอกผู้ใช้ว่าต้องกรอกอะไร" },
   select: { label:"Dropdown", icon:"🔽", tag:"<select>",
     when:"ใช้ให้ผู้ใช้เลือกตัวเลือกเดียวจากรายการที่กำหนดไว้ เหมาะกับกรณีที่มีตัวเลือกจำนวนมาก",
     fields:{ opt1:"เลือกตัวเลือก...", opt2:"ตัวเลือกที่ 1" },
     render: (d) => `<div class="comp-select"><div class="fake-select">${editSpan('opt1',d.opt1)} <span>▾</span></div></div>`,
-    html: (d) => `<select>\n  <option>${escapeHtml(d.opt1)}</option>\n  <option>${escapeHtml(d.opt2)}</option>\n</select>`,
+    html: (d) => `  <select>\n    <option>${escapeHtml(d.opt1)}</option>\n    <option>${escapeHtml(d.opt2)}</option>\n  </select>`,
     tip: "เหมาะกับตัวเลือกมากกว่า 5 รายการขึ้นไป ถ้าน้อยกว่านั้นควรใช้ radio button เพื่อให้เห็นทุกตัวเลือกพร้อมกัน" },
   checkbox: { label:"Checkbox", icon:"☑️", tag:"<input type=\"checkbox\">",
     when:"ใช้ให้ผู้ใช้เลือกได้หลายตัวเลือก หรือกดยอมรับเงื่อนไขการใช้งาน",
     fields:{ label:"ยอมรับเงื่อนไขการใช้งาน" },
     render: (d) => `<div class="comp-checkbox"><label><input type="checkbox" disabled> ${editSpan('label',d.label)}</label></div>`,
-    html: (d) => `<label>\n  <input type="checkbox">\n  ${escapeHtml(d.label)}\n</label>`,
+    html: (d) => `  <label>\n    <input type="checkbox">\n    ${escapeHtml(d.label)}\n  </label>`,
     tip: "ควรใส่ label ที่คลิกได้ครอบคู่กับ checkbox เสมอ เพื่อเพิ่มพื้นที่คลิกให้ใหญ่ขึ้น (Touch Target)" },
   text: { label:"Text", icon:"📝", tag:"<p>",
     when:"ใช้แสดงข้อความบรรยายทั่วไปที่ไม่ใช่หัวข้อหลัก เช่น คำอธิบาย เนื้อหาย่อหน้า",
     fields:{ content:"ข้อความอธิบายทั่วไปที่สามารถพิมพ์แก้ไขได้" },
     render: (d) => `<div class="comp-text"><p>${editSpan('content',d.content)}</p></div>`,
-    html: (d) => `<p>${escapeHtml(d.content)}</p>`,
+    html: (d) => `  <p>${escapeHtml(d.content)}</p>`,
     tip: "ข้อความควรมี Line Height และขนาดตัวอักษรที่อ่านง่าย ไม่ต่ำกว่า 16px บนเว็บ" },
   link: { label:"Link", icon:"🔗", tag:"<a>",
     when:"ใช้เมื่อต้องการเชื่อมไปยังหน้าอื่น เว็บไซต์อื่น หรือตำแหน่งอื่นในหน้าเดียวกัน ต้องมี attribute href เสมอ",
     fields:{ label:"ลิงก์ตัวอย่าง คลิกที่นี่" },
     render: (d) => `<div class="comp-link"><a href="#">${editSpan('label',d.label)}</a></div>`,
-    html: (d) => `<a href="#">${escapeHtml(d.label)}</a>`,
+    html: (d) => `  <a href="#">${escapeHtml(d.label)}</a>`,
     tip: "ลิงก์ควรมีสีหรือขีดเส้นใต้ให้แตกต่างจากข้อความทั่วไป เพื่อให้ผู้ใช้รู้ว่าคลิกได้ (Affordance)" },
   list: { label:"List", icon:"📋", tag:"<ul><li>",
     when:"ใช้แสดงข้อมูลที่เป็นรายการ เช่น สรรพคุณสินค้า ขั้นตอนการทำงาน หรือเมนูอาหาร",
     fields:{ item1:"รายการที่ 1", item2:"รายการที่ 2", item3:"รายการที่ 3" },
     render: (d) => `<div class="comp-list"><ul><li>${editSpan('item1',d.item1)}</li><li>${editSpan('item2',d.item2)}</li><li>${editSpan('item3',d.item3)}</li></ul></div>`,
-    html: (d) => `<ul>\n  <li>${escapeHtml(d.item1)}</li>\n  <li>${escapeHtml(d.item2)}</li>\n  <li>${escapeHtml(d.item3)}</li>\n</ul>`,
+    html: (d) => `  <ul>\n    <li>${escapeHtml(d.item1)}</li>\n    <li>${escapeHtml(d.item2)}</li>\n    <li>${escapeHtml(d.item3)}</li>\n  </ul>`,
     tip: "List ช่วยแบ่งข้อมูลเป็นก้อนเล็ก ๆ อ่านง่ายกว่าเขียนเป็นพารากราฟยาว ๆ" },
   table: { label:"Table", icon:"📊", tag:"<table>",
     when:"ใช้แสดงข้อมูลที่เป็นแถว-คอลัมน์ เช่น ราคาสินค้า ตารางเปรียบเทียบ ไม่ควรใช้ Table จัด Layout ทั่วไปของหน้าเว็บ",
     fields:{ h1:"หัวข้อ 1", h2:"หัวข้อ 2", c1:"ข้อมูล 1", c2:"ข้อมูล 2", c3:"ข้อมูล 3", c4:"ข้อมูล 4" },
     render: (d) => `<div class="comp-table"><table><tr><th>${editSpan('h1',d.h1)}</th><th>${editSpan('h2',d.h2)}</th></tr><tr><td>${editSpan('c1',d.c1)}</td><td>${editSpan('c2',d.c2)}</td></tr><tr><td>${editSpan('c3',d.c3)}</td><td>${editSpan('c4',d.c4)}</td></tr></table></div>`,
-    html: (d) => `<table>\n  <tr>\n    <th>${escapeHtml(d.h1)}</th>\n    <th>${escapeHtml(d.h2)}</th>\n  </tr>\n  <tr>\n    <td>${escapeHtml(d.c1)}</td>\n    <td>${escapeHtml(d.c2)}</td>\n  </tr>\n  <tr>\n    <td>${escapeHtml(d.c3)}</td>\n    <td>${escapeHtml(d.c4)}</td>\n  </tr>\n</table>`,
+    html: (d) => `  <table>\n    <tr>\n      <th>${escapeHtml(d.h1)}</th>\n      <th>${escapeHtml(d.h2)}</th>\n    </tr>\n    <tr>\n      <td>${escapeHtml(d.c1)}</td>\n      <td>${escapeHtml(d.c2)}</td>\n    </tr>\n    <tr>\n      <td>${escapeHtml(d.c3)}</td>\n      <td>${escapeHtml(d.c4)}</td>\n    </tr>\n  </table>`,
     tip: "Table เหมาะกับข้อมูลเชิงตารางเท่านั้น อย่าใช้ Table จัดโครงหน้าเว็บทั้งหน้าแบบสมัยก่อน ให้ใช้ Grid/Flexbox แทน" },
   video: { label:"Video", icon:"🎬", tag:"<video>",
     when:"ใช้แสดงวิดีโอ เช่น คลิปสาธิตสินค้าหรือวิดีโอแนะนำ ควรมี attribute controls ให้ผู้ใช้กดเล่น/หยุดเองได้",
     fields:{ caption:"วิดีโอตัวอย่าง (คลิกเล่น)" },
     render: (d) => `<div class="comp-video"><div class="video-box">▶️<small>${editSpan('caption',d.caption)}</small></div></div>`,
-    html: (d) => `<video controls width="100%">\n  <source src="video.mp4" type="video/mp4">\n</video>\n<!-- ${escapeHtml(d.caption)} -->`,
+    html: (d) => `  <video controls width="100%" style="border-radius:8px;">\n    <source src="video.mp4" type="video/mp4">\n    ${escapeHtml(d.caption)}\n  </video>`,
     tip: "วิดีโอควรมีขนาดไฟล์ที่เหมาะสมและปุ่มควบคุม (controls) เสมอ เพื่อให้ผู้ใช้ควบคุมการเล่นเองได้" },
   quote: { label:"Blockquote", icon:"💬", tag:"<blockquote>",
     when:"ใช้แสดงคำพูดอ้างอิง เช่น รีวิวจากลูกค้า หรือคำคมที่ยกมาจากแหล่งอื่น",
     fields:{ quote:"ข้อความอ้างอิงหรือคำรีวิวจากลูกค้า", cite:"ชื่อผู้พูด" },
     render: (d) => `<div class="comp-quote"><blockquote>"${editSpan('quote',d.quote)}"<cite>— ${editSpan('cite',d.cite)}</cite></blockquote></div>`,
-    html: (d) => `<blockquote>\n  "${escapeHtml(d.quote)}"\n  <cite>— ${escapeHtml(d.cite)}</cite>\n</blockquote>`,
+    html: (d) => `  <blockquote>\n    "${escapeHtml(d.quote)}"\n    <cite>— ${escapeHtml(d.cite)}</cite>\n  </blockquote>`,
     tip: "ควรใส่ <cite> ระบุที่มาของคำพูดเสมอ เพื่อความน่าเชื่อถือ" },
   badge: { label:"Badge", icon:"🏷️", tag:'<span class="badge">',
     when:"ใช้แสดงสถานะหรือป้ายกำกับสั้น ๆ เช่น 'ใหม่' 'ลดราคา' 'หมด' ติดไว้กับเนื้อหาอื่น",
     fields:{ label1:"ใหม่", label2:"แนะนำ" },
     render: (d) => `<div class="comp-badge"><span class="badge">${editSpan('label1',d.label1)}</span><span class="badge badge-alt">${editSpan('label2',d.label2)}</span></div>`,
-    html: (d) => `<span class="badge">${escapeHtml(d.label1)}</span>\n<span class="badge">${escapeHtml(d.label2)}</span>`,
+    html: (d) => `  <span class="badge">${escapeHtml(d.label1)}</span>\n  <span class="badge badge-alt">${escapeHtml(d.label2)}</span>`,
     tip: "Badge ควรมีสีที่โดดเด่นแต่ไม่รบกวนเนื้อหาหลัก และใช้ข้อความที่สั้นที่สุด" },
   divider: { label:"Divider", icon:"➖", tag:"<hr>",
     when:"ใช้แบ่งเนื้อหาออกเป็นส่วน ๆ ด้วยเส้นแบ่งแนวนอน เหมาะกับการแยกเนื้อหาที่ไม่เกี่ยวข้องกันออกจากกัน",
     render: () => `<div class="comp-divider"><hr></div>`,
-    html: () => `<hr>`,
+    html: () => `  <hr>`,
     tip: "เส้นแบ่งช่วยสร้าง Visual Separation แต่ไม่ควรใช้มากเกินไป เพราะจะทำให้หน้าเว็บดูรก" },
   codeblock: { label:"Code Block", icon:"💻", tag:"<pre><code>",
     when:"ใช้แสดงตัวอย่างโค้ดในหน้าเว็บ เช่น เว็บไซต์สอนโปรแกรมมิ่ง หรือ Documentation ประกอบเนื้อหา",
     fields:{ code:'<div class="hello">Hello World</div>' },
     render: (d) => `<div class="comp-code"><pre><code class="editable" contenteditable="true" draggable="false" spellcheck="false" data-field="code">${escapeHtml(d.code)}</code></pre></div>`,
-    html: (d) => `<pre><code>${escapeHtml(d.code)}</code></pre>`,
+    html: (d) => `  <pre><code>${escapeHtml(d.code)}</code></pre>`,
     tip: "ควรใช้ฟอนต์แบบ monospace และมี syntax highlighting เพื่อให้อ่านโค้ดง่ายขึ้น" },
   footer: { label:"Footer", icon:"⬛", tag:"<footer>",
     when:"ใช้เพียง 1 ครั้งต่อหน้า วางไว้ล่างสุดของหน้าเสมอ มักมีข้อมูลติดต่อหรือลิงก์ลิขสิทธิ์",
     fields:{ content:"© 2026 บริษัทของคุณ | ติดต่อเรา" },
     render: (d) => `<div class="comp-footer">${editSpan('content',d.content)}</div>`,
-    html: (d) => `<footer>\n  <p>${escapeHtml(d.content)}</p>\n</footer>`,
+    html: (d) => `  <footer>\n    <p>${escapeHtml(d.content)}</p>\n  </footer>`,
     tip: "Footer ควรมีข้อมูลติดต่อ/ลิงก์สำคัญ เป็นจุดสิ้นสุดที่ทำให้ผู้ใช้รู้ว่าหมดหน้าแล้ว" }
 };
 
-// ---------- นิยามกล่อง Layout (container) ----------
+/* ========== นิยามกล่อง Layout (container) ========== */
 const containerTemplates = {
-  section: { label:"Section", icon:"📦", cssClass:"layout-section", tag:'<div class="layout-section"> (หรือ <section>)',
+  section: { label:"Section", icon:"📦", cssClass:"layout-section", tag:'<section>',
     when:"ใช้แบ่งเนื้อหาของหน้าเว็บออกเป็นส่วน ๆ อย่างมีระเบียบ เช่น ส่วนแนะนำ ส่วนสินค้า ส่วนติดต่อ",
-    html: () => `<div class="layout-section">\n  <!-- เนื้อหาข้างใน Section -->\n</div>`,
+    html: () => '  <section class="layout-section">\n    <!-- เนื้อหาข้างใน Section -->\n  </section>',
     tip:"Section ใช้แบ่งเนื้อหาเป็นส่วน ๆ ช่วยสร้างระเบียบและ Whitespace ให้หน้าเว็บอ่านง่ายขึ้น" },
-  row: { label:"Row (แนวนอน)", icon:"↔️", cssClass:"layout-row", tag:'<div style="display:flex; flex-direction:row">',
+  row: { label:"Row (แนวนอน)", icon:"↔️", cssClass:"layout-row", tag:'<div class="layout-row">',
     when:"ใช้เมื่อต้องการให้องค์ประกอบเรียงกันแนวนอน เช่น แถบเมนู กลุ่มปุ่ม การ์ดเรียงแถวเดียว",
-    html: () => `<div class="layout-row">\n  <!-- องค์ประกอบเรียงแนวนอน -->\n</div>`,
+    html: () => '  <div class="layout-row">\n    <!-- องค์ประกอบเรียงแนวนอน -->\n  </div>',
     tip:"Row จัดองค์ประกอบเรียงกันแนวนอนด้วย Flexbox (display:flex; flex-direction:row) เหมาะกับเมนูหรือกลุ่มปุ่ม" },
-  col: { label:"Column (แนวตั้ง)", icon:"↕️", cssClass:"layout-col", tag:'<div style="display:flex; flex-direction:column">',
+  col: { label:"Column (แนวตั้ง)", icon:"↕️", cssClass:"layout-col", tag:'<div class="layout-col">',
     when:"ใช้เมื่อต้องการให้องค์ประกอบเรียงต่อกันแนวตั้ง เช่น ฟอร์มกรอกข้อมูล ลิสต์ข้อความ",
-    html: () => `<div class="layout-col">\n  <!-- องค์ประกอบเรียงแนวตั้ง -->\n</div>`,
+    html: () => '  <div class="layout-col">\n    <!-- องค์ประกอบเรียงแนวตั้ง -->\n  </div>',
     tip:"Column จัดองค์ประกอบเรียงต่อกันแนวตั้งด้วย Flexbox column เหมาะกับการจัดกลุ่มฟอร์มหรือข้อความ" },
-  grid2: { label:"Grid 2 คอลัมน์", icon:"▦", cssClass:"layout-grid2", tag:'<div style="display:grid; grid-template-columns:1fr 1fr">',
+  grid2: { label:"Grid 2 คอลัมน์", icon:"▦", cssClass:"layout-grid2", tag:'<div class="layout-grid2">',
     when:"ใช้จัดวางเนื้อหาเป็นตาราง 2 คอลัมน์เท่ากัน เหมาะกับการวาง Card สินค้าให้เป็นระเบียบ",
-    html: () => `<div class="layout-grid2">\n  <!-- Card หรือองค์ประกอบในตาราง 2 คอลัมน์ -->\n</div>`,
+    html: () => '  <div class="layout-grid2">\n    <!-- Card หรือองค์ประกอบในตาราง 2 คอลัมน์ -->\n  </div>',
     tip:"CSS Grid แบ่งพื้นที่เป็น 2 คอลัมน์เท่ากัน เหมาะกับการวาง Card สินค้าให้เป็นระเบียบ" },
-  grid3: { label:"Grid 3 คอลัมน์", icon:"▦", cssClass:"layout-grid3", tag:'<div style="display:grid; grid-template-columns:1fr 1fr 1fr">',
+  grid3: { label:"Grid 3 คอลัมน์", icon:"▦", cssClass:"layout-grid3", tag:'<div class="layout-grid3">',
     when:"ใช้จัดวางเนื้อหาเป็นตาราง 3 คอลัมน์เท่ากัน เหมาะกับหน้ารวมสินค้าหรือแสดง Card จำนวนมาก",
-    html: () => `<div class="layout-grid3">\n  <!-- Card หรือองค์ประกอบในตาราง 3 คอลัมน์ -->\n</div>`,
+    html: () => '  <div class="layout-grid3">\n    <!-- Card หรือองค์ประกอบในตาราง 3 คอลัมน์ -->\n  </div>',
     tip:"CSS Grid 3 คอลัมน์เหมาะกับการแสดง Card จำนวนมากในหน้าเดียว เช่น หน้ารวมสินค้า" }
 };
 
@@ -576,7 +583,7 @@ const containerDirection = { root:'vertical', section:'vertical', col:'vertical'
 
 function getTemplate(type) { return containerTemplates[type] || contentTemplates[type]; }
 
-// ---------- สถานะเครื่องมือ ----------
+/* ========== สถานะเครื่องมือ ========== */
 let idCounter = 0;
 const tree = { id:'root', type:'root', children:[] };
 let draggedId = null;
@@ -585,6 +592,7 @@ const canvas = document.getElementById('canvas');
 const elCount = document.getElementById('elCount');
 const codeEditor = document.getElementById('codeEditor');
 const copyBtn = document.getElementById('copyBtn');
+const downloadBtn = document.getElementById('downloadBtn');
 const tipBox = document.getElementById('tipBox');
 const toast = document.getElementById('toast');
 const guideBtn = document.getElementById('guideBtn');
@@ -595,7 +603,7 @@ const clearBtn = document.getElementById('clearBtn');
 const refreshBtn = document.getElementById('refreshBtn');
 let rawCodeText = '';
 
-// ---------- Drag จาก palette ----------
+/* ========== Drag จาก palette ========== */
 document.querySelectorAll('.palette-item[data-type]').forEach(item => {
   if (!item.dataset.type) return;
   item.addEventListener('dragstart', e => {
@@ -603,7 +611,7 @@ document.querySelectorAll('.palette-item[data-type]').forEach(item => {
   });
 });
 
-// ---------- helper: tree ----------
+/* ========== helper: tree ========== */
 function createNode(type) {
   idCounter++;
   const node = { id:'n'+idCounter, type };
@@ -653,7 +661,7 @@ function countAllNodes(node = tree) {
   return n;
 }
 
-// ---------- render ----------
+/* ========== render ========== */
 function renderNode(node) {
   const tpl = getTemplate(node.type);
   if (node.children) {
@@ -679,7 +687,7 @@ function renderAll() {
   updateCode();
 }
 
-// ---------- Drag & Drop ภายใน canvas (event delegation) ----------
+/* ========== Drag & Drop ภายใน canvas ========== */
 canvas.addEventListener('dragstart', e => {
   const el = e.target.closest('.comp-node');
   if (!el) return;
@@ -741,7 +749,7 @@ canvas.addEventListener('drop', e => {
   renderAll();
 });
 
-// ---------- คลิก: ลบ / ดูเคล็ดลับ ----------
+/* ========== คลิก: ลบ / ดูเคล็ดลับ ========== */
 canvas.addEventListener('click', e => {
   const delBtn = e.target.closest('.del-btn');
   if (delBtn) { e.stopPropagation(); removeNodeById(delBtn.dataset.del); return; }
@@ -755,7 +763,7 @@ canvas.addEventListener('click', e => {
   if (container) { showTip(container.className.match(/node-(\w+)/)[1]); }
 });
 
-// ---------- พิมพ์แก้ไขข้อความในองค์ประกอบ (contenteditable) ----------
+/* ========== พิมพ์แก้ไขข้อความ (contenteditable) ========== */
 let activeEditable = null;
 let savedRange = null;
 
@@ -798,7 +806,7 @@ function showTip(type, data) {
   `;
 }
 
-// ---------- คู่มือแท็กทั้งหมด ----------
+/* ========== คู่มือแท็กทั้งหมด ========== */
 function buildGuide() {
   const all = { ...containerTemplates, ...contentTemplates };
   guideList.innerHTML = Object.values(all).map(tpl => {
@@ -815,7 +823,7 @@ guideBtn.addEventListener('click', () => { buildGuide(); guideModal.classList.ad
 closeGuide.addEventListener('click', () => guideModal.classList.remove('show'));
 guideModal.addEventListener('click', e => { if (e.target === guideModal) guideModal.classList.remove('show'); });
 
-// ---------- เมนูอีโมจิ ----------
+/* ========== เมนูอีโมจิ ========== */
 const emojiMenuBtn = document.getElementById('emojiMenuBtn');
 const emojiModal = document.getElementById('emojiModal');
 const emojiGroups = document.getElementById('emojiGroups');
@@ -876,7 +884,7 @@ emojiModal.addEventListener('click', e => {
   if (btn) insertEmoji(btn.dataset.emoji);
 });
 
-// ---------- ล้างพื้นที่ทำงาน / รีเฟรช ----------
+/* ========== ล้างพื้นที่ทำงาน / รีเฟรช ========== */
 clearBtn.addEventListener('click', () => {
   if (tree.children.length === 0) return;
   if (confirm('ต้องการล้างพื้นที่ทำงานทั้งหมดหรือไม่? การกระทำนี้ไม่สามารถย้อนกลับได้')) {
@@ -890,22 +898,376 @@ refreshBtn.addEventListener('click', () => {
   showToast('⟳ รีเฟรชตัวอย่างแล้ว');
 });
 
-// ---------- สร้างโค้ด HTML+CSS ----------
+/* ========================================================
+   สร้างโค้ด HTML เต็มรูปแบบ — ไฟล์ index.html สำเร็จรูป
+   ======================================================== */
 function nodeToHtml(node, indent) {
   const tpl = getTemplate(node.type);
   if (node.children) {
     const inner = node.children.length
-      ? node.children.map(c => nodeToHtml(c, indent + '  ')).join('\n')
-      : indent + '  <!-- วางองค์ประกอบเพิ่มเติมที่นี่ -->';
-    return `${indent}<div class="${tpl.cssClass}">\n${inner}\n${indent}</div>`;
+      ? node.children.map(c => nodeToHtml(c, indent + '    ')).join('\n\n')
+      : indent + '    <!-- วางองค์ประกอบเพิ่มเติมที่นี่ -->';
+    return `${indent}<${tpl.cssClass.startsWith('layout-') ? 'div' : 'section'} class="${tpl.cssClass}">\n${inner}\n${indent}</${tpl.cssClass.startsWith('layout-') ? 'div' : 'section'}>`;
   }
   const raw = tpl.html(node.data || tpl.fields || {});
-  return raw.split('\n').map(l => indent + l).join('\n');
+  /* เอา indent เดิมออก แล้วเติม indent ใหม่ให้ตรงระดับ */
+  return raw.split('\n').map(l => indent + l.trimStart()).join('\n');
+}
+
+/* CSS สำหรับไฟล์ export ที่ครอบคลุมทุกคอมโพเนนต์ */
+function getExportCss() {
+  return `    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: #1e293b;
+      line-height: 1.6;
+      background: #f8fafc;
+    }
+
+    .page {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 24px 16px;
+    }
+
+    /* ---- Layout ---- */
+    .layout-section {
+      padding: 28px;
+      margin-bottom: 16px;
+      background: #ffffff;
+      border-radius: 10px;
+      border: 1px solid #e2e8f0;
+    }
+
+    .layout-row {
+      display: flex;
+      flex-direction: row;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .layout-col {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .layout-grid2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .layout-grid3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 16px;
+    }
+
+    @media (max-width: 640px) {
+      .layout-grid2,
+      .layout-grid3 {
+        grid-template-columns: 1fr;
+      }
+      .layout-row {
+        flex-direction: column;
+      }
+    }
+
+    /* ---- Header ---- */
+    .site-header {
+      background: #4f46e5;
+      color: #ffffff;
+      padding: 20px 24px;
+      border-radius: 8px;
+    }
+
+    .site-header h1 {
+      font-size: 1.5rem;
+      font-weight: 700;
+    }
+
+    /* ---- Nav ---- */
+    .site-nav {
+      background: #1e293b;
+      color: #ffffff;
+      padding: 12px 20px;
+      border-radius: 8px;
+      display: flex;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+
+    .site-nav a {
+      color: #cbd5e1;
+      text-decoration: none;
+      font-size: 0.95rem;
+      transition: color 0.2s;
+    }
+
+    .site-nav a:hover {
+      color: #ffffff;
+    }
+
+    /* ---- Hero ---- */
+    .hero {
+      background: linear-gradient(135deg, #818cf8, #c084fc);
+      color: #ffffff;
+      padding: 48px 28px;
+      border-radius: 12px;
+      text-align: center;
+    }
+
+    .hero h2 {
+      font-size: 1.8rem;
+      margin-bottom: 10px;
+      font-weight: 800;
+    }
+
+    .hero p {
+      font-size: 1.05rem;
+      opacity: 0.92;
+      max-width: 540px;
+      margin: 0 auto;
+    }
+
+    /* ---- Button ---- */
+    .btn {
+      display: inline-block;
+      background: #f59e0b;
+      color: #111827;
+      border: none;
+      padding: 12px 28px;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .btn:hover {
+      background: #d97706;
+    }
+
+    /* ---- Image ---- */
+    img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 8px;
+      display: block;
+    }
+
+    /* ---- Card ---- */
+    .card {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 20px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+      transition: box-shadow 0.2s;
+    }
+
+    .card:hover {
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    }
+
+    .card h3 {
+      margin-bottom: 8px;
+      color: #1e293b;
+      font-size: 1.1rem;
+    }
+
+    .card p {
+      color: #64748b;
+      font-size: 0.93rem;
+    }
+
+    /* ---- Form elements ---- */
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
+    textarea,
+    select {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      font-family: inherit;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      background: #ffffff;
+      color: #1e293b;
+    }
+
+    input[type="text"]:focus,
+    input[type="email"]:focus,
+    input[type="password"]:focus,
+    textarea:focus,
+    select:focus {
+      outline: none;
+      border-color: #6366f1;
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 90px;
+    }
+
+    label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.95rem;
+      color: #334155;
+      cursor: pointer;
+    }
+
+    /* ---- Text ---- */
+    p {
+      margin-bottom: 8px;
+      color: #334155;
+      font-size: 1rem;
+    }
+
+    /* ---- Link ---- */
+    a {
+      color: #4f46e5;
+      text-decoration: underline;
+      font-weight: 600;
+    }
+
+    a:hover {
+      color: #3730a3;
+    }
+
+    /* ---- List ---- */
+    ul {
+      padding-left: 24px;
+      margin-bottom: 8px;
+    }
+
+    li {
+      margin: 5px 0;
+      color: #334155;
+      font-size: 0.95rem;
+    }
+
+    /* ---- Table ---- */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 8px;
+      font-size: 0.92rem;
+    }
+
+    th, td {
+      border: 1px solid #cbd5e1;
+      padding: 10px 14px;
+      text-align: left;
+    }
+
+    th {
+      background: #f1f5f9;
+      color: #1e293b;
+      font-weight: 600;
+    }
+
+    tr:nth-child(even) td {
+      background: #f8fafc;
+    }
+
+    /* ---- Video ---- */
+    video {
+      border-radius: 8px;
+      max-width: 100%;
+    }
+
+    /* ---- Blockquote ---- */
+    blockquote {
+      border-left: 4px solid #94a3b8;
+      padding: 16px 20px;
+      font-style: italic;
+      color: #334155;
+      background: #f8fafc;
+      border-radius: 0 8px 8px 0;
+      margin-bottom: 8px;
+    }
+
+    blockquote cite {
+      display: block;
+      margin-top: 10px;
+      font-size: 0.85rem;
+      color: #64748b;
+      font-style: normal;
+    }
+
+    /* ---- Badge ---- */
+    .badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      margin-right: 6px;
+      margin-bottom: 4px;
+      background: #e0e7ff;
+      color: #4338ca;
+    }
+
+    .badge-alt {
+      background: #dcfce7;
+      color: #15803d;
+    }
+
+    /* ---- Divider ---- */
+    hr {
+      border: none;
+      border-top: 2px solid #e2e8f0;
+      margin: 20px 0;
+    }
+
+    /* ---- Code Block ---- */
+    pre {
+      background: #0f172a;
+      color: #7dd3fc;
+      padding: 18px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      overflow-x: auto;
+      margin-bottom: 8px;
+    }
+
+    pre code {
+      font-family: 'Courier New', Courier, monospace;
+    }
+
+    /* ---- Footer ---- */
+    footer {
+      background: #111827;
+      color: #9ca3af;
+      text-align: center;
+      padding: 20px;
+      border-radius: 8px;
+      font-size: 0.9rem;
+    }
+
+    footer p {
+      color: #9ca3af;
+      margin: 0;
+    }`;
 }
 
 function highlightLine(line) {
   let e = escapeHtml(line);
   if (/^\s*&lt;!--/.test(e)) return `<span class="tok-comment">${e}</span>`;
+  /* ไล่สี doctype */
+  if (/^&lt;!DOCTYPE/i.test(e)) return `<span class="tok-tag">${e}</span>`;
   e = e.replace(/(&lt;\/?)([a-zA-Z][a-zA-Z0-9]*)/g, (m, p1, p2) => `${p1}<span class="tok-tag">${p2}</span>`);
   e = e.replace(/([a-zA-Z-]+)(=)("[^"]*")/g, (m, p1, p2, p3) => `<span class="tok-attr">${p1}</span>${p2}<span class="tok-string">${p3}</span>`);
   e = e.replace(/(&gt;)/g, `<span class="tok-tag">$1</span>`);
@@ -921,38 +1283,78 @@ function renderCodeEditor(code) {
 
 function updateCode() {
   if (tree.children.length === 0) {
-    rawCodeText = '<!-- ยังไม่มีองค์ประกอบ -->';
+    rawCodeText = `<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Page</title>
+</head>
+<body>
+  <!-- ยังไม่มีองค์ประกอบ -->
+</body>
+</html>`;
     renderCodeEditor(rawCodeText);
     return;
   }
-  const body = tree.children.map(c => nodeToHtml(c, '  ')).join('\n\n');
-  const css = `<style>
-.layout-section { padding: 20px; border-radius: 8px; }
-.layout-row { display: flex; flex-direction: row; gap: 16px; flex-wrap: wrap; }
-.layout-col { display: flex; flex-direction: column; gap: 16px; }
-.layout-grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-.layout-grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
-.badge { display:inline-block; padding:4px 10px; border-radius:20px; font-size:0.8rem; font-weight:bold; background:#e0e7ff; color:#4338ca; }
-</style>`;
-  rawCodeText = `${css}\n\n<div class="page">\n${body}\n</div>`;
+
+  const bodyContent = tree.children.map(c => nodeToHtml(c, '    ')).join('\n\n');
+  const css = getExportCss();
+
+  rawCodeText = `<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Page</title>
+  <style>
+ ${css}
+  </style>
+</head>
+<body>
+  <div class="page">
+ ${bodyContent}
+  </div>
+</body>
+</html>`;
+
   renderCodeEditor(rawCodeText);
 }
 
+/* ========== คัดลอกโค้ด ========== */
 copyBtn.addEventListener('click', () => {
   navigator.clipboard.writeText(rawCodeText).then(() => {
-    copyBtn.textContent = '✅ คัดลอกแล้ว!';
+    copyBtn.textContent = '✅ คัดลอก index.html แล้ว!';
     copyBtn.classList.add('copied');
-    setTimeout(() => { copyBtn.textContent = '📋 คัดลอกโค้ด'; copyBtn.classList.remove('copied'); }, 1500);
+    setTimeout(() => { copyBtn.textContent = '📋 คัดลอกโค้ด (ไฟล์ index.html เต็ม)'; copyBtn.classList.remove('copied'); }, 2000);
   });
+});
+
+/* ========== ดาวน์โหลดเป็นไฟล์ ========== */
+downloadBtn.addEventListener('click', () => {
+  if (tree.children.length === 0) {
+    showToast('⚠️ ยังไม่มีองค์ประกอบให้ดาวน์โหลด');
+    return;
+  }
+  const blob = new Blob([rawCodeText], { type: 'text/html;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'index.html';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showToast('💾 ดาวน์โหลด index.html สำเร็จแล้ว');
 });
 
 function showToast(msg) {
   toast.textContent = msg;
   toast.classList.add('show');
-  setTimeout(() => toast.classList.remove('show'), 2200);
+  setTimeout(() => toast.classList.remove('show'), 2500);
 }
 
-// ---------- เริ่มต้นเครื่องมือ ----------
+/* ========== เริ่มต้นเครื่องมือ ========== */
 renderAll();
 </script>
 </body>
