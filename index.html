@@ -3,83 +3,142 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>UI/UX Design Quest 🎨 - เกมออกแบบหน้าเว็บ (Layout ซ้อนได้)</title>
+<title>Layout Builder — เครื่องมือจัดหน้าเว็บ (Drag & Drop)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
+  :root{
+    --bg:#0a0e14;
+    --bg-panel:#10151c;
+    --bg-panel-alt:#161d27;
+    --border:#232b38;
+    --border-soft:#1a212c;
+    --text:#c8d3f5;
+    --text-dim:#5c6773;
+    --blue:#7aa2f7;
+    --green:#9ece6a;
+    --orange:#e0af68;
+    --pink:#bb9af7;
+    --red:#f7768e;
+    --cyan:#7dcfff;
+  }
   * { margin:0; padding:0; box-sizing:border-box; }
   body {
-    font-family: 'Segoe UI', 'Tahoma', sans-serif;
-    background: linear-gradient(135deg, #1e1b4b, #312e81);
-    color: #eee;
-    min-height: 100vh;
+    font-family:'JetBrains Mono','Fira Code',monospace;
+    background: var(--bg);
+    color: var(--text);
+    min-height:100vh;
   }
+  ::-webkit-scrollbar { width:10px; height:10px; }
+  ::-webkit-scrollbar-track { background:var(--bg-panel); }
+  ::-webkit-scrollbar-thumb { background:var(--border); border-radius:6px; }
+  ::-webkit-scrollbar-thumb:hover { background:var(--text-dim); }
+
+  /* ---------- Top bar ---------- */
   .topbar {
     display:flex; justify-content:space-between; align-items:center;
-    padding: 14px 24px; background: rgba(0,0,0,0.25);
-    border-bottom: 2px solid #6366f1;
+    padding: 10px 20px; background: var(--bg-panel);
+    border-bottom: 1px solid var(--border);
     flex-wrap: wrap; gap:10px;
   }
-  .topbar h1 { font-size: 1.3rem; color:#fbbf24; }
-  .stats { display:flex; gap:16px; font-weight:bold; font-size:0.95rem; }
-  .stats span { background:#1f2937; padding:6px 12px; border-radius:20px; }
-  .stats .score { color:#4ade80; }
-  .stats .level { color:#60a5fa; }
+  .topbar-left { display:flex; align-items:center; gap:14px; }
+  .traffic { display:flex; gap:6px; }
+  .traffic .dot { width:11px; height:11px; border-radius:50%; display:inline-block; }
+  .traffic .dot.red { background:var(--red); }
+  .traffic .dot.yellow { background:var(--orange); }
+  .traffic .dot.green { background:var(--green); }
+  .traffic.small .dot { width:9px; height:9px; }
+  .filename { color:var(--text-dim); font-size:0.85rem; }
+  .filename b { color:var(--blue); }
+  .cursor { display:inline-block; color:var(--cyan); animation: blink 1s step-end infinite; margin-left:2px; }
+  @keyframes blink { 50% { opacity:0; } }
+  .topbar-right { display:flex; align-items:center; gap:14px; }
+  .counter { font-size:0.8rem; color:var(--text-dim); }
+  .counter b { color:var(--green); }
+  .btn-ghost {
+    background:transparent; border:1px solid var(--border); color:var(--text-dim);
+    padding:6px 12px; border-radius:6px; font-family:inherit; font-size:0.78rem; cursor:pointer;
+  }
+  .btn-ghost:hover { border-color:var(--red); color:var(--red); }
 
+  /* ---------- Layout grid ---------- */
   .layout {
     display:grid;
-    grid-template-columns: 230px 1fr 350px;
+    grid-template-columns: 240px 1fr 360px;
     gap: 14px;
     padding: 16px;
     align-items:start;
   }
-  @media (max-width: 980px) {
-    .layout { grid-template-columns: 1fr; }
-  }
+  @media (max-width: 1000px) { .layout { grid-template-columns: 1fr; } }
 
   .panel {
-    background: #0f172acc;
-    border: 1px solid #334155;
-    border-radius: 12px;
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
     padding: 14px;
   }
-  .panel h2 { font-size:1rem; color:#fbbf24; margin-bottom:10px; }
-  .group-label { font-size:0.78rem; color:#94a3b8; margin:10px 0 6px; text-transform:uppercase; letter-spacing:0.5px; }
+  .panel h2 {
+    font-size:0.78rem; color:var(--text-dim); margin-bottom:10px;
+    text-transform:none; letter-spacing:0.3px; font-weight:600;
+  }
+  .group-label {
+    font-size:0.72rem; color:var(--pink); margin:14px 0 6px; letter-spacing:0.3px;
+  }
+  .group-label:first-of-type { margin-top:0; }
 
-  /* Palette */
+  /* ---------- Palette ---------- */
   .palette-item {
-    background: #1e293b;
-    border: 1px solid #475569;
-    border-radius: 8px;
-    padding: 9px 10px;
-    margin-bottom: 7px;
+    background: var(--bg-panel-alt);
+    border: 1px solid var(--border-soft);
+    border-radius: 6px;
+    padding: 8px 10px;
+    margin-bottom: 6px;
     cursor: grab;
-    font-size: 0.85rem;
+    font-size: 0.8rem;
     display:flex; align-items:center; gap:8px;
     transition: 0.15s;
+    color: var(--text);
   }
-  .palette-item:hover { background:#334155; transform: translateX(3px); }
-  .palette-item.layout-type { border-left: 4px solid #38bdf8; }
-  .palette-item.content-type { border-left: 4px solid #fbbf24; }
-  .palette-item .ico { font-size:1.1rem; }
+  .palette-item:hover { background:#1c2531; transform: translateX(3px); }
+  .palette-item.layout-type { border-left: 3px solid var(--blue); }
+  .palette-item.content-type { border-left: 3px solid var(--orange); }
+  .palette-item .ico { font-size:1rem; }
 
-  /* Canvas */
-  .canvas-hint {
-    font-size:0.78rem; color:#94a3b8; margin-bottom:8px; line-height:1.5;
+  /* ---------- Canvas panel (browser mockup) ---------- */
+  .canvas-panel { padding:0; overflow:hidden; }
+  .browser-bar {
+    display:flex; align-items:center; gap:10px;
+    padding:10px 14px; background:var(--bg-panel-alt); border-bottom:1px solid var(--border);
   }
+  .url-bar {
+    flex:1; background:var(--bg); border:1px solid var(--border); border-radius:20px;
+    padding:5px 12px; font-size:0.75rem; color:var(--text-dim);
+  }
+  .btn-icon {
+    background:transparent; border:1px solid var(--border); color:var(--text-dim);
+    width:26px; height:26px; border-radius:6px; cursor:pointer; font-size:0.9rem;
+  }
+  .btn-icon:hover { color:var(--cyan); border-color:var(--cyan); }
+  .canvas-hint {
+    font-size:0.74rem; color:var(--text-dim); padding:10px 14px 0; line-height:1.5;
+  }
+  .canvas-wrap-inner { padding:14px; }
   #canvas {
     background: #ffffff;
     color:#111;
-    border-radius: 8px;
+    border-radius: 6px;
     min-height: 460px;
     padding: 14px;
     display:flex;
     flex-direction:column;
     gap:10px;
-    border: 3px dashed #6366f1;
+    margin:14px;
+    border: 2px dashed #94a3b8;
   }
   #canvas.dropzone-hover { border-color:#4ade80; background:#f0fdf4; }
-  .placeholder { color:#94a3b8; text-align:center; margin:180px 0; font-size:0.9rem; }
+  .placeholder { color:#94a3b8; text-align:center; margin:180px 0; font-size:0.85rem; font-family:'JetBrains Mono',monospace; }
   .empty-hint {
-    color:#94a3b8; text-align:center; font-size:0.78rem;
+    color:#94a3b8; text-align:center; font-size:0.75rem;
     border:1px dashed #cbd5e1; border-radius:6px; padding:14px;
     min-height:30px;
   }
@@ -87,7 +146,6 @@
   .comp-node { position:relative; }
   .comp-node.dragging { opacity:0.35; }
 
-  /* leaf content components */
   .comp-node.leaf {
     border:1px dashed #cbd5e1;
     border-radius:6px;
@@ -103,6 +161,7 @@
   .comp-image img { width:100%; border-radius:6px; display:block; }
   .comp-card { background:#fff; border:1px solid #e2e8f0; border-radius:8px; padding:12px; box-shadow:0 2px 6px #0001; }
   .comp-input input { width:100%; padding:8px; border-radius:6px; border:1px solid #cbd5e1; }
+  .comp-textarea textarea { width:100%; padding:8px; border-radius:6px; border:1px solid #cbd5e1; font-family:inherit; resize:vertical; }
   .comp-text p { color:#334155; font-size:0.92rem; }
   .comp-footer { background:#111827; color:#9ca3af; text-align:center; padding:10px; border-radius:6px; font-size:0.85rem; }
   .comp-link { padding:6px 0; }
@@ -117,6 +176,15 @@
     text-align:center; font-size:1.6rem;
   }
   .comp-video .video-box small { display:block; font-size:0.7rem; color:#94a3b8; margin-top:6px; }
+  .comp-divider hr { border:none; border-top:2px solid #cbd5e1; margin:8px 0; }
+  .comp-quote blockquote { border-left:4px solid #94a3b8; padding:10px 14px; font-style:italic; color:#334155; background:#f8fafc; border-radius:0 6px 6px 0; }
+  .comp-quote cite { display:block; margin-top:6px; font-size:0.8rem; color:#64748b; font-style:normal; }
+  .comp-badge .badge { display:inline-block; background:#e0e7ff; color:#4338ca; padding:4px 10px; border-radius:20px; font-size:0.78rem; font-weight:bold; margin-right:6px; }
+  .comp-badge .badge-alt { background:#dcfce7; color:#15803d; }
+  .comp-checkbox label { display:flex; align-items:center; gap:8px; font-size:0.9rem; color:#334155; }
+  .comp-select select { width:100%; padding:8px; border-radius:6px; border:1px solid #cbd5e1; }
+  .comp-code pre { background:#0f172a; color:#7dd3fc; padding:10px; border-radius:6px; font-size:0.78rem; overflow:auto; margin:0; }
+  .comp-code code { font-family:'Fira Code','JetBrains Mono',monospace; }
 
   /* container (layout) components */
   .comp-node.container {
@@ -126,8 +194,8 @@
   }
   .node-label {
     display:flex; align-items:center; justify-content:space-between;
-    font-size:0.75rem; font-weight:bold; padding:4px 8px; border-radius:5px;
-    margin-bottom:8px; color:#fff;
+    font-size:0.72rem; font-weight:bold; padding:4px 8px; border-radius:5px;
+    margin-bottom:8px; color:#fff; font-family:'JetBrains Mono',monospace;
   }
   .node-section { border:2px dashed #94a3b8; background:#f1f5f9; }
   .node-section .node-label { background:#64748b; }
@@ -156,74 +224,74 @@
   }
   .node-label .del-btn { position:static; }
 
-  /* Mission / Code */
-  .mission-box { background:#312e81; border-radius:8px; padding:12px; margin-bottom:12px; }
-  .mission-box h3 { color:#fde68a; font-size:0.95rem; margin-bottom:6px; }
-  .req-list { list-style:none; font-size:0.85rem; margin-top:6px; }
-  .req-list li { margin:4px 0; }
-  .req-list li.done { color:#4ade80; text-decoration: line-through; }
-  .req-list li.pending { color:#fca5a5; }
-  .btn-primary {
-    margin-top:10px; width:100%; background:#4ade80; color:#052e16; border:none;
-    padding:10px; border-radius:8px; font-weight:bold; cursor:pointer;
-  }
-  .btn-primary:disabled { background:#475569; color:#94a3b8; cursor:not-allowed; }
-
+  /* ---------- Inspector panel ---------- */
   .tip-box {
-    background:#082f49; border-left:4px solid #38bdf8; border-radius:6px;
-    padding:10px; font-size:0.82rem; margin-bottom:12px; min-height:50px;
-    line-height:1.5;
+    background:var(--bg-panel-alt); border-left:3px solid var(--cyan); border-radius:6px;
+    padding:10px; font-size:0.78rem; margin-bottom:12px; min-height:50px;
+    line-height:1.55; color:var(--text);
   }
-  .tip-box code { color:#7dd3fc; background:#001a2b; padding:1px 5px; border-radius:4px; }
+  .tip-box b { color:var(--cyan); }
+  .tip-box code { color:var(--pink); background:#000c14; padding:1px 5px; border-radius:4px; }
   .tip-box pre {
-    margin-top:6px; background:#00131f; color:#a5f3fc; padding:6px;
-    border-radius:4px; font-size:0.7rem; white-space:pre-wrap; word-break:break-word;
+    margin-top:6px; background:#050a10; color:var(--green); padding:6px;
+    border-radius:4px; font-size:0.68rem; white-space:pre-wrap; word-break:break-word;
   }
 
   .guide-btn {
-    margin-bottom:12px; width:100%; background:#1e293b; color:#fbbf24;
-    border:1px solid #475569; padding:9px; border-radius:8px; cursor:pointer;
-    font-weight:bold; font-size:0.85rem;
+    margin-bottom:14px; width:100%; background:var(--bg-panel-alt); color:var(--orange);
+    border:1px solid var(--border); padding:9px; border-radius:6px; cursor:pointer;
+    font-weight:600; font-size:0.8rem; font-family:inherit;
   }
-  .guide-btn:hover { background:#334155; }
+  .guide-btn:hover { border-color:var(--orange); }
 
   .modal-overlay {
-    position:fixed; inset:0; background:rgba(0,0,0,0.65);
+    position:fixed; inset:0; background:rgba(0,0,0,0.7);
     display:none; align-items:center; justify-content:center; z-index:1000; padding:20px;
   }
   .modal-overlay.show { display:flex; }
   .modal-box {
-    background:#0f172a; border:1px solid #334155; border-radius:12px;
+    background:var(--bg-panel); border:1px solid var(--border); border-radius:10px;
     padding:20px; max-width:720px; max-height:82vh; overflow:auto; width:100%;
   }
-  .modal-box h2 { color:#fbbf24; margin-bottom:14px; }
-  .guide-item { background:#1e293b; border-radius:8px; padding:12px; margin-bottom:10px; font-size:0.85rem; line-height:1.5; }
-  .guide-item b { color:#fde68a; }
-  .guide-item code { color:#38bdf8; background:#001a2b; padding:1px 5px; border-radius:4px; }
+  .modal-box h2 { color:var(--orange); margin-bottom:14px; font-size:1rem; }
+  .guide-item { background:var(--bg-panel-alt); border-radius:8px; padding:12px; margin-bottom:10px; font-size:0.82rem; line-height:1.55; }
+  .guide-item b { color:var(--cyan); }
+  .guide-item code { color:var(--pink); background:#000c14; padding:1px 5px; border-radius:4px; }
   .guide-item pre {
-    background:#020617; color:#a5f3fc; padding:8px; border-radius:6px;
-    margin-top:6px; font-size:0.72rem; white-space:pre-wrap; word-break:break-word;
+    background:#050a10; color:var(--green); padding:8px; border-radius:6px;
+    margin-top:6px; font-size:0.7rem; white-space:pre-wrap; word-break:break-word;
   }
   .modal-close {
-    margin-top:6px; width:100%; background:#ef4444; color:#fff; border:none;
-    padding:10px; border-radius:8px; cursor:pointer; font-weight:bold;
+    margin-top:6px; width:100%; background:var(--red); color:#1a0508; border:none;
+    padding:10px; border-radius:8px; cursor:pointer; font-weight:700; font-family:inherit;
   }
 
-  pre#codeOut {
-    background:#020617; color:#a5f3fc; font-size:0.7rem;
-    padding:10px; border-radius:8px; max-height:260px; overflow:auto;
-    white-space:pre-wrap; word-break:break-word;
+  /* ---------- Code editor ---------- */
+  .lang-tag { font-size:0.65rem; color:var(--bg); background:var(--orange); padding:1px 6px; border-radius:4px; margin-left:6px; vertical-align:middle; }
+  .code-editor {
+    background:#080b10; border:1px solid var(--border); border-radius:6px;
+    max-height:280px; overflow:auto; font-size:0.72rem; line-height:1.6;
   }
+  .code-editor .line { display:flex; padding:0 8px; }
+  .code-editor .line:hover { background:#0d121a; }
+  .code-editor .ln { color:#3b4252; width:26px; text-align:right; margin-right:10px; user-select:none; flex-shrink:0; }
+  .code-editor .code { white-space:pre-wrap; word-break:break-word; color:var(--text); }
+  .code-editor .code.muted { color:var(--text-dim); }
+  .tok-tag { color:var(--red); }
+  .tok-attr { color:var(--orange); }
+  .tok-string { color:var(--green); }
+  .tok-comment { color:var(--text-dim); font-style:italic; }
+
   .copy-btn {
-    margin-top:8px; width:100%; background:#6366f1; color:#fff; border:none;
-    padding:8px; border-radius:8px; cursor:pointer; font-weight:bold;
+    margin-top:8px; width:100%; background:var(--blue); color:#0a0e14; border:none;
+    padding:9px; border-radius:6px; cursor:pointer; font-weight:700; font-family:inherit;
   }
-  .copy-btn.copied { background:#22c55e; }
+  .copy-btn.copied { background:var(--green); }
 
   .toast {
-    position:fixed; top:20px; right:20px; background:#22c55e; color:#052e16;
+    position:fixed; top:20px; right:20px; background:var(--green); color:#052e16;
     padding:12px 20px; border-radius:8px; font-weight:bold; opacity:0;
-    transform:translateY(-10px); transition:0.3s; z-index:999;
+    transform:translateY(-10px); transition:0.3s; z-index:999; font-size:0.85rem;
   }
   .toast.show { opacity:1; transform:translateY(0); }
 </style>
@@ -231,10 +299,13 @@
 <body>
 
 <div class="topbar">
-  <h1>🎮 UI/UX Design Quest — Layout Edition</h1>
-  <div class="stats">
-    <span class="score">⭐ คะแนน: <span id="scoreVal">0</span></span>
-    <span class="level">🏆 เลเวล: <span id="levelVal">1</span></span>
+  <div class="topbar-left">
+    <span class="traffic"><span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span></span>
+    <span class="filename">~/<b>layout-builder</b>.html<span class="cursor">▊</span></span>
+  </div>
+  <div class="topbar-right">
+    <span class="counter">elements: <b id="elCount">0</b></span>
+    <button class="btn-ghost" id="clearBtn">🗑 ล้างพื้นที่ทำงาน</button>
   </div>
 </div>
 
@@ -242,15 +313,15 @@
 
   <!-- ซ้าย: คลังองค์ประกอบ -->
   <div class="panel">
-    <h2>🧩 คลังองค์ประกอบ</h2>
-    <div class="group-label">🧱 กล่องจัดวาง Layout</div>
+    <h2>// คลังองค์ประกอบ</h2>
+    <div class="group-label">📁 layout/</div>
     <div class="palette-item layout-type" draggable="true" data-type="section"><span class="ico">📦</span> Section</div>
     <div class="palette-item layout-type" draggable="true" data-type="row"><span class="ico">↔️</span> Row (แนวนอน)</div>
     <div class="palette-item layout-type" draggable="true" data-type="col"><span class="ico">↕️</span> Column (แนวตั้ง)</div>
     <div class="palette-item layout-type" draggable="true" data-type="grid2"><span class="ico">▦</span> Grid 2 คอลัมน์</div>
     <div class="palette-item layout-type" draggable="true" data-type="grid3"><span class="ico">▦</span> Grid 3 คอลัมน์</div>
 
-    <div class="group-label">📝 องค์ประกอบเนื้อหา</div>
+    <div class="group-label">📁 content/</div>
     <div class="palette-item content-type" draggable="true" data-type="header"><span class="ico">🟪</span> Header</div>
     <div class="palette-item content-type" draggable="true" data-type="nav"><span class="ico">📑</span> Navbar</div>
     <div class="palette-item content-type" draggable="true" data-type="hero"><span class="ico">🌈</span> Hero Section</div>
@@ -258,40 +329,44 @@
     <div class="palette-item content-type" draggable="true" data-type="image"><span class="ico">🖼️</span> Image</div>
     <div class="palette-item content-type" draggable="true" data-type="card"><span class="ico">🃏</span> Card</div>
     <div class="palette-item content-type" draggable="true" data-type="input"><span class="ico">⌨️</span> Input Field</div>
+    <div class="palette-item content-type" draggable="true" data-type="textarea"><span class="ico">🗒️</span> Textarea</div>
+    <div class="palette-item content-type" draggable="true" data-type="select"><span class="ico">🔽</span> Dropdown</div>
+    <div class="palette-item content-type" draggable="true" data-type="checkbox"><span class="ico">☑️</span> Checkbox</div>
     <div class="palette-item content-type" draggable="true" data-type="text"><span class="ico">📝</span> Text</div>
+    <div class="palette-item content-type" draggable="true" data-type="link"><span class="ico">🔗</span> Link</div>
+    <div class="palette-item content-type" draggable="true" data-type="list"><span class="ico">📋</span> List</div>
+    <div class="palette-item content-type" draggable="true" data-type="table"><span class="ico">📊</span> Table</div>
+    <div class="palette-item content-type" draggable="true" data-type="video"><span class="ico">🎬</span> Video</div>
+    <div class="palette-item content-type" draggable="true" data-type="quote"><span class="ico">💬</span> Blockquote</div>
+    <div class="palette-item content-type" draggable="true" data-type="badge"><span class="ico">🏷️</span> Badge</div>
+    <div class="palette-item content-type" draggable="true" data-type="divider"><span class="ico">➖</span> Divider</div>
+    <div class="palette-item content-type" draggable="true" data-type="codeblock"><span class="ico">💻</span> Code Block</div>
     <div class="palette-item content-type" draggable="true" data-type="footer"><span class="ico">⬛</span> Footer</div>
-    <div class="palette-item content-type" draggable="true" data-type="link"><span class="ico">🔗</span> Link (ลิงก์)</div>
-    <div class="palette-item content-type" draggable="true" data-type="list"><span class="ico">📋</span> List (ลิสต์)</div>
-    <div class="palette-item content-type" draggable="true" data-type="table"><span class="ico">📊</span> Table (ตาราง)</div>
-    <div class="palette-item content-type" draggable="true" data-type="video"><span class="ico">🎬</span> Video (วิดีโอ)</div>
   </div>
 
-  <!-- กลาง: พื้นที่ออกแบบ -->
-  <div class="panel canvas-wrap">
-    <h2>🖥️ พื้นที่ออกแบบหน้าเว็บ</h2>
-    <div class="canvas-hint">💡 ลากกล่อง Layout (Row / Column / Grid) มาวางก่อน แล้วลากองค์ประกอบเนื้อหาไปวาง "ข้างใน" กล่องนั้น เพื่อควบคุมการจัดวางได้ลึกขึ้น — สามารถซ้อนกล่อง Layout เข้าไปในกล่อง Layout อื่นได้ด้วย!</div>
+  <!-- กลาง: พื้นที่ออกแบบ (จำลอง browser) -->
+  <div class="panel canvas-panel">
+    <div class="browser-bar">
+      <span class="traffic small"><span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span></span>
+      <div class="url-bar">🔒 localhost:5500/index.html</div>
+      <button class="btn-icon" id="refreshBtn" title="รีเฟรชตัวอย่าง">⟳</button>
+    </div>
+    <div class="canvas-hint">// ลากกล่อง Layout (Row / Column / Grid) มาวางก่อน แล้วลากองค์ประกอบเนื้อหาไปวาง "ข้างใน" กล่องนั้น — สามารถซ้อนกล่อง Layout เข้าไปในกล่อง Layout อื่นได้ไม่จำกัดชั้น</div>
     <div id="canvas" class="dropzone" data-parent-id="root">
-      <div class="placeholder">ลากองค์ประกอบจากด้านซ้ายมาวางที่นี่ ⬅️</div>
+      <div class="placeholder">// ลากองค์ประกอบจากด้านซ้ายมาวางที่นี่</div>
     </div>
   </div>
 
-  <!-- ขวา: ภารกิจ + โค้ด -->
+  <!-- ขวา: Inspector + Code -->
   <div class="panel">
-    <div class="mission-box">
-      <h3 id="missionTitle">ภารกิจที่ 1</h3>
-      <div id="missionDesc" style="font-size:0.85rem; color:#e0e7ff;"></div>
-      <ul class="req-list" id="reqList"></ul>
-      <button class="btn-primary" id="submitMission">✅ ส่งภารกิจ</button>
-    </div>
-
-    <button class="guide-btn" id="guideBtn">📚 ดูคู่มือแท็กทั้งหมด</button>
-
+    <h2>// Inspector</h2>
     <div class="tip-box" id="tipBox">
-      💡 <b>เคล็ดลับ UX:</b> คลิกที่องค์ประกอบในพื้นที่ออกแบบเพื่อดูคำอธิบายแท็กและวิธีใช้งาน
+      💡 คลิกที่องค์ประกอบในพื้นที่ออกแบบ เพื่อดูคำอธิบายแท็ก HTML/CSS และคำแนะนำการใช้งาน
     </div>
+    <button class="guide-btn" id="guideBtn">📖 เปิด Docs แท็กทั้งหมด</button>
 
-    <h2>💻 โค้ด HTML + CSS ที่สร้างขึ้น</h2>
-    <pre id="codeOut">&lt;!-- ยังไม่มีองค์ประกอบ --&gt;</pre>
+    <h2>// Code Output <span class="lang-tag">html</span></h2>
+    <div class="code-editor" id="codeEditor"></div>
     <button class="copy-btn" id="copyBtn">📋 คัดลอกโค้ด</button>
   </div>
 
@@ -299,9 +374,9 @@
 
 <div class="modal-overlay" id="guideModal">
   <div class="modal-box">
-    <h2>📚 คู่มือแท็ก HTML/CSS ทั้งหมด</h2>
+    <h2>📖 Docs — แท็ก HTML/CSS ทั้งหมด</h2>
     <div id="guideList"></div>
-    <button class="modal-close" id="closeGuide">ปิดคู่มือ</button>
+    <button class="modal-close" id="closeGuide">ปิด</button>
   </div>
 </div>
 
@@ -345,16 +420,26 @@ const contentTemplates = {
     render: () => `<div class="comp-input"><input type="text" placeholder="กรอกข้อมูล..." disabled></div>`,
     html: () => `<input type="text" placeholder="กรอกข้อมูล">`,
     tip: "ช่องกรอกข้อมูลควรมี placeholder หรือ label ที่ชัดเจน บอกผู้ใช้ว่าต้องพิมพ์อะไร" },
+  textarea: { label:"Textarea", icon:"🗒️", tag:"<textarea>",
+    when:"ใช้รับข้อความยาวหลายบรรทัดจากผู้ใช้ เช่น ข้อความรีวิว คอมเมนต์ หรือรายละเอียดเพิ่มเติม ต่างจาก input ที่รับได้บรรทัดเดียว",
+    render: () => `<div class="comp-textarea"><textarea rows="3" placeholder="พิมพ์ข้อความหลายบรรทัด..." disabled></textarea></div>`,
+    html: () => `<textarea rows="4" placeholder="พิมพ์ข้อความที่นี่..."></textarea>`,
+    tip: "ควรกำหนด rows ให้พอเหมาะกับเนื้อหา และมี placeholder บอกผู้ใช้ว่าต้องกรอกอะไร" },
+  select: { label:"Dropdown", icon:"🔽", tag:"<select>",
+    when:"ใช้ให้ผู้ใช้เลือกตัวเลือกเดียวจากรายการที่กำหนดไว้ เหมาะกับกรณีที่มีตัวเลือกจำนวนมาก",
+    render: () => `<div class="comp-select"><select disabled><option>เลือกตัวเลือก...</option><option>ตัวเลือกที่ 1</option><option>ตัวเลือกที่ 2</option></select></div>`,
+    html: () => `<select>\n  <option>เลือกตัวเลือก...</option>\n  <option>ตัวเลือกที่ 1</option>\n  <option>ตัวเลือกที่ 2</option>\n</select>`,
+    tip: "เหมาะกับตัวเลือกมากกว่า 5 รายการขึ้นไป ถ้าน้อยกว่านั้นควรใช้ radio button เพื่อให้เห็นทุกตัวเลือกพร้อมกัน" },
+  checkbox: { label:"Checkbox", icon:"☑️", tag:"<input type=\"checkbox\">",
+    when:"ใช้ให้ผู้ใช้เลือกได้หลายตัวเลือก หรือกดยอมรับเงื่อนไขการใช้งาน",
+    render: () => `<div class="comp-checkbox"><label><input type="checkbox" disabled> ยอมรับเงื่อนไขการใช้งาน</label></div>`,
+    html: () => `<label>\n  <input type="checkbox">\n  ยอมรับเงื่อนไขการใช้งาน\n</label>`,
+    tip: "ควรใส่ label ที่คลิกได้ครอบคู่กับ checkbox เสมอ เพื่อเพิ่มพื้นที่คลิกให้ใหญ่ขึ้น (Touch Target)" },
   text: { label:"Text", icon:"📝", tag:"<p>",
     when:"ใช้แสดงข้อความบรรยายทั่วไปที่ไม่ใช่หัวข้อหลัก เช่น คำอธิบาย เนื้อหาย่อหน้า",
     render: () => `<div class="comp-text"><p>ข้อความอธิบายทั่วไปที่สามารถแก้ไขได้</p></div>`,
     html: () => `<p>ข้อความอธิบายทั่วไป</p>`,
     tip: "ข้อความควรมี Line Height และขนาดตัวอักษรที่อ่านง่าย ไม่ต่ำกว่า 16px บนเว็บ" },
-  footer: { label:"Footer", icon:"⬛", tag:"<footer>",
-    when:"ใช้เพียง 1 ครั้งต่อหน้า วางไว้ล่างสุดของหน้าเสมอ มักมีข้อมูลติดต่อหรือลิงก์ลิขสิทธิ์",
-    render: () => `<div class="comp-footer">© 2026 บริษัทของคุณ | ติดต่อเรา</div>`,
-    html: () => `<footer>\n  <p>© 2026 บริษัทของคุณ</p>\n</footer>`,
-    tip: "Footer ควรมีข้อมูลติดต่อ/ลิงก์สำคัญ เป็นจุดสิ้นสุดที่ทำให้ผู้ใช้รู้ว่าหมดหน้าแล้ว" },
   link: { label:"Link", icon:"🔗", tag:"<a>",
     when:"ใช้เมื่อต้องการเชื่อมไปยังหน้าอื่น เว็บไซต์อื่น หรือตำแหน่งอื่นในหน้าเดียวกัน ต้องมี attribute href เสมอ",
     render: () => `<div class="comp-link"><a href="#">ลิงก์ตัวอย่าง คลิกที่นี่</a></div>`,
@@ -374,7 +459,32 @@ const contentTemplates = {
     when:"ใช้แสดงวิดีโอ เช่น คลิปสาธิตสินค้าหรือวิดีโอแนะนำ ควรมี attribute controls ให้ผู้ใช้กดเล่น/หยุดเองได้",
     render: () => `<div class="comp-video"><div class="video-box">▶️<small>วิดีโอตัวอย่าง (คลิกเล่น)</small></div></div>`,
     html: () => `<video controls width="100%">\n  <source src="video.mp4" type="video/mp4">\n</video>`,
-    tip: "วิดีโอควรมีขนาดไฟล์ที่เหมาะสมและปุ่มควบคุม (controls) เสมอ เพื่อให้ผู้ใช้ควบคุมการเล่นเองได้" }
+    tip: "วิดีโอควรมีขนาดไฟล์ที่เหมาะสมและปุ่มควบคุม (controls) เสมอ เพื่อให้ผู้ใช้ควบคุมการเล่นเองได้" },
+  quote: { label:"Blockquote", icon:"💬", tag:"<blockquote>",
+    when:"ใช้แสดงคำพูดอ้างอิง เช่น รีวิวจากลูกค้า หรือคำคมที่ยกมาจากแหล่งอื่น",
+    render: () => `<div class="comp-quote"><blockquote>"ข้อความอ้างอิงหรือคำรีวิวจากลูกค้า"<cite>— ชื่อผู้พูด</cite></blockquote></div>`,
+    html: () => `<blockquote>\n  "ข้อความอ้างอิง"\n  <cite>— ชื่อผู้พูด</cite>\n</blockquote>`,
+    tip: "ควรใส่ <cite> ระบุที่มาของคำพูดเสมอ เพื่อความน่าเชื่อถือ" },
+  badge: { label:"Badge", icon:"🏷️", tag:'<span class="badge">',
+    when:"ใช้แสดงสถานะหรือป้ายกำกับสั้น ๆ เช่น 'ใหม่' 'ลดราคา' 'หมด' ติดไว้กับเนื้อหาอื่น",
+    render: () => `<div class="comp-badge"><span class="badge">ใหม่</span><span class="badge badge-alt">แนะนำ</span></div>`,
+    html: () => `<span class="badge">ใหม่</span>`,
+    tip: "Badge ควรมีสีที่โดดเด่นแต่ไม่รบกวนเนื้อหาหลัก และใช้ข้อความที่สั้นที่สุด" },
+  divider: { label:"Divider", icon:"➖", tag:"<hr>",
+    when:"ใช้แบ่งเนื้อหาออกเป็นส่วน ๆ ด้วยเส้นแบ่งแนวนอน เหมาะกับการแยกเนื้อหาที่ไม่เกี่ยวข้องกันออกจากกัน",
+    render: () => `<div class="comp-divider"><hr></div>`,
+    html: () => `<hr>`,
+    tip: "เส้นแบ่งช่วยสร้าง Visual Separation แต่ไม่ควรใช้มากเกินไป เพราะจะทำให้หน้าเว็บดูรก" },
+  codeblock: { label:"Code Block", icon:"💻", tag:"<pre><code>",
+    when:"ใช้แสดงตัวอย่างโค้ดในหน้าเว็บ เช่น เว็บไซต์สอนโปรแกรมมิ่ง หรือ Documentation ประกอบเนื้อหา",
+    render: () => `<div class="comp-code"><pre><code>&lt;div class="hello"&gt;Hello World&lt;/div&gt;</code></pre></div>`,
+    html: () => `<pre><code>&lt;div class="hello"&gt;Hello World&lt;/div&gt;</code></pre>`,
+    tip: "ควรใช้ฟอนต์แบบ monospace และมี syntax highlighting เพื่อให้อ่านโค้ดง่ายขึ้น" },
+  footer: { label:"Footer", icon:"⬛", tag:"<footer>",
+    when:"ใช้เพียง 1 ครั้งต่อหน้า วางไว้ล่างสุดของหน้าเสมอ มักมีข้อมูลติดต่อหรือลิงก์ลิขสิทธิ์",
+    render: () => `<div class="comp-footer">© 2026 บริษัทของคุณ | ติดต่อเรา</div>`,
+    html: () => `<footer>\n  <p>© 2026 บริษัทของคุณ</p>\n</footer>`,
+    tip: "Footer ควรมีข้อมูลติดต่อ/ลิงก์สำคัญ เป็นจุดสิ้นสุดที่ทำให้ผู้ใช้รู้ว่าหมดหน้าแล้ว" }
 };
 
 // ---------- นิยามกล่อง Layout (container) ----------
@@ -406,59 +516,14 @@ const containerDirection = { root:'vertical', section:'vertical', col:'vertical'
 
 function getTemplate(type) { return containerTemplates[type] || contentTemplates[type]; }
 
-// ---------- ภารกิจ ----------
-const missions = [
-  { title:"ภารกิจที่ 1: หน้า Landing Page เบื้องต้น",
-    desc:"ออกแบบหน้าแรกง่าย ๆ ที่มี Header, Hero Section และ Button อย่างน้อย 1 ปุ่ม",
-    require:{ header:1, hero:1, button:1 }, points:100 },
-  { title:"ภารกิจที่ 2: ฟอร์ม Login ด้วย Column",
-    desc:"ลาก Column มาวางก่อน แล้ววาง Header, ช่องกรอกข้อมูล 2 ช่อง และปุ่มยืนยันไว้ในหน้า",
-    require:{ col:1, header:1, input:2, button:1 }, points:150 },
-  { title:"ภารกิจที่ 3: แสดงสินค้าด้วย Grid 2 คอลัมน์",
-    desc:"ลาก Grid 2 คอลัมน์มาวาง แล้วใส่ Card สินค้าอย่างน้อย 2 ใบไว้ข้างใน",
-    require:{ grid2:1, card:2 }, points:180 },
-  { title:"ภารกิจที่ 4: จัดเมนูด้วย Row",
-    desc:"ลาก Row มาวาง แล้วใส่ปุ่มอย่างน้อย 2 ปุ่มไว้ข้างในให้เรียงกันแนวนอน",
-    require:{ row:1, button:2 }, points:150 },
-  { title:"ภารกิจที่ 5: หน้าเว็บสมบูรณ์แบบมือโปร",
-    desc:"ประกอบหน้าเว็บให้ครบวงจร: Header, Section, Grid 3 คอลัมน์ (มี Card 3 ใบ) และ Footer",
-    require:{ header:1, section:1, grid3:1, card:3, footer:1 }, points:300 },
-  { title:"ภารกิจที่ 6: แกลเลอรีสินค้าขนาดใหญ่",
-    desc:"ลาก Grid 3 คอลัมน์มาวาง แล้วใส่ Card สินค้าอย่างน้อย 4 ใบ (มากกว่าจำนวนคอลัมน์ เพื่อดูการ wrap บรรทัดใหม่)",
-    require:{ grid3:1, card:4 }, points:200 },
-  { title:"ภารกิจที่ 7: Layout ซ้อนกัน (Nested)",
-    desc:"ลาก Section มาวางก่อน แล้วลาก Row เข้าไปไว้ข้างใน Section นั้น จากนั้นใส่ปุ่ม 3 ปุ่มไว้ใน Row",
-    require:{ section:1, row:1, button:3 }, points:220 },
-  { title:"ภารกิจที่ 8: ฟอร์มติดต่อเรา (Contact Us)",
-    desc:"ใช้ Column จัดกลุ่มฟอร์ม ต้องมีช่องกรอกข้อมูล 3 ช่อง ข้อความอธิบาย 1 ข้อความ และปุ่มส่ง",
-    require:{ col:1, input:3, text:1, button:1 }, points:220 },
-  { title:"ภารกิจที่ 9: ส่วนหัวเว็บไซต์แบบมาตรฐาน",
-    desc:"ประกอบส่วนหัวหน้าเว็บให้ครบ: Header, Navbar และ Hero Section เรียงต่อกัน",
-    require:{ header:1, nav:1, hero:1 }, points:180 },
-  { title:"ภารกิจที่ 10: หน้าร้านค้าออนไลน์ (E-commerce)",
-    desc:"ประกอบหน้าร้านค้า: Header, Hero, Grid 3 คอลัมน์ (มี Card สินค้า 3 ใบ) และ Footer",
-    require:{ header:1, hero:1, grid3:1, card:3, footer:1 }, points:280 },
-  { title:"ภารกิจที่ 11: หน้า Dashboard แบบผสม",
-    desc:"ใช้ทั้ง Row และ Column ในหน้าเดียวกัน โดยต้องมี Card อย่างน้อย 2 ใบ และข้อความอย่างน้อย 2 ข้อความ กระจายอยู่ในกล่องทั้งสองแบบ",
-    require:{ row:1, col:1, card:2, text:2 }, points:260 },
-  { title:"ภารกิจที่ 12: หน้าเว็บระดับมือโปร (Capstone)",
-    desc:"ประกอบหน้าเว็บที่สมบูรณ์ที่สุด: Header, Navbar, Hero, Section 2 ส่วน, Grid 3 คอลัมน์ (มี Card 3 ใบ) และ Footer",
-    require:{ header:1, nav:1, hero:1, section:2, grid3:1, card:3, footer:1 }, points:400 }
-];
-
-// ---------- สถานะเกม ----------
-let score = 0, level = 1, missionIndex = 0, idCounter = 0;
+// ---------- สถานะเครื่องมือ ----------
+let idCounter = 0;
 const tree = { id:'root', type:'root', children:[] };
 let draggedId = null;
 
 const canvas = document.getElementById('canvas');
-const scoreVal = document.getElementById('scoreVal');
-const levelVal = document.getElementById('levelVal');
-const missionTitle = document.getElementById('missionTitle');
-const missionDesc = document.getElementById('missionDesc');
-const reqList = document.getElementById('reqList');
-const submitBtn = document.getElementById('submitMission');
-const codeOut = document.getElementById('codeOut');
+const elCount = document.getElementById('elCount');
+const codeEditor = document.getElementById('codeEditor');
 const copyBtn = document.getElementById('copyBtn');
 const tipBox = document.getElementById('tipBox');
 const toast = document.getElementById('toast');
@@ -466,9 +531,13 @@ const guideBtn = document.getElementById('guideBtn');
 const guideModal = document.getElementById('guideModal');
 const guideList = document.getElementById('guideList');
 const closeGuide = document.getElementById('closeGuide');
+const clearBtn = document.getElementById('clearBtn');
+const refreshBtn = document.getElementById('refreshBtn');
+let rawCodeText = '';
 
 // ---------- Drag จาก palette ----------
-document.querySelectorAll('.palette-item').forEach(item => {
+document.querySelectorAll('.palette-item[data-type]').forEach(item => {
+  if (!item.dataset.type) return;
   item.addEventListener('dragstart', e => {
     e.dataTransfer.setData('text/plain', JSON.stringify({ source:'palette', type:item.dataset.type }));
   });
@@ -510,6 +579,14 @@ function removeNodeById(id) {
   const found = findParentAndIndex(id);
   if (found) { found.parent.children.splice(found.index, 1); renderAll(); }
 }
+function countAllNodes(node = tree) {
+  let n = 0;
+  if (node.children) {
+    n += node.children.length;
+    node.children.forEach(c => { n += countAllNodes(c); });
+  }
+  return n;
+}
 
 // ---------- render ----------
 function renderNode(node) {
@@ -532,9 +609,9 @@ function renderNode(node) {
 function renderAll() {
   canvas.innerHTML = tree.children.length
     ? tree.children.map(renderNode).join('')
-    : '<div class="placeholder">ลากองค์ประกอบจากด้านซ้ายมาวางที่นี่ ⬅️</div>';
+    : '<div class="placeholder">// ลากองค์ประกอบจากด้านซ้ายมาวางที่นี่</div>';
+  elCount.textContent = countAllNodes();
   updateCode();
-  updateMissionProgress();
 }
 
 // ---------- Drag & Drop ภายใน canvas (event delegation) ----------
@@ -557,9 +634,6 @@ canvas.addEventListener('dragover', e => {
   const dz = e.target.closest('.dropzone');
   if (dz) dz.classList.add('dropzone-hover');
 });
-canvas.addEventListener('dragleave', () => {
-  // handled on next dragover
-});
 canvas.addEventListener('drop', e => {
   e.preventDefault();
   document.querySelectorAll('.dropzone-hover').forEach(d => d.classList.remove('dropzone-hover'));
@@ -572,7 +646,6 @@ canvas.addEventListener('drop', e => {
   let data;
   try { data = JSON.parse(e.dataTransfer.getData('text/plain')); } catch (err) { return; }
 
-  // คำนวณตำแหน่งแทรก
   const directItems = Array.from(dz.children).filter(c => c.classList.contains('comp-node'));
   const direction = containerDirection[parentNode.type] || 'vertical';
   let insertIndex = directItems.length;
@@ -610,7 +683,7 @@ canvas.addEventListener('click', e => {
   const leaf = e.target.closest('.comp-node.leaf');
   if (leaf) { showTip(leaf.dataset.type); return; }
   const container = e.target.closest('.comp-node.container');
-  if (container) { showTip(container.querySelector('.node-label') ? container.className.match(/node-(\w+)/)[1] : ''); }
+  if (container) { showTip(container.className.match(/node-(\w+)/)[1]); }
 });
 
 function escapeHtml(str) {
@@ -646,6 +719,20 @@ guideBtn.addEventListener('click', () => { buildGuide(); guideModal.classList.ad
 closeGuide.addEventListener('click', () => guideModal.classList.remove('show'));
 guideModal.addEventListener('click', e => { if (e.target === guideModal) guideModal.classList.remove('show'); });
 
+// ---------- ล้างพื้นที่ทำงาน / รีเฟรช ----------
+clearBtn.addEventListener('click', () => {
+  if (tree.children.length === 0) return;
+  if (confirm('ต้องการล้างพื้นที่ทำงานทั้งหมดหรือไม่? การกระทำนี้ไม่สามารถย้อนกลับได้')) {
+    tree.children = [];
+    renderAll();
+    showToast('🗑 ล้างพื้นที่ทำงานแล้ว');
+  }
+});
+refreshBtn.addEventListener('click', () => {
+  renderAll();
+  showToast('⟳ รีเฟรชตัวอย่างแล้ว');
+});
+
 // ---------- สร้างโค้ด HTML+CSS ----------
 function nodeToHtml(node, indent) {
   const tpl = getTemplate(node.type);
@@ -659,8 +746,28 @@ function nodeToHtml(node, indent) {
   return raw.split('\n').map(l => indent + l).join('\n');
 }
 
+function highlightLine(line) {
+  let e = escapeHtml(line);
+  if (/^\s*&lt;!--/.test(e)) return `<span class="tok-comment">${e}</span>`;
+  e = e.replace(/(&lt;\/?)([a-zA-Z][a-zA-Z0-9]*)/g, (m, p1, p2) => `${p1}<span class="tok-tag">${p2}</span>`);
+  e = e.replace(/([a-zA-Z-]+)(=)("[^"]*")/g, (m, p1, p2, p3) => `<span class="tok-attr">${p1}</span>${p2}<span class="tok-string">${p3}</span>`);
+  e = e.replace(/(&gt;)/g, `<span class="tok-tag">$1</span>`);
+  return e;
+}
+
+function renderCodeEditor(code) {
+  const lines = code.split('\n');
+  codeEditor.innerHTML = lines.map((line, i) =>
+    `<div class="line"><span class="ln">${i + 1}</span><span class="code${line.trim() === '' ? ' muted' : ''}">${highlightLine(line) || '&nbsp;'}</span></div>`
+  ).join('');
+}
+
 function updateCode() {
-  if (tree.children.length === 0) { codeOut.textContent = '<!-- ยังไม่มีองค์ประกอบ -->'; return; }
+  if (tree.children.length === 0) {
+    rawCodeText = '<!-- ยังไม่มีองค์ประกอบ -->';
+    renderCodeEditor(rawCodeText);
+    return;
+  }
   const body = tree.children.map(c => nodeToHtml(c, '  ')).join('\n\n');
   const css = `<style>
 .layout-section { padding: 20px; border-radius: 8px; }
@@ -668,71 +775,18 @@ function updateCode() {
 .layout-col { display: flex; flex-direction: column; gap: 16px; }
 .layout-grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 .layout-grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+.badge { display:inline-block; padding:4px 10px; border-radius:20px; font-size:0.8rem; font-weight:bold; background:#e0e7ff; color:#4338ca; }
 </style>`;
-  codeOut.textContent = `${css}\n\n<div class="page">\n${body}\n</div>`;
+  rawCodeText = `${css}\n\n<div class="page">\n${body}\n</div>`;
+  renderCodeEditor(rawCodeText);
 }
 
 copyBtn.addEventListener('click', () => {
-  navigator.clipboard.writeText(codeOut.textContent).then(() => {
+  navigator.clipboard.writeText(rawCodeText).then(() => {
     copyBtn.textContent = '✅ คัดลอกแล้ว!';
     copyBtn.classList.add('copied');
     setTimeout(() => { copyBtn.textContent = '📋 คัดลอกโค้ด'; copyBtn.classList.remove('copied'); }, 1500);
   });
-});
-
-// ---------- ภารกิจ ----------
-function countAll(node = tree, counts = {}) {
-  if (node.children) {
-    node.children.forEach(c => { counts[c.type] = (counts[c.type] || 0) + 1; countAll(c, counts); });
-  }
-  return counts;
-}
-
-function loadMission() {
-  const m = missions[missionIndex];
-  if (!m) {
-    missionTitle.textContent = '🎉 ผ่านทุกภารกิจแล้ว!';
-    missionDesc.textContent = 'เก่งมาก! ลองออกแบบหน้าเว็บของตัวเองต่อได้เลย ไม่มีข้อจำกัดแล้ว';
-    reqList.innerHTML = '';
-    submitBtn.disabled = true;
-    submitBtn.textContent = 'จบเกมแล้ว 🏆';
-    return;
-  }
-  missionTitle.textContent = m.title;
-  missionDesc.textContent = m.desc;
-  submitBtn.textContent = '✅ ส่งภารกิจ';
-  updateMissionProgress();
-}
-
-function updateMissionProgress() {
-  const m = missions[missionIndex];
-  if (!m) return;
-  const counts = countAll();
-  reqList.innerHTML = '';
-  let allDone = true;
-  Object.entries(m.require).forEach(([type, need]) => {
-    const have = counts[type] || 0;
-    const done = have >= need;
-    if (!done) allDone = false;
-    const tpl = getTemplate(type);
-    const li = document.createElement('li');
-    li.className = done ? 'done' : 'pending';
-    li.textContent = `${tpl.icon} ${tpl.label} (${have}/${need})`;
-    reqList.appendChild(li);
-  });
-  submitBtn.disabled = !allDone;
-}
-
-submitBtn.addEventListener('click', () => {
-  const m = missions[missionIndex];
-  if (!m) return;
-  score += m.points;
-  scoreVal.textContent = score;
-  level = Math.floor(score / 250) + 1;
-  levelVal.textContent = level;
-  showToast(`🎉 สำเร็จภารกิจ! +${m.points} คะแนน`);
-  missionIndex++;
-  loadMission();
 });
 
 function showToast(msg) {
@@ -741,8 +795,7 @@ function showToast(msg) {
   setTimeout(() => toast.classList.remove('show'), 2200);
 }
 
-// ---------- เริ่มเกม ----------
-loadMission();
+// ---------- เริ่มต้นเครื่องมือ ----------
 renderAll();
 </script>
 </body>
