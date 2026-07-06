@@ -1,230 +1,483 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ComDept - Student Information Dashboard</title>
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <style>
-        body { font-family: 'Prompt', sans-serif; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UI/UX Design Quest 🎨 - เกมออกแบบหน้าเว็บ</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: 'Segoe UI', 'Tahoma', sans-serif;
+    background: linear-gradient(135deg, #1e1b4b, #312e81);
+    color: #eee;
+    min-height: 100vh;
+  }
+  .topbar {
+    display:flex; justify-content:space-between; align-items:center;
+    padding: 14px 24px; background: rgba(0,0,0,0.25);
+    border-bottom: 2px solid #6366f1;
+    flex-wrap: wrap; gap:10px;
+  }
+  .topbar h1 { font-size: 1.3rem; color:#fbbf24; }
+  .stats { display:flex; gap:16px; font-weight:bold; font-size:0.95rem; }
+  .stats span { background:#1f2937; padding:6px 12px; border-radius:20px; }
+  .stats .score { color:#4ade80; }
+  .stats .level { color:#60a5fa; }
+
+  .layout {
+    display:grid;
+    grid-template-columns: 220px 1fr 340px;
+    gap: 14px;
+    padding: 16px;
+    align-items:start;
+  }
+  @media (max-width: 950px) {
+    .layout { grid-template-columns: 1fr; }
+  }
+
+  .panel {
+    background: #0f172acc;
+    border: 1px solid #334155;
+    border-radius: 12px;
+    padding: 14px;
+  }
+  .panel h2 { font-size:1rem; color:#fbbf24; margin-bottom:10px; }
+
+  /* Palette */
+  .palette-item {
+    background: #1e293b;
+    border: 1px solid #475569;
+    border-radius: 8px;
+    padding: 10px;
+    margin-bottom: 8px;
+    cursor: grab;
+    font-size: 0.9rem;
+    display:flex; align-items:center; gap:8px;
+    transition: 0.15s;
+  }
+  .palette-item:hover { background:#334155; transform: translateX(3px); }
+  .palette-item .ico { font-size:1.2rem; }
+
+  /* Canvas */
+  .canvas-wrap { min-height: 480px; }
+  #canvas {
+    background: #ffffff;
+    color:#111;
+    border-radius: 8px;
+    min-height: 460px;
+    padding: 14px;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    border: 3px dashed #6366f1;
+  }
+  #canvas.dragover { border-color:#4ade80; background:#f0fdf4; }
+  #canvas .placeholder { color:#94a3b8; text-align:center; margin-top:180px; font-size:0.9rem; }
+
+  .comp {
+    position:relative;
+    border:1px dashed #cbd5e1;
+    border-radius:6px;
+    padding:10px;
+    cursor:grab;
+    background:#f8fafc;
+  }
+  .comp.dragging { opacity:0.4; }
+  .comp .del-btn {
+    position:absolute; top:4px; right:4px;
+    background:#ef4444; color:#fff; border:none;
+    width:20px; height:20px; border-radius:50%;
+    cursor:pointer; font-size:0.7rem; line-height:1;
+  }
+  .comp-header { background:#4f46e5; color:#fff; padding:14px; border-radius:6px; font-weight:bold; }
+  .comp-nav { background:#1e293b; color:#fff; padding:10px; border-radius:6px; display:flex; gap:14px; }
+  .comp-hero { background:linear-gradient(120deg,#818cf8,#c084fc); color:#fff; padding:24px; border-radius:6px; text-align:center; }
+  .comp-hero h2 { margin-bottom:6px; }
+  .comp-button button { background:#f59e0b; color:#111; border:none; padding:8px 18px; border-radius:6px; font-weight:bold; cursor:default; }
+  .comp-image img { width:100%; border-radius:6px; display:block; }
+  .comp-card { background:#fff; border:1px solid #e2e8f0; border-radius:8px; padding:12px; box-shadow:0 2px 6px #0001; }
+  .comp-input input { width:100%; padding:8px; border-radius:6px; border:1px solid #cbd5e1; }
+  .comp-text p { color:#334155; }
+  .comp-footer { background:#111827; color:#9ca3af; text-align:center; padding:10px; border-radius:6px; font-size:0.85rem; }
+
+  /* Mission / Code */
+  .mission-box {
+    background:#312e81; border-radius:8px; padding:12px; margin-bottom:12px;
+  }
+  .mission-box h3 { color:#fde68a; font-size:0.95rem; margin-bottom:6px; }
+  .req-list { list-style:none; font-size:0.85rem; margin-top:6px; }
+  .req-list li { margin:4px 0; }
+  .req-list li.done { color:#4ade80; text-decoration: line-through; }
+  .req-list li.pending { color:#fca5a5; }
+  .btn-primary {
+    margin-top:10px; width:100%; background:#4ade80; color:#052e16; border:none;
+    padding:10px; border-radius:8px; font-weight:bold; cursor:pointer;
+  }
+  .btn-primary:disabled { background:#475569; color:#94a3b8; cursor:not-allowed; }
+
+  .tip-box {
+    background:#082f49; border-left:4px solid #38bdf8; border-radius:6px;
+    padding:10px; font-size:0.82rem; margin-bottom:12px; min-height:50px;
+  }
+
+  pre#codeOut {
+    background:#020617; color:#a5f3fc; font-size:0.72rem;
+    padding:10px; border-radius:8px; max-height:260px; overflow:auto;
+    white-space:pre-wrap; word-break:break-word;
+  }
+  .copy-btn {
+    margin-top:8px; width:100%; background:#6366f1; color:#fff; border:none;
+    padding:8px; border-radius:8px; cursor:pointer; font-weight:bold;
+  }
+  .copy-btn.copied { background:#22c55e; }
+
+  .toast {
+    position:fixed; top:20px; right:20px; background:#22c55e; color:#052e16;
+    padding:12px 20px; border-radius:8px; font-weight:bold; opacity:0;
+    transform:translateY(-10px); transition:0.3s; z-index:999;
+  }
+  .toast.show { opacity:1; transform:translateY(0); }
+</style>
 </head>
-<body class="bg-slate-50 text-slate-800">
+<body>
 
-    <div class="flex h-screen overflow-hidden">
-        
-        <aside class="w-64 bg-slate-950 text-slate-200 p-6 hidden md:flex flex-col justify-between shrink-0">
-            <div>
-                <div class="flex items-center gap-3 mb-8">
-                    <span class="text-2xl text-blue-400">💻</span>
-                    <h1 class="text-xl font-bold text-white tracking-wide">ComDept IT</h1>
-                </div>
-                <nav class="space-y-1">
-                    <a href="#" class="flex items-center gap-3 px-4 py-3 bg-blue-600 text-white rounded-xl font-medium transition-all">
-                        <span>📊</span> ข้อมูลจำนวนนักศึกษา
-                    </a>
-                    <a href="#" class="flex items-center gap-3 px-4 py-3 text-slate-400 hover:bg-slate-900 hover:text-slate-200 rounded-xl transition-all">
-                        <span>🎓</span> ตรวจสอบการจบการศึกษา
-                    </a>
-                    <a href="#" class="flex items-center gap-3 px-4 py-3 text-slate-400 hover:bg-slate-900 hover:text-slate-200 rounded-xl transition-all">
-                        <span>⚠️</span> กลุ่มเสี่ยง/ติดตามผล
-                    </a>
-                    <a href="#" class="flex items-center gap-3 px-4 py-3 text-slate-400 hover:bg-slate-900 hover:text-slate-200 rounded-xl transition-all">
-                        <span>📝</span> รายงานสถิติภาพรวม
-                    </a>
-                </nav>
-            </div>
-            <div class="border-t border-slate-800 pt-4 text-xs text-slate-500">
-                <p>ระบบสารสนเทศภาควิชา v2.1</p>
-            </div>
-        </aside>
+<div class="topbar">
+  <h1>🎮 UI/UX Design Quest</h1>
+  <div class="stats">
+    <span class="score">⭐ คะแนน: <span id="scoreVal">0</span></span>
+    <span class="level">🏆 เลเวล: <span id="levelVal">1</span></span>
+  </div>
+</div>
 
-        <main class="flex-1 overflow-y-auto p-4 md:p-8">
-            
-            <header class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
-                <div>
-                    <h2 class="text-2xl font-bold text-slate-900">ระบบฐานข้อมูลนักศึกษา</h2>
-                    <p class="text-slate-500 text-sm">ภาพรวมข้อมูลภาคเรียนที่ 1 ปีการศึกษา 2026 แผนกคอมพิวเตอร์</p>
-                </div>
-                <select class="bg-white border border-slate-200 rounded-xl px-4 py-2 text-sm font-medium text-slate-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <option>ปีการศึกษา 2026 (ปัจจุบัน)</option>
-                    <option>ปีการศึกษา 2025</option>
-                    <option>ปีการศึกษา 2024</option>
-                </select>
-            </header>
+<div class="layout">
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
-                    <div>
-                        <p class="text-sm text-slate-500 font-medium">นักศึกษาทั้งหมด (Active)</p>
-                        <h3 class="text-3xl font-bold text-slate-900 mt-1">485 <span class="text-sm font-normal text-slate-500">คน</span></h3>
-                        <p class="text-xs text-emerald-600 mt-2 font-medium">✨ ลงทะเบียนครบทุกคนแล้ว</p>
-                    </div>
-                    <div class="w-12 h-12 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center text-xl shrink-0">👥</div>
-                </div>
-                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
-                    <div>
-                        <p class="text-sm text-slate-500 font-medium">นักศึกษาใหม่ (ปี 1)</p>
-                        <h3 class="text-3xl font-bold text-slate-900 mt-1">135 <span class="text-sm font-normal text-slate-500">คน</span></h3>
-                        <p class="text-xs text-blue-600 mt-2 font-medium">📈 เพิ่มขึ้น 8% จากปีที่แล้ว</p>
-                    </div>
-                    <div class="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center text-xl shrink-0">🌱</div>
-                </div>
-                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
-                    <div>
-                        <p class="text-sm text-slate-500 font-medium">กลุ่มเสี่ยง (GPA < 2.00)</p>
-                        <h3 class="text-3xl font-bold text-slate-900 mt-1">24 <span class="text-sm font-normal text-slate-500">คน</span></h3>
-                        <p class="text-xs text-amber-600 mt-2 font-medium">⚠️ ต้องเข้าพบอาจารย์ที่ปรึกษา</p>
-                    </div>
-                    <div class="w-12 h-12 bg-amber-50 text-amber-600 rounded-xl flex items-center justify-center text-xl shrink-0">⚠️</div>
-                </div>
-                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
-                    <div>
-                        <p class="text-sm text-slate-500 font-medium">ลาออก/พ้นสภาพ (เทอมนี้)</p>
-                        <h3 class="text-3xl font-bold text-slate-900 mt-1">3 <span class="text-sm font-normal text-slate-500">คน</span></h3>
-                        <p class="text-xs text-rose-500 mt-2 font-medium">📉 ลดลงจากเทอมที่แล้ว</p>
-                    </div>
-                    <div class="w-12 h-12 bg-rose-50 text-rose-600 rounded-xl flex items-center justify-center text-xl shrink-0">❌</div>
-                </div>
-            </div>
+  <!-- ซ้าย: คลังองค์ประกอบ -->
+  <div class="panel">
+    <h2>🧩 คลังองค์ประกอบ<br><small style="color:#94a3b8">(ลากไปวางขวา)</small></h2>
+    <div class="palette-item" draggable="true" data-type="header"><span class="ico">🟪</span> Header</div>
+    <div class="palette-item" draggable="true" data-type="nav"><span class="ico">📑</span> Navbar</div>
+    <div class="palette-item" draggable="true" data-type="hero"><span class="ico">🌈</span> Hero Section</div>
+    <div class="palette-item" draggable="true" data-type="button"><span class="ico">🔘</span> Button</div>
+    <div class="palette-item" draggable="true" data-type="image"><span class="ico">🖼️</span> Image</div>
+    <div class="palette-item" draggable="true" data-type="card"><span class="ico">🃏</span> Card</div>
+    <div class="palette-item" draggable="true" data-type="input"><span class="ico">⌨️</span> Input Field</div>
+    <div class="palette-item" draggable="true" data-type="text"><span class="ico">📝</span> Text</div>
+    <div class="palette-item" draggable="true" data-type="footer"><span class="ico">⬛</span> Footer</div>
+  </div>
 
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm lg:col-span-2">
-                    <div class="flex justify-between items-center mb-4">
-                        <h4 class="font-bold text-slate-900">จำนวนนักศึกษาแยกตามชั้นปี (คน)</h4>
-                        <span class="text-xs bg-slate-100 text-slate-600 px-2.5 py-1 rounded-full font-medium">แยก ชาย-หญิง</span>
-                    </div>
-                    <div class="h-64">
-                        <canvas id="studentBarChart"></canvas>
-                    </div>
-                </div>
-                
-                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-                    <h4 class="font-bold text-slate-900 mb-4">สัดส่วนนักศึกษาตามสาขา</h4>
-                    <div class="h-64 flex items-center justify-center">
-                        <canvas id="majorPieChart"></canvas>
-                    </div>
-                </div>
-            </div>
+  <!-- กลาง: พื้นที่ออกแบบ -->
+  <div class="panel canvas-wrap">
+    <h2>🖥️ พื้นที่ออกแบบหน้าเว็บ</h2>
+    <div id="canvas">
+      <div class="placeholder">ลากองค์ประกอบจากด้านซ้ายมาวางที่นี่ ⬅️</div>
+    </div>
+  </div>
 
-            <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-                <div class="p-6 border-b border-slate-100 flex justify-between items-center">
-                    <div>
-                        <h4 class="font-bold text-slate-900">รายชื่อนักศึกษาที่ต้องติดตามผลการเรียนด่วน (GPA < 1.80)</h4>
-                        <p class="text-slate-400 text-xs mt-0.5">อัปเดตสถานะล่าสุดรายบุคคล</p>
-                    </div>
-                    <button class="text-sm text-blue-600 hover:text-blue-700 font-semibold transition-colors">ดูทั้งหมด</button>
-                </div>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse">
-                        <thead>
-                            <tr class="bg-slate-50 text-slate-500 text-xs uppercase font-semibold">
-                                <th class="p-4">รหัสนักศึกษา</th>
-                                <th class="p-4">ชื่อ-นามสกุล</th>
-                                <th class="p-4">ชั้นปี</th>
-                                <th class="p-4">GPAX</th>
-                                <th class="p-4">อาจารย์ที่ปรึกษา</th>
-                                <th class="p-4">สถานะ</th>
-                            </tr>
-                        </thead>
-                        <tbody class="text-sm divide-y divide-slate-100">
-                            <tr class="hover:bg-slate-50/50 transition-colors">
-                                <td class="p-4 font-medium text-slate-900">66010234</td>
-                                <td class="p-4">นายกิตติพงษ์ วงศ์ดี</td>
-                                <td class="p-4">ชั้นปีที่ 3</td>
-                                <td class="p-4 text-rose-600 font-semibold">1.65</td>
-                                <td class="p-4">ดร.สมชาย (CS)</td>
-                                <td class="p-4"><span class="bg-rose-50 text-rose-600 px-2.5 py-1 rounded-full text-xs font-medium">วิกฤต (Probation 2)</span></td>
-                            </tr>
-                            <tr class="hover:bg-slate-50/50 transition-colors">
-                                <td class="p-4 font-medium text-slate-900">67010589</td>
-                                <td class="p-4">นางสาวอาริยา รักเรียน</td>
-                                <td class="p-4">ชั้นปีที่ 2</td>
-                                <td class="p-4 text-amber-600 font-semibold">1.78</td>
-                                <td class="p-4">ผศ.หญิงวิภา (IT)</td>
-                                <td class="p-4"><span class="bg-amber-50 text-amber-600 px-2.5 py-1 rounded-full text-xs font-medium">เตือน (Probation 1)</span></td>
-                            </tr>
-                            <tr class="hover:bg-slate-50/50 transition-colors">
-                                <td class="p-4 font-medium text-slate-900">65020112</td>
-                                <td class="p-4">นายณัฐพล เรียนดี</td>
-                                <td class="p-4">ชั้นปีที่ 4</td>
-                                <td class="p-4 text-amber-600 font-semibold">1.72</td>
-                                <td class="p-4">อ.ธนพล (SE)</td>
-                                <td class="p-4"><span class="bg-amber-50 text-amber-600 px-2.5 py-1 rounded-full text-xs font-medium">เตือน (Probation 1)</span></td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-        </main>
+  <!-- ขวา: ภารกิจ + โค้ด -->
+  <div class="panel">
+    <div class="mission-box">
+      <h3 id="missionTitle">ภารกิจที่ 1</h3>
+      <div id="missionDesc" style="font-size:0.85rem; color:#e0e7ff;"></div>
+      <ul class="req-list" id="reqList"></ul>
+      <button class="btn-primary" id="submitMission">✅ ส่งภารกิจ</button>
     </div>
 
-    <script>
-        // กำหนดฟอนต์หลักให้กราฟเพื่อสอดคล้องกับ UI
-        Chart.defaults.font.family = 'Prompt';
+    <div class="tip-box" id="tipBox">
+      💡 <b>เคล็ดลับ UX:</b> คลิกที่บล็อกในพื้นที่ออกแบบเพื่อดูคำแนะนำเกี่ยวกับองค์ประกอบนั้น
+    </div>
 
-        // 1. กราฟแท่ง (Bar Chart): จำนวนนักศึกษาชาย-หญิง แยกตามชั้นปี
-        const ctxBar = document.getElementById('studentBarChart').getContext('2d');
-        new Chart(ctxBar, {
-            type: 'bar',
-            data: {
-                labels: ['ชั้นปีที่ 1', 'ชั้นปีที่ 2', 'ชั้นปีที่ 3', 'ชั้นปีที่ 4'],
-                datasets: [
-                    {
-                        label: 'นักศึกษาชาย',
-                        data: [85, 70, 65, 55],
-                        backgroundColor: '#3b82f6', // สีน้ำเงินสว่าง
-                        borderRadius: 6
-                    },
-                    {
-                        label: 'นักศึกษาหญิง',
-                        data: [50, 55, 60, 45],
-                        backgroundColor: '#ec4899', // สีชมพู
-                        borderRadius: 6
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { position: 'top', labels: { boxWidth: 14 } }
-                },
-                scales: {
-                    y: { 
-                        grid: { color: '#f1f5f9' }, 
-                        beginAtZero: true,
-                        ticks: { stepSize: 20 }
-                    },
-                    x: { grid: { display: false } }
-                }
-            }
-        });
+    <h2>💻 โค้ด HTML ที่สร้างขึ้น</h2>
+    <pre id="codeOut">&lt;!-- ยังไม่มีองค์ประกอบ --&gt;</pre>
+    <button class="copy-btn" id="copyBtn">📋 คัดลอกโค้ด</button>
+  </div>
 
-        // 2. กราฟวงกลม (Pie Chart): สัดส่วนแยกตามสาขาวิชา
-        const ctxPie = document.getElementById('majorPieChart').getContext('2d');
-        new Chart(ctxPie, {
-            type: 'pie',
-            data: {
-                labels: ['วิทยาการคอมพิวเตอร์ (CS)', 'เทคโนโลยีสารสนเทศ (IT)', 'วิศวกรรมซอฟต์แวร์ (SE)'],
-                datasets: [{
-                    data: [210, 165, 110],
-                    backgroundColor: ['#0f172a', '#2563eb', '#10b981'], // สีกรมท่า, น้ำเงิน, เขียว
-                    borderWidth: 2,
-                    borderColor: '#ffffff'
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { position: 'bottom', labels: { boxWidth: 12, padding: 16 } }
-                }
-            }
-        });
-    </script>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ---------- ข้อมูลองค์ประกอบ ----------
+const templates = {
+  header: {
+    label: "Header",
+    icon: "🟪",
+    render: () => `<div class="comp-header">โลโก้ / ชื่อเว็บไซต์ของคุณ</div>`,
+    html: () => `<header class="site-header">\n  <h1>โลโก้ / ชื่อเว็บไซต์</h1>\n</header>`,
+    tip: "Header ควรอยู่บนสุดของหน้าเสมอ ช่วยสร้าง Visual Hierarchy บอกผู้ใช้ว่ากำลังอยู่เว็บไซต์ไหน"
+  },
+  nav: {
+    label: "Navbar",
+    icon: "📑",
+    render: () => `<div class="comp-nav"><span>หน้าแรก</span><span>เกี่ยวกับ</span><span>ติดต่อ</span></div>`,
+    html: () => `<nav class="site-nav">\n  <a href="#">หน้าแรก</a>\n  <a href="#">เกี่ยวกับ</a>\n  <a href="#">ติดต่อ</a>\n</nav>`,
+    tip: "Navbar ช่วยให้ผู้ใช้เดินทางในเว็บไซต์ได้ง่าย ควรมีความสม่ำเสมอ (Consistency) ทุกหน้า"
+  },
+  hero: {
+    label: "Hero Section",
+    icon: "🌈",
+    render: () => `<div class="comp-hero"><h2>ข้อความหลักที่ดึงดูดใจ</h2><p>คำอธิบายสั้น ๆ เกี่ยวกับสิ่งที่คุณนำเสนอ</p></div>`,
+    html: () => `<section class="hero">\n  <h2>ข้อความหลักที่ดึงดูดใจ</h2>\n  <p>คำอธิบายสั้น ๆ เกี่ยวกับสิ่งที่คุณนำเสนอ</p>\n</section>`,
+    tip: "Hero Section คือจุดแรกที่ดึงดูดความสนใจ ควรใช้ตัวอักษรใหญ่ ชัดเจน และ Contrast สูง"
+  },
+  button: {
+    label: "Button",
+    icon: "🔘",
+    render: () => `<div class="comp-button"><button>คลิกที่นี่</button></div>`,
+    html: () => `<button class="btn">คลิกที่นี่</button>`,
+    tip: "ปุ่ม Call-to-Action ควรมีสีตัดกับพื้นหลัง (Contrast) เพื่อให้สายตาจับได้ทันที"
+  },
+  image: {
+    label: "Image",
+    icon: "🖼️",
+    render: () => `<div class="comp-image"><img src="https://via.placeholder.com/500x220?text=Image" alt="รูปภาพตัวอย่าง"></div>`,
+    html: () => `<img src="https://via.placeholder.com/600x300" alt="คำอธิบายรูปภาพ">`,
+    tip: "รูปภาพช่วยสื่อสารเร็วกว่าข้อความ แต่ต้องมี alt text เพื่อ Accessibility เสมอ"
+  },
+  card: {
+    label: "Card",
+    icon: "🃏",
+    render: () => `<div class="comp-card"><h3>หัวข้อการ์ด</h3><p>รายละเอียดสั้น ๆ ของการ์ดนี้</p></div>`,
+    html: () => `<div class="card">\n  <h3>หัวข้อการ์ด</h3>\n  <p>รายละเอียดสั้น ๆ ของการ์ดนี้</p>\n</div>`,
+    tip: "Card ใช้จัดกลุ่มข้อมูลที่เกี่ยวข้องกัน ช่วยให้ผู้ใช้สแกนเนื้อหาได้ง่าย (Chunking)"
+  },
+  input: {
+    label: "Input Field",
+    icon: "⌨️",
+    render: () => `<div class="comp-input"><input type="text" placeholder="กรอกข้อมูล..." disabled></div>`,
+    html: () => `<input type="text" placeholder="กรอกข้อมูล">`,
+    tip: "ช่องกรอกข้อมูลควรมี placeholder หรือ label ที่ชัดเจน บอกผู้ใช้ว่าต้องพิมพ์อะไร"
+  },
+  text: {
+    label: "Text",
+    icon: "📝",
+    render: () => `<div class="comp-text"><p>ข้อความอธิบายทั่วไปที่สามารถแก้ไขได้</p></div>`,
+    html: () => `<p>ข้อความอธิบายทั่วไป</p>`,
+    tip: "ข้อความควรมี Line Height และขนาดตัวอักษรที่อ่านง่าย ไม่ต่ำกว่า 16px บนเว็บ"
+  },
+  footer: {
+    label: "Footer",
+    icon: "⬛",
+    render: () => `<div class="comp-footer">© 2026 บริษัทของคุณ | ติดต่อเรา</div>`,
+    html: () => `<footer>\n  <p>© 2026 บริษัทของคุณ</p>\n</footer>`,
+    tip: "Footer ควรมีข้อมูลติดต่อ/ลิงก์สำคัญ เป็นจุดสิ้นสุดที่ทำให้ผู้ใช้รู้ว่าหมดหน้าแล้ว"
+  }
+};
+
+// ---------- ภารกิจ ----------
+const missions = [
+  {
+    title: "ภารกิจที่ 1: หน้า Landing Page เบื้องต้น",
+    desc: "ออกแบบหน้าแรกง่าย ๆ ที่มี Header, Hero Section และ Button อย่างน้อย 1 ปุ่ม",
+    require: { header:1, hero:1, button:1 },
+    points: 100
+  },
+  {
+    title: "ภารกิจที่ 2: หน้า Login",
+    desc: "ต้องมี Header, ช่องกรอกข้อมูลอย่างน้อย 2 ช่อง และปุ่มยืนยัน",
+    require: { header:1, input:2, button:1 },
+    points: 150
+  },
+  {
+    title: "ภารกิจที่ 3: หน้าสินค้า (Product Card)",
+    desc: "ต้องมี Image, Text อธิบาย และ Button สั่งซื้อ",
+    require: { image:1, text:1, button:1 },
+    points: 150
+  },
+  {
+    title: "ภารกิจที่ 4: หน้าเว็บสมบูรณ์",
+    desc: "ประกอบหน้าเว็บให้ครบวงจร: Header, Navbar, Hero, Card, Footer",
+    require: { header:1, nav:1, hero:1, card:1, footer:1 },
+    points: 250
+  }
+];
+
+// ---------- สถานะเกม ----------
+let score = 0;
+let level = 1;
+let missionIndex = 0;
+let comps = []; // {id, type}
+let idCounter = 0;
+
+const canvas = document.getElementById('canvas');
+const scoreVal = document.getElementById('scoreVal');
+const levelVal = document.getElementById('levelVal');
+const missionTitle = document.getElementById('missionTitle');
+const missionDesc = document.getElementById('missionDesc');
+const reqList = document.getElementById('reqList');
+const submitBtn = document.getElementById('submitMission');
+const codeOut = document.getElementById('codeOut');
+const copyBtn = document.getElementById('copyBtn');
+const tipBox = document.getElementById('tipBox');
+const toast = document.getElementById('toast');
+
+// ---------- Drag จาก palette ----------
+document.querySelectorAll('.palette-item').forEach(item => {
+  item.addEventListener('dragstart', e => {
+    e.dataTransfer.setData('text/plain', JSON.stringify({source:'palette', type:item.dataset.type}));
+  });
+});
+
+canvas.addEventListener('dragover', e => {
+  e.preventDefault();
+  canvas.classList.add('dragover');
+});
+canvas.addEventListener('dragleave', () => canvas.classList.remove('dragover'));
+
+canvas.addEventListener('drop', e => {
+  e.preventDefault();
+  canvas.classList.remove('dragover');
+  let data;
+  try { data = JSON.parse(e.dataTransfer.getData('text/plain')); } catch(err){ return; }
+
+  if (data.source === 'palette') {
+    addComponent(data.type);
+  } else if (data.source === 'canvas') {
+    reorderComponent(data.id, e);
+  }
+});
+
+function addComponent(type) {
+  idCounter++;
+  comps.push({ id: 'c'+idCounter, type });
+  renderCanvas();
+}
+
+function removeComponent(id) {
+  comps = comps.filter(c => c.id !== id);
+  renderCanvas();
+}
+
+function reorderComponent(draggedId, dropEvent) {
+  const target = dropEvent.target.closest('.comp');
+  if (!target || target.dataset.id === draggedId) return;
+  const fromIdx = comps.findIndex(c => c.id === draggedId);
+  const toIdx = comps.findIndex(c => c.id === target.dataset.id);
+  if (fromIdx === -1 || toIdx === -1) return;
+  const [moved] = comps.splice(fromIdx, 1);
+  comps.splice(toIdx, 0, moved);
+  renderCanvas();
+}
+
+function renderCanvas() {
+  canvas.innerHTML = '';
+  if (comps.length === 0) {
+    canvas.innerHTML = '<div class="placeholder">ลากองค์ประกอบจากด้านซ้ายมาวางที่นี่ ⬅️</div>';
+  } else {
+    comps.forEach(c => {
+      const tpl = templates[c.type];
+      const div = document.createElement('div');
+      div.className = 'comp';
+      div.draggable = true;
+      div.dataset.id = c.id;
+      div.dataset.type = c.type;
+      div.innerHTML = tpl.render() + `<button class="del-btn" title="ลบ">✕</button>`;
+
+      div.addEventListener('dragstart', e => {
+        e.dataTransfer.setData('text/plain', JSON.stringify({source:'canvas', id:c.id}));
+        div.classList.add('dragging');
+      });
+      div.addEventListener('dragend', () => div.classList.remove('dragging'));
+      div.querySelector('.del-btn').addEventListener('click', ev => {
+        ev.stopPropagation();
+        removeComponent(c.id);
+      });
+      div.addEventListener('click', () => showTip(c.type));
+
+      canvas.appendChild(div);
+    });
+  }
+  updateCode();
+  updateMissionProgress();
+}
+
+function showTip(type) {
+  tipBox.innerHTML = `💡 <b>เคล็ดลับ UX (${templates[type].label}):</b> ${templates[type].tip}`;
+}
+
+function updateCode() {
+  if (comps.length === 0) {
+    codeOut.textContent = '<!-- ยังไม่มีองค์ประกอบ -->';
+    return;
+  }
+  const htmlLines = comps.map(c => templates[c.type].html());
+  const full = `<div class="page">\n${htmlLines.map(l => '  ' + l.replace(/\n/g,'\n  ')).join('\n\n')}\n</div>`;
+  codeOut.textContent = full;
+}
+
+copyBtn.addEventListener('click', () => {
+  navigator.clipboard.writeText(codeOut.textContent).then(() => {
+    copyBtn.textContent = '✅ คัดลอกแล้ว!';
+    copyBtn.classList.add('copied');
+    setTimeout(() => {
+      copyBtn.textContent = '📋 คัดลอกโค้ด';
+      copyBtn.classList.remove('copied');
+    }, 1500);
+  });
+});
+
+// ---------- ภารกิจ ----------
+function loadMission() {
+  const m = missions[missionIndex];
+  if (!m) {
+    missionTitle.textContent = '🎉 ผ่านทุกภารกิจแล้ว!';
+    missionDesc.textContent = 'เก่งมาก! ลองออกแบบหน้าเว็บของตัวเองต่อได้เลย';
+    reqList.innerHTML = '';
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'จบเกมแล้ว 🏆';
+    return;
+  }
+  missionTitle.textContent = m.title;
+  missionDesc.textContent = m.desc;
+  submitBtn.disabled = false;
+  submitBtn.textContent = '✅ ส่งภารกิจ';
+  updateMissionProgress();
+}
+
+function countByType() {
+  const counts = {};
+  comps.forEach(c => counts[c.type] = (counts[c.type]||0) + 1);
+  return counts;
+}
+
+function updateMissionProgress() {
+  const m = missions[missionIndex];
+  if (!m) return;
+  const counts = countByType();
+  reqList.innerHTML = '';
+  let allDone = true;
+  Object.entries(m.require).forEach(([type, need]) => {
+    const have = counts[type] || 0;
+    const done = have >= need;
+    if (!done) allDone = false;
+    const li = document.createElement('li');
+    li.className = done ? 'done' : 'pending';
+    li.textContent = `${templates[type].icon} ${templates[type].label} (${have}/${need})`;
+    reqList.appendChild(li);
+  });
+  submitBtn.disabled = !allDone;
+}
+
+submitBtn.addEventListener('click', () => {
+  const m = missions[missionIndex];
+  if (!m) return;
+  score += m.points;
+  scoreVal.textContent = score;
+  level = Math.floor(score / 200) + 1;
+  levelVal.textContent = level;
+  showToast(`🎉 สำเร็จภารกิจ! +${m.points} คะแนน`);
+  missionIndex++;
+  loadMission();
+});
+
+function showToast(msg) {
+  toast.textContent = msg;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 2000);
+}
+
+// ---------- เริ่มเกม ----------
+loadMission();
+renderCanvas();
+</script>
 </body>
 </html>
