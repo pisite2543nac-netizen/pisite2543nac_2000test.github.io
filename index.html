@@ -3,897 +3,753 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Layout Builder — Programmer Edition</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<title>CSS Quest - เกมเรียนรู้ CSS</title>
+<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700;800;900&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<script src="https://cdn.tailwindcss.com"></script>
 <style>
-/* ═══════════════════════════════════════════
-   Catppuccin Mocha — Programmer Theme
-   ═══════════════════════════════════════════ */
-:root {
-  --crust:#11111b; --mantle:#181825; --base:#1e1e2e;
-  --surface0:#313244; --surface1:#45475a; --surface2:#585b70;
-  --overlay0:#6c7086; --overlay1:#7f849c; --subtext:#a6adc8; --text:#cdd6f4;
-  --rosewater:#f5e0dc; --flamingo:#f2cdcd; --pink:#f5c2e7; --mauve:#cba6f7;
-  --red:#f38ba8; --maroon:#eba0ac; --peach:#fab387; --yellow:#f9e2af;
-  --green:#a6e3a1; --teal:#94e2d5; --sky:#89dceb; --sapphire:#74c7ec;
-  --blue:#89b4fa; --lavender:#b4befe;
-  --radius:8px; --radius-sm:5px; --radius-xs:3px;
-  --font-mono:'JetBrains Mono',monospace;
-  --font-ui:'Inter','JetBrains Mono',sans-serif;
-  --transition:0.2s cubic-bezier(.4,0,.2,1);
-}
+:root{--bg:#0d1117;--card:#161b22;--card2:#1c2333;--border:#30363d;--text:#e6edf3;--muted:#8b949e;--accent:#4dabf7;--accent-dim:#2f8fdb;--gold:#e3b341;--danger:#ff6b6b;--info:#79c0ff;}
 *{margin:0;padding:0;box-sizing:border-box;}
-html,body{height:100%;overflow:hidden;}
-body{font-family:var(--font-mono);background:var(--crust);color:var(--text);font-size:13px;}
-::-webkit-scrollbar{width:8px;height:8px;}
-::-webkit-scrollbar-track{background:transparent;}
-::-webkit-scrollbar-thumb{background:var(--surface0);border-radius:4px;}
-::-webkit-scrollbar-thumb:hover{background:var(--surface1);}
-::selection{background:var(--surface1);color:var(--text);}
-
-/* ── 顶部渐变线 ── */
-.top-accent{height:2px;background:linear-gradient(90deg,var(--blue),var(--mauve),var(--pink),var(--peach),var(--yellow),var(--green),var(--teal),var(--sapphire),var(--blue));background-size:300% 100%;animation:gradFlow 10s linear infinite;flex-shrink:0;}
-@keyframes gradFlow{0%{background-position:0% 50%}100%{background-position:300% 50%}}
-
-/* ── 主布局 ── */
-.app{display:flex;height:calc(100% - 2px);overflow:hidden;}
-
-/* ═══════════════════════════
-   Activity Bar (最左)
-   ═══════════════════════════ */
-.activity-bar{width:48px;background:var(--mantle);border-right:1px solid var(--surface0);display:flex;flex-direction:column;align-items:center;padding:6px 0;flex-shrink:0;gap:2px;z-index:10;}
-.ab-logo{width:32px;height:32px;border-radius:var(--radius-sm);background:linear-gradient(135deg,var(--blue),var(--mauve));display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;color:var(--crust);margin-bottom:10px;cursor:default;letter-spacing:-1px;}
-.ab-sep{width:24px;height:1px;background:var(--surface0);margin:6px 0;}
-.ab-btn{width:40px;height:40px;border:none;background:transparent;color:var(--overlay0);border-radius:var(--radius-sm);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:var(--transition);position:relative;}
-.ab-btn:hover{color:var(--text);background:var(--surface0);}
-.ab-btn.active{color:var(--text);}
-.ab-btn.active::before{content:'';position:absolute;left:0;top:8px;bottom:8px;width:2px;background:var(--blue);border-radius:0 2px 2px 0;}
-.ab-btn svg{width:22px;height:22px;stroke-width:1.5;fill:none;stroke:currentColor;}
-.ab-bottom{margin-top:auto;display:flex;flex-direction:column;align-items:center;gap:2px;padding-bottom:4px;}
-
-/* ═══════════════════════════
-   Sidebar (组件面板)
-   ═══════════════════════════ */
-.sidebar{width:248px;background:var(--base);border-right:1px solid var(--surface0);display:flex;flex-direction:column;flex-shrink:0;overflow:hidden;transition:width 0.3s ease,opacity 0.2s ease;}
-.sidebar.collapsed{width:0;opacity:0;pointer-events:none;}
-.sidebar-head{padding:12px 14px 8px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
-.sidebar-title{font-size:0.68rem;text-transform:uppercase;letter-spacing:1.5px;color:var(--overlay1);font-weight:600;}
-.sidebar-actions{display:flex;gap:4px;}
-.sidebar-actions button{background:transparent;border:1px solid var(--surface0);color:var(--overlay0);width:24px;height:24px;border-radius:var(--radius-xs);cursor:pointer;font-size:0.75rem;display:flex;align-items:center;justify-content:center;transition:var(--transition);}
-.sidebar-actions button:hover{color:var(--red);border-color:var(--red);background:rgba(243,139,168,0.08);}
-.sidebar-body{flex:1;overflow-y:auto;overflow-x:hidden;padding:0 6px 12px;}
-
-/* ── 树形组件列表 ── */
-.tree-cat{margin-bottom:2px;}
-.tree-cat-head{display:flex;align-items:center;gap:6px;padding:5px 8px;border-radius:var(--radius-xs);cursor:pointer;user-select:none;transition:var(--transition);font-size:0.72rem;font-weight:600;letter-spacing:0.3px;}
-.tree-cat-head:hover{background:var(--surface0);}
-.tree-cat-head .arrow{font-size:0.6rem;color:var(--overlay0);transition:transform 0.25s ease;display:inline-block;width:10px;text-align:center;}
-.tree-cat.collapsed .arrow{transform:rotate(0deg);}
-.tree-cat:not(.collapsed) .arrow{transform:rotate(90deg);}
-.tree-cat-head .folder{font-size:0.85rem;}
-.tree-cat-head .cat-name{color:var(--subtext);}
-.tree-items{display:grid;grid-template-rows:1fr;transition:grid-template-rows 0.3s ease;}
-.tree-cat.collapsed .tree-items{grid-template-rows:0fr;}
-.tree-items-inner{overflow:hidden;}
-.tree-item{display:flex;align-items:center;gap:8px;padding:5px 8px 5px 26px;border-radius:var(--radius-xs);cursor:grab;font-size:0.78rem;color:var(--subtext);transition:var(--transition);border:1px solid transparent;position:relative;}
-.tree-item:hover{background:var(--surface0);color:var(--text);border-color:var(--surface0);}
-.tree-item:active{cursor:grabbing;transform:scale(0.97);}
-.tree-item .t-icon{font-size:0.9rem;flex-shrink:0;width:18px;text-align:center;}
-.tree-item.layout-t::before{content:'';position:absolute;left:14px;top:0;bottom:0;width:2px;background:var(--sapphire);border-radius:2px;opacity:0.6;}
-.tree-item.content-t::before{content:'';position:absolute;left:14px;top:0;bottom:0;width:2px;background:var(--peach);border-radius:2px;opacity:0.6;}
-
-/* ═══════════════════════════
-   Main Area (中间画布)
-   ═══════════════════════════ */
-.main-area{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0;}
-
-/* ── Tab Bar ── */
-.tab-bar{display:flex;align-items:stretch;background:var(--mantle);border-bottom:1px solid var(--surface0);flex-shrink:0;height:36px;padding:0 8px;}
-.tab{display:flex;align-items:center;gap:6px;padding:0 14px;font-size:0.75rem;color:var(--overlay0);cursor:default;border-bottom:2px solid transparent;transition:var(--transition);position:relative;}
-.tab.active{color:var(--text);border-bottom-color:var(--blue);background:var(--base);margin-bottom:-1px;}
-.tab .tab-icon{font-size:0.8rem;}
-.tab .tab-mod{width:6px;height:6px;border-radius:50%;background:var(--peach);display:none;}
-.tab .tab-close{margin-left:6px;width:16px;height:16px;border-radius:var(--radius-xs);display:flex;align-items:center;justify-content:center;font-size:0.7rem;color:var(--overlay0);opacity:0;transition:var(--transition);}
-.tab:hover .tab-close{opacity:1;}
-.tab .tab-close:hover{background:var(--surface1);color:var(--text);}
-
-/* ── Browser Chrome ── */
-.browser-chrome{display:flex;align-items:center;gap:10px;padding:8px 14px;background:var(--base);border-bottom:1px solid var(--surface0);flex-shrink:0;}
-.chrome-dots{display:flex;gap:6px;}
-.chrome-dot{width:10px;height:10px;border-radius:50%;}
-.chrome-dot.r{background:var(--red);}
-.chrome-dot.y{background:var(--yellow);}
-.chrome-dot.g{background:var(--green);}
-.chrome-url{flex:1;background:var(--mantle);border:1px solid var(--surface0);border-radius:20px;padding:5px 14px;font-size:0.72rem;color:var(--overlay0);display:flex;align-items:center;gap:6px;transition:border-color var(--transition);}
-.chrome-url:hover{border-color:var(--surface1);}
-.chrome-url .lock{color:var(--green);font-size:0.7rem;}
-.chrome-btn{background:transparent;border:1px solid var(--surface0);color:var(--overlay0);width:26px;height:26px;border-radius:var(--radius-sm);cursor:pointer;font-size:0.85rem;display:flex;align-items:center;justify-content:center;transition:var(--transition);}
-.chrome-btn:hover{color:var(--sky);border-color:var(--sky);background:rgba(137,220,235,0.06);}
-
-/* ── Canvas Container ── */
-.canvas-wrap{flex:1;overflow:auto;background-color:var(--mantle);background-image:radial-gradient(var(--surface0) 0.8px,transparent 0.8px);background-size:18px 18px;padding:24px;display:flex;justify-content:center;align-items:flex-start;}
-#canvas{background:#ffffff;color:#1e293b;border-radius:var(--radius);min-height:500px;width:100%;max-width:860px;padding:16px;display:flex;flex-direction:column;gap:10px;border:2px dashed var(--surface1);transition:border-color 0.3s ease,background 0.3s ease,box-shadow 0.3s ease;box-shadow:0 4px 24px rgba(0,0,0,0.3);}
-#canvas.dropzone-hover{border-color:var(--green);background:rgba(166,227,161,0.03);box-shadow:0 0 0 4px rgba(166,227,161,0.08),0 4px 24px rgba(0,0,0,0.3);}
-.canvas-placeholder{color:#94a3b8;text-align:center;margin:200px 0;font-size:0.82rem;font-family:var(--font-mono);line-height:1.8;}
-.canvas-placeholder span{color:var(--overlay0);font-size:0.72rem;}
-.empty-hint{color:#94a3b8;text-align:center;font-size:0.72rem;border:1px dashed #cbd5e1;border-radius:6px;padding:14px;min-height:32px;font-family:var(--font-mono);}
-
-/* ── Canvas内组件 ── */
-.comp-node{position:relative;transition:opacity 0.15s ease,transform 0.15s ease;}
-.comp-node.dragging{opacity:0.3;transform:scale(0.97);}
-.comp-node.leaf{border:1px dashed #e2e8f0;border-radius:var(--radius-sm);padding:10px 32px 10px 10px;cursor:grab;background:#fafbfc;transition:box-shadow 0.2s ease,border-color 0.2s ease;}
-.comp-node.leaf:hover{border-color:#cbd5e1;box-shadow:0 2px 8px rgba(0,0,0,0.06);}
-.comp-header{background:linear-gradient(135deg,#4f46e5,#6366f1);color:#fff;padding:16px 20px;border-radius:var(--radius-sm);font-weight:700;font-size:1.05rem;letter-spacing:-0.3px;}
-.comp-nav{background:#0f172a;color:#e2e8f0;padding:10px 16px;border-radius:var(--radius-sm);display:flex;gap:20px;flex-wrap:wrap;font-size:0.9rem;}
-.comp-nav a{color:#94a3b8;text-decoration:none;transition:color 0.2s;}
-.comp-hero{background:linear-gradient(135deg,#818cf8 0%,#c084fc 50%,#f472b6 100%);color:#fff;padding:32px 28px;border-radius:var(--radius);text-align:center;}
-.comp-hero h2{margin-bottom:8px;font-size:1.3rem;font-weight:800;letter-spacing:-0.5px;}
-.comp-hero p{opacity:0.9;font-size:0.95rem;}
-.comp-button button{background:linear-gradient(135deg,#f59e0b,#f97316);color:#fff;border:none;padding:10px 24px;border-radius:var(--radius-sm);font-weight:700;cursor:default;font-size:0.9rem;box-shadow:0 2px 8px rgba(245,158,11,0.3);}
-.comp-image img{width:100%;border-radius:var(--radius-sm);display:block;}
-.comp-card{background:#fff;border:1px solid #e2e8f0;border-radius:var(--radius);padding:16px;box-shadow:0 1px 3px rgba(0,0,0,0.04);transition:box-shadow 0.2s;}
-.comp-card:hover{box-shadow:0 4px 12px rgba(0,0,0,0.08);}
-.comp-card h3{margin-bottom:6px;font-size:1rem;color:#1e293b;}
-.comp-card p{color:#64748b;font-size:0.88rem;}
-.comp-text p{color:#334155;font-size:0.92rem;line-height:1.6;}
-.comp-footer{background:#0f172a;color:#64748b;text-align:center;padding:14px;border-radius:var(--radius-sm);font-size:0.82rem;}
-.comp-link a{color:#4f46e5;text-decoration:none;font-weight:600;border-bottom:2px solid rgba(79,70,229,0.2);padding-bottom:1px;transition:border-color 0.2s;}
-.comp-link a:hover{border-color:#4f46e5;}
-.comp-list ul{padding-left:20px;color:#334155;font-size:0.9rem;}
-.comp-list li{margin:4px 0;}
-.comp-table table{width:100%;border-collapse:collapse;font-size:0.82rem;}
-.comp-table th,.comp-table td{border:1px solid #e2e8f0;padding:8px 12px;text-align:left;}
-.comp-table th{background:#f1f5f9;color:#1e293b;font-weight:600;}
-.comp-video .video-box{background:#0f172a;color:#fff;border-radius:var(--radius-sm);padding:32px;text-align:center;font-size:1.8rem;}
-.comp-video .video-box small{display:block;font-size:0.72rem;color:#64748b;margin-top:8px;}
-.comp-divider hr{border:none;border-top:2px solid #e2e8f0;margin:8px 0;}
-.comp-quote blockquote{border-left:4px solid #818cf8;padding:14px 18px;font-style:italic;color:#334155;background:#f8fafc;border-radius:0 var(--radius-sm) var(--radius-sm) 0;}
-.comp-quote cite{display:block;margin-top:8px;font-size:0.8rem;color:#64748b;font-style:normal;}
-.comp-badge .badge{display:inline-block;padding:4px 12px;border-radius:20px;font-size:0.75rem;font-weight:700;margin-right:6px;}
-.comp-badge .badge:nth-child(1){background:#e0e7ff;color:#4338ca;}
-.comp-badge .badge:nth-child(2){background:#dcfce7;color:#15803d;}
-.comp-checkbox label{display:flex;align-items:center;gap:8px;font-size:0.9rem;color:#334155;}
-.fake-input,.fake-textarea,.fake-select{width:100%;padding:9px 12px;border-radius:var(--radius-sm);border:1px solid #e2e8f0;background:#fff;color:#94a3b8;font-size:0.88rem;font-family:var(--font-ui);}
-.fake-textarea{min-height:60px;display:block;}
-.fake-select{display:flex;align-items:center;justify-content:space-between;color:#64748b;}
-.comp-code pre{background:#0f172a;color:#7dd3fc;padding:14px;border-radius:var(--radius-sm);font-size:0.78rem;overflow:auto;margin:0;line-height:1.6;}
-.comp-code code{font-family:var(--font-mono);}
-
-/* ── Editable ── */
-.editable{outline:none;cursor:text;-webkit-user-drag:none;user-drag:none;border-radius:var(--radius-xs);padding:0 3px;transition:background 0.15s,box-shadow 0.15s;}
-.editable:hover{background:rgba(99,102,241,0.06);}
-.editable:focus{background:rgba(99,102,241,0.1);box-shadow:0 0 0 2px rgba(99,102,241,0.2);}
-
-/* ── Layout Containers in Canvas ── */
-.comp-node.container{border-radius:var(--radius);padding:8px;margin-bottom:2px;}
-.node-label{display:flex;align-items:center;justify-content:space-between;font-size:0.68rem;font-weight:700;padding:4px 10px;border-radius:var(--radius-xs);margin-bottom:8px;color:#fff;font-family:var(--font-mono);letter-spacing:0.3px;text-transform:uppercase;}
-.node-section{border:2px dashed #94a3b8;background:#f8fafc;}
-.node-section .node-label{background:#64748b;}
-.node-row{border:2px dashed #38bdf8;background:#f0f9ff;}
-.node-row .node-label{background:#0ea5e9;}
-.node-col{border:2px dashed #a78bfa;background:#faf5ff;}
-.node-col .node-label{background:#8b5cf6;}
-.node-grid2{border:2px dashed #fb923c;background:#fff7ed;}
-.node-grid2 .node-label{background:#f97316;}
-.node-grid3{border:2px dashed #34d399;background:#ecfdf5;}
-.node-grid3 .node-label{background:#10b981;}
-.dropzone{min-height:32px;}
-.dropzone.dropzone-hover{outline:2px solid var(--green);outline-offset:2px;border-radius:6px;background:rgba(166,227,161,0.04)!important;}
-.node-row>.dropzone,.node-grid2>.dropzone,.node-grid3>.dropzone{display:flex;flex-wrap:wrap;gap:10px;}
-.node-row>.dropzone>.comp-node{flex:1;min-width:120px;}
-.node-grid2>.dropzone{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
-.node-grid3>.dropzone{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;}
-.node-col>.dropzone,.node-section>.dropzone{display:flex;flex-direction:column;gap:10px;}
-.del-btn{position:absolute;top:5px;right:5px;background:var(--red);color:#fff;border:none;width:20px;height:20px;border-radius:50%;cursor:pointer;font-size:0.65rem;line-height:1;z-index:5;opacity:0;transition:opacity 0.15s,transform 0.15s;transform:scale(0.8);}
-.comp-node:hover .del-btn{opacity:1;transform:scale(1);}
-.del-btn:hover{background:#e11d48;transform:scale(1.1)!important;}
-.node-label .del-btn{position:static;opacity:1;transform:none;width:18px;height:18px;font-size:0.6rem;}
-.node-label .del-btn:hover{transform:scale(1.1)!important;}
-
-/* ═══════════════════════════
-   Right Panel (Inspector + Code)
-   ═══════════════════════════ */
-.right-panel{width:380px;background:var(--base);border-left:1px solid var(--surface0);display:flex;flex-direction:column;flex-shrink:0;overflow:hidden;}
-.rp-section{display:flex;flex-direction:column;overflow:hidden;}
-.rp-section.inspector{flex:0 0 auto;max-height:45%;}
-.rp-section.code-output{flex:1;min-height:0;}
-.rp-head{padding:10px 14px 8px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--surface0);flex-shrink:0;}
-.rp-title{font-size:0.68rem;text-transform:uppercase;letter-spacing:1.2px;color:var(--overlay1);font-weight:600;display:flex;align-items:center;gap:6px;}
-.rp-title .dot{width:6px;height:6px;border-radius:50%;}
-.rp-body{overflow-y:auto;padding:10px 12px;}
-.rp-divider{height:1px;background:var(--surface0);flex-shrink:0;}
-
-/* ── Tip Box ── */
-.tip-box{background:var(--mantle);border:1px solid var(--surface0);border-radius:var(--radius-sm);padding:12px;font-size:0.75rem;line-height:1.6;color:var(--subtext);min-height:48px;}
-.tip-box b{color:var(--blue);}
-.tip-box code{color:var(--mauve);background:var(--surface0);padding:1px 5px;border-radius:var(--radius-xs);font-size:0.72rem;}
-.tip-box pre{margin-top:8px;background:var(--crust);color:var(--green);padding:8px 10px;border-radius:var(--radius-xs);font-size:0.66rem;white-space:pre-wrap;word-break:break-word;border:1px solid var(--surface0);line-height:1.5;}
-
-/* ── Guide Button ── */
-.guide-btn{margin-bottom:10px;width:100%;background:var(--mantle);color:var(--peach);border:1px solid var(--surface0);padding:8px;border-radius:var(--radius-sm);cursor:pointer;font-weight:600;font-size:0.75rem;font-family:var(--font-mono);transition:var(--transition);display:flex;align-items:center;justify-content:center;gap:6px;}
-.guide-btn:hover{border-color:var(--peach);background:rgba(250,179,135,0.06);}
-
-/* ── Code Editor ── */
-.code-editor{background:var(--crust);border:1px solid var(--surface0);border-radius:var(--radius-sm);font-size:0.68rem;line-height:1.65;overflow:auto;flex:1;min-height:0;}
-.code-editor .line{display:flex;padding:0 8px;}
-.code-editor .line:hover{background:rgba(49,50,68,0.4);}
-.code-editor .ln{color:var(--surface1);width:32px;text-align:right;margin-right:12px;user-select:none;flex-shrink:0;font-size:0.65rem;}
-.code-editor .code{white-space:pre-wrap;word-break:break-word;color:var(--text);}
-.code-editor .code.muted{color:var(--surface1);}
-.tok-tag{color:var(--blue);}
-.tok-attr{color:var(--peach);}
-.tok-string{color:var(--green);}
-.tok-comment{color:var(--overlay0);font-style:italic;}
-.tok-doctype{color:var(--mauve);}
-
-/* ── Buttons ── */
-.btn-copy{margin-top:8px;width:100%;background:var(--blue);color:var(--crust);border:none;padding:9px;border-radius:var(--radius-sm);cursor:pointer;font-weight:700;font-family:var(--font-mono);font-size:0.78rem;transition:var(--transition);display:flex;align-items:center;justify-content:center;gap:6px;}
-.btn-copy:hover{filter:brightness(1.1);transform:translateY(-1px);}
-.btn-copy:active{transform:translateY(0);}
-.btn-copy.copied{background:var(--green);}
-.btn-download{margin-top:6px;width:100%;background:var(--surface0);color:var(--green);border:1px solid var(--surface1);padding:9px;border-radius:var(--radius-sm);cursor:pointer;font-weight:700;font-family:var(--font-mono);font-size:0.78rem;transition:var(--transition);display:flex;align-items:center;justify-content:center;gap:6px;}
-.btn-download:hover{background:var(--surface1);border-color:var(--green);transform:translateY(-1px);}
-.btn-download:active{transform:translateY(0);}
-
-/* ═══════════════════════════
-   Status Bar
-   ═══════════════════════════ */
-.status-bar{height:24px;background:var(--surface0);display:flex;align-items:center;justify-content:space-between;padding:0 12px;font-size:0.68rem;color:var(--overlay1);flex-shrink:0;border-top:1px solid var(--surface1);}
-.sb-left,.sb-right{display:flex;align-items:center;gap:2px;}
-.sb-item{padding:0 8px;height:24px;display:flex;align-items:center;gap:5px;cursor:default;transition:var(--transition);border-radius:0;}
-.sb-item:hover{background:var(--surface1);}
-.sb-branch{color:var(--mauve);font-weight:600;}
-.sb-errors{color:var(--red);}
-.sb-warn{color:var(--yellow);}
-.sb-accent{background:var(--blue);color:var(--crust);font-weight:600;}
-.sb-accent:hover{background:var(--sapphire)!important;}
-.sb-count{color:var(--green);font-weight:600;}
-
-/* ═══════════════════════════
-   Modals
-   ═══════════════════════════ */
-.modal-overlay{position:fixed;inset:0;background:rgba(17,17,27,0.85);backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;z-index:1000;padding:24px;opacity:0;transition:opacity 0.25s ease;}
-.modal-overlay.show{display:flex;opacity:1;}
-.modal-box{background:var(--base);border:1px solid var(--surface0);border-radius:12px;padding:24px;max-width:760px;max-height:82vh;overflow:auto;width:100%;box-shadow:0 20px 60px rgba(0,0,0,0.5);transform:translateY(10px);transition:transform 0.25s ease;}
-.modal-overlay.show .modal-box{transform:translateY(0);}
-.modal-box h2{color:var(--peach);margin-bottom:16px;font-size:1rem;font-weight:700;display:flex;align-items:center;gap:8px;}
-.guide-item{background:var(--mantle);border:1px solid var(--surface0);border-radius:var(--radius-sm);padding:14px;margin-bottom:10px;font-size:0.78rem;line-height:1.6;}
-.guide-item b{color:var(--blue);}
-.guide-item code{color:var(--mauve);background:var(--surface0);padding:1px 5px;border-radius:var(--radius-xs);font-size:0.72rem;}
-.guide-item pre{background:var(--crust);color:var(--green);padding:10px;border-radius:var(--radius-xs);margin-top:8px;font-size:0.68rem;white-space:pre-wrap;word-break:break-word;border:1px solid var(--surface0);line-height:1.5;}
-.modal-close{margin-top:12px;width:100%;background:var(--red);color:var(--crust);border:none;padding:10px;border-radius:var(--radius-sm);cursor:pointer;font-weight:700;font-family:var(--font-mono);font-size:0.82rem;transition:var(--transition);}
-.modal-close:hover{filter:brightness(1.1);}
-
-/* ── Emoji Modal ── */
-.emoji-hint{background:var(--mantle);border:1px solid var(--surface0);border-radius:var(--radius-sm);padding:12px;font-size:0.75rem;margin-bottom:14px;line-height:1.6;color:var(--subtext);}
-.emoji-grid{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px;}
-.emoji-btn{font-size:1.2rem;background:var(--mantle);border:1px solid var(--surface0);border-radius:var(--radius-sm);width:38px;height:38px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:var(--transition);}
-.emoji-btn:hover{background:var(--surface0);border-color:var(--sky);transform:scale(1.12);}
-
-/* ── Toast ── */
-.toast{position:fixed;bottom:40px;right:20px;background:var(--surface1);color:var(--text);padding:10px 18px;border-radius:var(--radius-sm);font-weight:600;opacity:0;transform:translateY(8px) scale(0.96);transition:all 0.3s cubic-bezier(.4,0,.2,1);z-index:999;font-size:0.8rem;box-shadow:0 8px 24px rgba(0,0,0,0.3);border:1px solid var(--surface2);display:flex;align-items:center;gap:8px;}
-.toast.show{opacity:1;transform:translateY(0) scale(1);}
-.toast.success{border-left:3px solid var(--green);}
-.toast.warning{border-left:3px solid var(--yellow);}
-
-/* ── Responsive ── */
-@media(max-width:1100px){
-  .right-panel{width:320px;}
-  .sidebar{width:200px;}
-}
-@media(max-width:900px){
-  .app{flex-wrap:wrap;}
-  .activity-bar{width:100%;flex-direction:row;height:40px;padding:0 8px;overflow-x:auto;border-right:none;border-bottom:1px solid var(--surface0);}
-  .ab-logo{margin-bottom:0;margin-right:8px;}
-  .ab-sep{width:1px;height:20px;margin:0 4px;}
-  .ab-bottom{margin-top:0;margin-left:auto;flex-direction:row;}
-  .sidebar,.right-panel{width:100%;max-height:40vh;border:none;border-bottom:1px solid var(--surface0);}
-  .main-area{min-height:300px;}
-}
+body{font-family:'Kanit',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;}
+#bgCanvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none;}
+#app{position:relative;z-index:1;min-height:100vh;}
+.cf{font-family:'Fira Code',monospace;}
+.xp-outer{background:var(--border);border-radius:999px;height:10px;overflow:hidden;}
+.xp-inner{height:100%;background:linear-gradient(90deg,var(--accent-dim),var(--accent));border-radius:999px;transition:width .8s cubic-bezier(.25,1,.5,1);box-shadow:0 0 10px rgba(77,171,247,.4);}
+.gc{background:var(--card);border:1px solid var(--border);border-radius:16px;transition:all .3s ease;}
+.gc:hover{border-color:rgba(77,171,247,.25);}
+.bp{background:linear-gradient(135deg,var(--accent-dim),var(--accent));color:#0d1117;font-weight:700;padding:13px 32px;border-radius:12px;border:none;cursor:pointer;font-size:1rem;font-family:'Kanit',sans-serif;transition:all .3s ease;box-shadow:0 4px 20px rgba(77,171,247,.3);display:inline-flex;align-items:center;justify-content:center;gap:8px;}
+.bp:hover{transform:translateY(-2px);box-shadow:0 6px 30px rgba(77,171,247,.5);}.bp:active{transform:translateY(0);}.bp:disabled{opacity:.5;cursor:not-allowed;transform:none;box-shadow:none;}
+.bs{background:var(--card2);color:var(--text);font-weight:600;padding:11px 24px;border-radius:12px;border:1px solid var(--border);cursor:pointer;font-size:.9rem;font-family:'Kanit',sans-serif;transition:all .3s ease;display:inline-flex;align-items:center;justify-content:center;gap:8px;}
+.bs:hover{border-color:var(--accent);color:var(--accent);}
+.bsm{padding:8px 18px;font-size:.82rem;border-radius:10px;}
+.code-block{background:#0a0e14;border:1px solid var(--border);border-radius:12px;padding:18px;overflow-x:auto;font-family:'Fira Code',monospace;font-size:.8rem;line-height:1.8;tab-size:2;white-space:pre;color:var(--text);}
+.code-block .tag{color:#7ee787;}.code-block .attr{color:#79c0ff;}.code-block .val{color:#ffa657;}.code-block .cmt{color:#8b949e;font-style:italic;}.code-block .sel{color:#d2a8ff;}.code-block .prop{color:#79c0ff;}
+.pf{border:1px solid var(--border);border-radius:12px;overflow:hidden;background:#fff;}
+.pf iframe{width:100%;height:200px;border:none;display:block;}
+.pb{background:var(--card);padding:7px 14px;display:flex;align-items:center;gap:6px;border-bottom:1px solid var(--border);}
+.pd{width:10px;height:10px;border-radius:50%;}
+.ew{display:flex;background:#0a0e14;border:2px solid var(--border);border-radius:12px;overflow:hidden;transition:border-color .4s,box-shadow .4s;min-height:260px;}
+.ew.ok{border-color:var(--accent);box-shadow:0 0 20px rgba(77,171,247,.15);}
+.ew.err{border-color:var(--danger);box-shadow:0 0 15px rgba(255,107,107,.15);}
+.ln{padding:14px 0;min-width:40px;text-align:right;padding-right:10px;color:#484f58;font-family:'Fira Code',monospace;font-size:.8rem;line-height:1.8;user-select:none;border-right:1px solid var(--border);overflow:hidden;background:#0a0e14;flex-shrink:0;}
+.ce{flex:1;padding:14px;background:transparent;color:var(--text);font-family:'Fira Code',monospace;font-size:.8rem;line-height:1.8;border:none;outline:none;resize:none;tab-size:2;white-space:pre;overflow:auto;min-height:260px;width:100%;}
+.ce::selection{background:rgba(77,171,247,.2);}
+.ci{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:10px;transition:all .3s;font-size:.88rem;}
+.ci.pass{background:rgba(77,171,247,.08);color:var(--accent);}.ci.fail{background:rgba(255,107,107,.08);color:var(--danger);}.ci.pend{background:var(--card2);color:var(--muted);}
+.ch{font-size:.76rem;color:var(--muted);margin-top:4px;margin-left:30px;padding:6px 10px;background:rgba(227,179,65,.08);border-radius:8px;border-left:3px solid var(--gold);display:none;}.ci.fail .ch{display:block;}
+.lc{position:relative;cursor:pointer;transition:all .3s;}.lc.locked{opacity:.35;cursor:not-allowed;pointer-events:none;}.lc.locked:hover{opacity:.4;}
+.lc.done{border-color:rgba(77,171,247,.3);}.lc.done .lnum{background:var(--accent);border-color:var(--accent);color:#0d1117;}
+.lc.cur{border-color:rgba(77,171,247,.5);box-shadow:0 0 20px rgba(77,171,247,.1);}
+.lnum{width:44px;height:44px;border-radius:50%;border:2px solid var(--border);background:var(--card);display:flex;align-items:center;justify-content:center;font-size:.95rem;font-weight:700;transition:all .3s;flex-shrink:0;}
+.tab-btn{padding:10px 0;flex:1;text-align:center;font-weight:600;cursor:pointer;border-bottom:2px solid transparent;transition:all .3s;color:var(--muted);font-size:.9rem;}
+.tab-btn.active{color:var(--accent);border-bottom-color:var(--accent);}
+.sb{animation:si .4s ease forwards;border-radius:12px;padding:12px 20px;display:flex;align-items:center;gap:10px;font-weight:500;box-shadow:0 8px 30px rgba(0,0,0,.4);pointer-events:auto;}
+.sb.lv{animation:so .3s ease forwards;}
+.sb-s{background:rgba(77,171,247,.15);border:1px solid rgba(77,171,247,.3);color:var(--accent);}.sb-e{background:rgba(255,107,107,.15);border:1px solid rgba(255,107,107,.3);color:var(--danger);}.sb-i{background:rgba(227,179,65,.15);border:1px solid rgba(227,179,65,.3);color:var(--gold);}
+.confetti{position:fixed;width:10px;height:10px;z-index:100;animation:cfa linear forwards;pointer-events:none;}
+.dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;transition:all .3s;}
+.dot.done{background:var(--accent);box-shadow:0 0 6px rgba(77,171,247,.5);}.dot.no{background:var(--border);}
+@keyframes fiu{from{opacity:0;transform:translateY(30px);}to{opacity:1;transform:translateY(0);}}
+@keyframes fi{from{opacity:0;}to{opacity:1;}}
+@keyframes sd{from{opacity:0;transform:translateY(-20px);}to{opacity:1;transform:translateY(0);}}
+@keyframes fl{0%,100%{transform:translateY(0);}50%{transform:translateY(-10px);}}
+@keyframes gl{0%,100%{text-shadow:0 0 20px rgba(77,171,247,.3);}50%{text-shadow:0 0 40px rgba(77,171,247,.6),0 0 80px rgba(77,171,247,.2);}}
+@keyframes sc{from{transform:scale(.5);opacity:0;}to{transform:scale(1);opacity:1;}}
+@keyframes cfa{0%{transform:translateY(-100vh) rotate(0deg);opacity:1;}100%{transform:translateY(100vh) rotate(720deg);opacity:0;}}
+@keyframes si{from{transform:translateX(100%);opacity:0;}to{transform:translateX(0);opacity:1;}}
+@keyframes so{from{transform:translateX(0);opacity:1;}to{transform:translateX(100%);opacity:0;}}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(77,171,247,.4);}50%{box-shadow:0 0 0 10px rgba(77,171,247,0);}}
+.afiu{animation:fiu .6s ease forwards;}.afi{animation:fi .5s ease forwards;}.asd{animation:sd .4s ease forwards;}.afl{animation:fl 3s ease-in-out infinite;}.agl{animation:gl 3s ease-in-out infinite;}.apulse{animation:pulse 2s ease-in-out infinite;}
+.s1{animation-delay:.1s;opacity:0;}.s2{animation-delay:.2s;opacity:0;}.s3{animation-delay:.3s;opacity:0;}.s4{animation-delay:.4s;opacity:0;}.s5{animation-delay:.5s;opacity:0;}
+::-webkit-scrollbar{width:5px;height:5px;}::-webkit-scrollbar-track{background:var(--bg);}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+@media(max-width:768px){.code-block,.ce,.ln{font-size:.7rem;}.lnum{width:38px;height:38px;font-size:.85rem;}.ew,.ce{min-height:200px;}.editor-grid{flex-direction:column!important;}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important;}}
 </style>
 </head>
 <body>
-
-<!-- 顶部渐变线 -->
-<div class="top-accent"></div>
-
-<div class="app">
-
-  <!-- ═══ Activity Bar ═══ -->
-  <div class="activity-bar">
-    <div class="ab-logo">LB</div>
-    <button class="ab-btn active" id="abPalette" title="Components">
-      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
-    </button>
-    <button class="ab-btn" id="abEmoji" title="Insert Emoji">
-      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9" stroke-width="2.5" stroke-linecap="round"/><line x1="15" y1="9" x2="15.01" y2="9" stroke-width="2.5" stroke-linecap="round"/></svg>
-    </button>
-    <button class="ab-btn" id="abGuide" title="Documentation">
-      <svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/><line x1="8" y1="7" x2="16" y2="7"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
-    </button>
-    <div class="ab-sep"></div>
-    <div class="ab-bottom">
-      <button class="ab-btn" id="abDownload" title="Download index.html">
-        <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-      </button>
-    </div>
-  </div>
-
-  <!-- ═══ Sidebar ═══ -->
-  <div class="sidebar" id="sidebar">
-    <div class="sidebar-head">
-      <span class="sidebar-title">Explorer</span>
-      <div class="sidebar-actions">
-        <button id="clearBtn" title="Clear All">🗑</button>
-      </div>
-    </div>
-    <div class="sidebar-body">
-
-      <div class="tree-cat" id="catLayout">
-        <div class="tree-cat-head">
-          <span class="arrow">▸</span>
-          <span class="folder">📁</span>
-          <span class="cat-name">layout/</span>
-        </div>
-        <div class="tree-items"><div class="tree-items-inner">
-          <div class="tree-item layout-t" draggable="true" data-type="section"><span class="t-icon">📦</span>Section</div>
-          <div class="tree-item layout-t" draggable="true" data-type="row"><span class="t-icon">↔</span>Row</div>
-          <div class="tree-item layout-t" draggable="true" data-type="col"><span class="t-icon">↕</span>Column</div>
-          <div class="tree-item layout-t" draggable="true" data-type="grid2"><span class="t-icon">▦</span>Grid 2-col</div>
-          <div class="tree-item layout-t" draggable="true" data-type="grid3"><span class="t-icon">▦</span>Grid 3-col</div>
-        </div></div>
-      </div>
-
-      <div class="tree-cat" id="catContent">
-        <div class="tree-cat-head">
-          <span class="arrow">▸</span>
-          <span class="folder">📁</span>
-          <span class="cat-name">content/</span>
-        </div>
-        <div class="tree-items"><div class="tree-items-inner">
-          <div class="tree-item content-t" draggable="true" data-type="header"><span class="t-icon">H</span>Header</div>
-          <div class="tree-item content-t" draggable="true" data-type="nav"><span class="t-icon">N</span>Navbar</div>
-          <div class="tree-item content-t" draggable="true" data-type="hero"><span class="t-icon">★</span>Hero Section</div>
-          <div class="tree-item content-t" draggable="true" data-type="button"><span class="t-icon"> Btn</span>Button</div>
-          <div class="tree-item content-t" draggable="true" data-type="image"><span class="t-icon">IMG</span>Image</div>
-          <div class="tree-item content-t" draggable="true" data-type="card"><span class="t-icon">Card</span>Card</div>
-          <div class="tree-item content-t" draggable="true" data-type="input"><span class="t-icon">In</span>Input Field</div>
-          <div class="tree-item content-t" draggable="true" data-type="textarea"><span class="t-icon">Ta</span>Textarea</div>
-          <div class="tree-item content-t" draggable="true" data-type="select"><span class="t-icon">Sel</span>Dropdown</div>
-          <div class="tree-item content-t" draggable="true" data-type="checkbox"><span class="t-icon">☑</span>Checkbox</div>
-          <div class="tree-item content-t" draggable="true" data-type="text"><span class="t-icon">T</span>Text</div>
-          <div class="tree-item content-t" draggable="true" data-type="link"><span class="t-icon">A</span>Link</div>
-          <div class="tree-item content-t" draggable="true" data-type="list"><span class="t-icon">Li</span>List</div>
-          <div class="tree-item content-t" draggable="true" data-type="table"><span class="t-icon">Tbl</span>Table</div>
-          <div class="tree-item content-t" draggable="true" data-type="video"><span class="t-icon">Vid</span>Video</div>
-          <div class="tree-item content-t" draggable="true" data-type="quote"><span class="t-icon">"</span>Blockquote</div>
-          <div class="tree-item content-t" draggable="true" data-type="badge"><span class="t-icon">Tag</span>Badge</div>
-          <div class="tree-item content-t" draggable="true" data-type="divider"><span class="t-icon">—</span>Divider</div>
-          <div class="tree-item content-t" draggable="true" data-type="codeblock"><span class="t-icon">&lt;/&gt;</span>Code Block</div>
-          <div class="tree-item content-t" draggable="true" data-type="footer"><span class="t-icon">F</span>Footer</div>
-        </div></div>
-      </div>
-
-    </div>
-  </div>
-
-  <!-- ═══ Main Area ═══ -->
-  <div class="main-area">
-    <div class="tab-bar">
-      <div class="tab active">
-        <span class="tab-icon">🌐</span>
-        <span>preview.html</span>
-        <span class="tab-mod"></span>
-      </div>
-    </div>
-    <div class="browser-chrome">
-      <div class="chrome-dots"><span class="chrome-dot r"></span><span class="chrome-dot y"></span><span class="chrome-dot g"></span></div>
-      <div class="chrome-url"><span class="lock">🔒</span> localhost:5500/index.html</div>
-      <button class="chrome-btn" id="refreshBtn" title="Refresh">⟳</button>
-    </div>
-    <div class="canvas-wrap">
-      <div id="canvas" class="dropzone" data-parent-id="root">
-        <div class="canvas-placeholder">// Drag components here<br><span>from the Explorer panel on the left</span></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ═══ Right Panel ═══ -->
-  <div class="right-panel">
-    <div class="rp-section inspector">
-      <div class="rp-head">
-        <span class="rp-title"><span class="dot" style="background:var(--blue)"></span>Inspector</span>
-      </div>
-      <div class="rp-body" id="inspectorBody">
-        <div class="tip-box">Click a component on the canvas to view its HTML tag, usage guide, and UX tips. Click text directly to edit inline.</div>
-        <button class="guide-btn" id="guideBtn">📖 Open Tag Documentation</button>
-      </div>
-    </div>
-    <div class="rp-divider"></div>
-    <div class="rp-section code-output">
-      <div class="rp-head">
-        <span class="rp-title"><span class="dot" style="background:var(--green)"></span>Output — index.html</span>
-      </div>
-      <div class="rp-body" style="display:flex;flex-direction:column;gap:0;">
-        <div class="code-editor" id="codeEditor"></div>
-        <button class="btn-copy" id="copyBtn">📋 Copy Full HTML</button>
-        <button class="btn-download" id="downloadBtn2">💾 Download index.html</button>
-      </div>
-    </div>
-  </div>
-
-</div>
-
-<!-- Status Bar -->
-<div class="status-bar">
-  <div class="sb-left">
-    <span class="sb-item sb-branch">⎇ main</span>
-    <span class="sb-item sb-errors">⊘ 0</span>
-    <span class="sb-item sb-warn">⚠ 0</span>
-  </div>
-  <div class="sb-right">
-    <span class="sb-item">Elements: <span class="sb-count" id="elCount">0</span></span>
-    <span class="sb-item">UTF-8</span>
-    <span class="sb-item sb-accent">HTML</span>
-  </div>
-</div>
-
-<!-- Modals -->
-<div class="modal-overlay" id="guideModal">
-  <div class="modal-box">
-    <h2>📖 Tag Documentation</h2>
-    <div id="guideList"></div>
-    <button class="modal-close" id="closeGuide">Close</button>
-  </div>
-</div>
-<div class="modal-overlay" id="emojiModal">
-  <div class="modal-box">
-    <h2>😀 Emoji Picker</h2>
-    <div class="emoji-hint">Click text on the canvas first to set cursor position, then click an emoji to insert it.</div>
-    <div id="emojiGroups"></div>
-    <button class="modal-close" id="closeEmoji">Close</button>
-  </div>
-</div>
-<div class="toast" id="toast"></div>
-
+<canvas id="bgCanvas" aria-hidden="true"></canvas>
+<div id="app" role="main"></div>
+<div id="tc" style="position:fixed;top:20px;right:20px;z-index:80;display:flex;flex-direction:column;gap:10px;pointer-events:none;"></div>
 <script>
-/* ═══════════════════════════════════════════════
-   Content Templates
-   ═══════════════════════════════════════════════ */
-function editSpan(field, value) {
-  return `<span class="editable" contenteditable="true" draggable="false" spellcheck="false" data-field="${field}">${escapeHtml(value)}</span>`;
+/* ================================================================
+   ข้อมูลด่านทั้ง 16 ด่าน - CSS Quest
+   ================================================================ */
+const LS=[
+
+{id:1,title:'รู้จัก CSS และวิธีเขียน',icon:'fa-brands fa-css3-alt',
+desc:'เรียนรู้ว่า CSS คืออะไร และวิธีเขียน 3 แบบ',
+pts:['CSS ย่อมาจาก Cascading Style Sheets ใช้จัดรูปแบบหน้าเว็บ','เขียนแบบ <span class="cf" style="color:#ffa657;">Inline</span> ด้วย attribute <code class="cf" style="color:#79c0ff;">style="..."</code>','เขียนแบบ <span class="cf" style="color:#ffa657;">Internal</span> ด้วยแท็ก <code class="cf" style="color:#7ee787;">&lt;style&gt;</code> ใน <code class="cf" style="color:#7ee787;">&lt;head&gt;</code>','รูปแบบกฎ CSS คือ <code class="cf" style="color:#d2a8ff;">selector</code> <code class="cf" style="color:#79c0ff;">{ property: value; }</code>'],
+code:'<!DOCTYPE html>\n<html>\n<head>\n<style>\n  h1 {\n    color: #4dabf7;\n  }\n  p {\n    font-size: 18px;\n  }\n</style>\n</head>\n<body>\n  <h1 style="text-decoration: underline;">หัวข้อ (inline style)</h1>\n  <p>ข้อความย่อหน้า (internal style)</p>\n</body>\n</html>',
+prac:{title:'เขียน CSS แบบ Internal',desc:'สร้าง <style> ใน head แล้วกำหนดสี h1 และขนาดตัวอักษรของ p',start:'<!DOCTYPE html>\n<html>\n<head>\n<style>\n\n</style>\n</head>\n<body>\n  <h1>สวัสดี CSS</h1>\n  <p>นี่คือย่อหน้าแรกของฉัน</p>\n</body>\n</html>',cks:[{lb:'มีแท็ก <style>',ck:d=>!!d.querySelector('style')},{lb:'h1 กำหนด color',ck:(d,c)=>/h1\s*{[^}]*color\s*:/i.test(c)},{lb:'p กำหนด font-size',ck:(d,c)=>/p\s*{[^}]*font-size\s*:/i.test(c)}],xp:15,gh:'เขียนกฎในรูปแบบ selector { property: value; } ภายในแท็ก <style>'},
+tests:[
+{title:'เขียน CSS แบบ Inline',desc:'สร้าง h1 ที่มี inline style กำหนดสีตัวอักษร',start:'<!DOCTYPE html>\n<html>\n<head></head>\n<body>\n  \n</body>\n</html>',cks:[{lb:'มี <h1>',ck:d=>!!d.querySelector('h1')},{lb:'h1 มี inline style กำหนด color',ck:(d,c)=>/<h1[^>]*style\s*=\s*["'][^"']*color\s*:/i.test(c)}]},
+{title:'กำหนดพื้นหลังทั้งหน้า',desc:'สร้าง style block ที่กำหนด background-color ให้ body',start:'<!DOCTYPE html>\n<html>\n<head>\n<style>\n\n</style>\n</head>\n<body>\n  <p>ทดสอบพื้นหลัง</p>\n</body>\n</html>',cks:[{lb:'มี body { }',ck:(d,c)=>/body\s*{/i.test(c)},{lb:'body กำหนด background-color',ck:(d,c)=>/body\s*{[^}]*background-color\s*:/i.test(c)}]},
+{title:'ใช้ทั้ง Inline และ Internal',desc:'ทำให้ p มีสีจาก internal style และ h1 มี inline style',start:'<!DOCTYPE html>\n<html>\n<head>\n<style>\n\n</style>\n</head>\n<body>\n  <h1>หัวข้อ</h1>\n  <p>ย่อหน้า</p>\n</body>\n</html>',cks:[{lb:'p กำหนด color ใน <style>',ck:(d,c)=>/p\s*{[^}]*color\s*:/i.test(c)},{lb:'h1 มี inline style',ck:(d,c)=>/<h1\s+style\s*=/i.test(c)}]}
+]},
+
+{id:2,title:'ตัวเลือก Selectors พื้นฐาน',icon:'fa-solid fa-crosshairs',
+desc:'เรียนรู้การเลือกองค์ประกอบด้วย Selector แบบต่างๆ',
+pts:['<code class="cf" style="color:#d2a8ff;">tag</code> เลือกตามชื่อแท็ก เช่น <code class="cf">p { }</code>','<code class="cf" style="color:#d2a8ff;">.class</code> เลือกตามคลาส เช่น <code class="cf">.box { }</code>','<code class="cf" style="color:#d2a8ff;">#id</code> เลือกตาม id เช่น <code class="cf">#main { }</code>','<code class="cf" style="color:#d2a8ff;">*</code> เลือกทุกองค์ประกอบ, ใช้ <code class="cf">,</code> เลือกหลายตัวพร้อมกัน'],
+code:'<style>\n  * { box-sizing: border-box; }\n  .box {\n    background: #1c2333;\n  }\n  #title {\n    color: #4dabf7;\n  }\n  h2, h3 {\n    font-weight: 700;\n  }\n</style>\n<h1 id="title">หัวข้อหลัก</h1>\n<div class="box">กล่องคลาส box</div>',
+prac:{title:'ใช้ class และ id',desc:'สร้างกฎ .highlight และ #main ให้กำหนดสีต่างกัน',start:'<!DOCTYPE html>\n<html>\n<head>\n<style>\n\n</style>\n</head>\n<body>\n  <h1 id="main">หัวข้อ</h1>\n  <p class="highlight">ข้อความไฮไลท์</p>\n</body>\n</html>',cks:[{lb:'มี .highlight { }',ck:(d,c)=>/\.highlight\s*{/i.test(c)},{lb:'มี #main { }',ck:(d,c)=>/#main\s*{/i.test(c)},{lb:'.highlight กำหนด color',ck:(d,c)=>/\.highlight\s*{[^}]*color\s*:/i.test(c)}],xp:20,gh:'class ใช้จุดนำหน้า (.) ส่วน id ใช้เครื่องหมายชาร์ป (#)'},
+tests:[
+{title:'เลือกด้วยชื่อแท็ก',desc:'กำหนดสีให้ span ทุกตัวด้วย tag selector',start:'<!DOCTYPE html>\n<html>\n<head>\n<style>\n\n</style>\n</head>\n<body>\n  <p><span>คำที่ 1</span> <span>คำที่ 2</span></p>\n</body>\n</html>',cks:[{lb:'มี span { }',ck:(d,c)=>/span\s*{/i.test(c)},{lb:'span กำหนด color',ck:(d,c)=>/span\s*{[^}]*color\s*:/i.test(c)}]},
+{title:'เลือกหลายตัวพร้อมกัน',desc:'กำหนด font-weight ให้ h1 และ h2 พร้อมกันด้วย comma',start:'<!DOCTYPE html>\n<html>\n<head>\n<style>\n\n</style>\n</head>\n<body>\n  <h1>หัวข้อ 1</h1>\n  <h2>หัวข้อ 2</h2>\n</body>\n</html>',cks:[{lb:'มี h1, h2 { }',ck:(d,c)=>/h1\s*,\s*h2\s*{/i.test(c)},{lb:'กำหนด font-weight',ck:(d,c)=>/h1\s*,\s*h2\s*{[^}]*font-weight\s*:/i.test(c)}]},
+{title:'ใช้ Universal Selector',desc:'ใช้ * เพื่อกำหนด box-sizing ให้ทุกองค์ประกอบ',start:'<!DOCTYPE html>\n<html>\n<head>\n<style>\n\n</style>\n</head>\n<body>\n  <div>เนื้อหา</div>\n</body>\n</html>',cks:[{lb:'มี * { }',ck:(d,c)=>/\*\s*{/.test(c)},{lb:'กำหนด box-sizing',ck:(d,c)=>/\*\s*{[^}]*box-sizing\s*:/i.test(c)}]}
+]},
+
+{id:3,title:'สีและพื้นหลัง',icon:'fa-solid fa-palette',
+desc:'เรียนรู้การกำหนดสีตัวอักษรและพื้นหลัง',
+pts:['<code class="cf" style="color:#79c0ff;">color</code> กำหนดสีตัวอักษร','<code class="cf" style="color:#79c0ff;">background-color</code> กำหนดสีพื้นหลัง','<code class="cf" style="color:#79c0ff;">background-image</code> ใส่รูปพื้นหลัง','สีเขียนได้หลายแบบ: ชื่อสี, <code class="cf">#hex</code>, <code class="cf">rgb()</code>, <code class="cf">rgba()</code>'],
+code:'<style>\n  body {\n    background-color: #0d1117;\n  }\n  h1 {\n    color: #4dabf7;\n  }\n  .card {\n    background-color: rgba(77,171,247,0.15);\n    color: rgb(255,255,255);\n  }\n</style>\n<h1>ตัวอย่างสี</h1>\n<div class="card">การ์ดโปร่งแสง</div>',
+prac:{title:'กำหนดสีให้หน้าเว็บ',desc:'กำหนด background-color ของ body และ color ของ h1',start:'<!DOCTYPE html>\n<html>\n<head>\n<style>\n\n</style>\n</head>\n<body>\n  <h1>สีสันสวยงาม</h1>\n</body>\n</html>',cks:[{lb:'body กำหนด background-color',ck:(d,c)=>/body\s*{[^}]*background-color\s*:/i.test(c)},{lb:'h1 กำหนด color',ck:(d,c)=>/h1\s*{[^}]*color\s*:/i.test(c)}],xp:20,gh:'สีเขียนเป็นชื่อ (red), hex (#ff0000) หรือ rgb(255,0,0) ก็ได้'},
+tests:[
+{title:'ใช้สีแบบ HEX',desc:'กำหนด color ของ p เป็นค่า hex เช่น #ff6b6b',start:'<!DOCTYPE html>\n<html>\n<head>\n<style>\n\n</style>\n</head>\n<body>\n  <p>ข้อความสี</p>\n</body>\n</html>',cks:[{lb:'p กำหนด color แบบ hex',ck:(d,c)=>/p\s*{[^}]*color\s*:\s*#[0-9a-f]{3,6}/i.test(c)}]},
+{title:'ใช้สีแบบ rgba โปร่งแสง',desc:'กำหนด background-color ของ .box ด้วย rgba',start:'<!DOCTYPE html>\n<html>\n<head>\n<style>\n\n</style>\n</head>\n<body>\n  <div class="box">กล่อง</div>\n</body>\n</html>',cks:[{lb:'มี .box { }',ck:(d,c)=>/\.box\s*{/i.test(c)},{lb:'ใช้ rgba() กำหนด background-color',ck:(d,c)=>/\.box\s*{[^}]*background-color\s*:\s*rgba\(/i.test(c)}]},
+{title:'ใส่รูปพื้นหลัง',desc:'กำหนด background-image ให้ .banner',start:'<!DOCTYPE html>\n<html>\n<head>\n<style>\n\n</style>\n</head>\n<body>\n  <div class="banner">แบนเนอร์</div>\n</body>\n</html>',cks:[{lb:'มี .banner { }',ck:(d,c)=>/\.banner\s*{/i.test(c)},{lb:'กำหนด background-image',ck:(d,c)=>/\.banner\s*{[^}]*background-image\s*:/i.test(c)}]}
+]},
+
+{id:4,title:'กล่องและระยะห่าง Box Model',icon:'fa-solid fa-cube',
+desc:'เรียนรู้ margin, border, padding, width และ box-sizing',
+pts:['<code class="cf" style="color:#79c0ff;">margin</code> ระยะห่างด้านนอกกล่อง','<code class="cf" style="color:#79c0ff;">padding</code> ระยะห่างด้านในก่อนถึงเนื้อหา','<code class="cf" style="color:#79c0ff;">border</code>, <code class="cf" style="color:#79c0ff;">width</code>, <code class="cf" style="color:#79c0ff;">height</code> กำหนดขนาดกล่อง','<code class="cf" style="color:#79c0ff;">box-sizing: border-box</code> รวม border/padding ไว้ในความกว้างที่กำหนด'],
+code:'<style>\n  .box {\n    width: 200px;\n    padding: 16px;\n    margin: 20px;\n    border: 2px solid #4dabf7;\n    box-sizing: border-box;\n  }\n</style>\n<div class="box">กล่อง Box Model</div>',
+prac:{title:'สร้างกล่องตาม Box Model',desc:'กำหนด width, padding, margin และ border ให้ .card',start:'<!DOCTYPE html>\n<html>\n<head>\n<style>\n\n</style>\n</head>\n<body>\n  <div class="card">เนื้อหาในกล่อง</div>\n</body>\n</html>',cks:[{lb:'.card กำหนด width',ck:(d,c)=>/\.card\s*{[^}]*width\s*:/i.test(c)},{lb:'.card กำหนด padding',ck:(d,c)=>/\.card\s*{[^}]*padding\s*:/i.test(c)},{lb:'.card กำหนด border',ck:(d,c)=>/\.card\s*{[^}]*border\s*:/i.test(c)}],xp:25,gh:'ลำดับจากในสุดไปนอกสุด: content > padding > border > margin'},
+tests:[
+{title:'กำหนด margin รอบกล่อง',desc:'กำหนด margin ให้ .item เท่ากันทุกด้าน',start:'<!DOCTYPE html>\n<html>\n<head>\n<style>\n\n</style>\n</head>\n<body>\n  <div class="item">ไอเทม</div>\n</body>\n</html>',cks:[{lb:'.item กำหนด margin',ck:(d,c)=>/\.item\s*{[^}]*margin\s*:/i.test(c)}]},
+{title:'ใช้ box-sizing: border-box',desc:'กำหนด width และ box-sizing ให้ .frame',start:'<!DOCTYPE html>\n<html>\n<head>\n<style>\n\n</style>\n</head>\n<body>\n  <div class="frame">เฟรม</div>\n</body>\n</html>',cks:[{lb:'.frame กำหนด width',ck:(d,c)=>/\.frame\s*{[^}]*width\s*:/i.test(c)},{lb:'.frame กำหนด box-sizing: border-box',ck:(d,c)=>/\.frame\s*{[^}]*box-sizing\s*:\s*border-box/i.test(c)}]},
+{title:'กล่องขนาดครบ',desc:'สร้าง .panel ที่มีทั้ง width, height, padding, margin, border',start:'<!DOCTYPE html>\n<html>\n<head>\n<style>\n\n</style>\n</head>\n<body>\n  <div class="panel">แผง</div>\n</body>\n</html>',cks:[{lb:'มี width',ck:(d,c)=>/\.panel\s*{[^}]*width\s*:/i.test(c)},{lb:'มี height',ck:(d,c)=>/\.panel\s*{[^}]*height\s*:/i.test(c)},{lb:'มี padding',ck:(d,c)=>/\.panel\s*{[^}]*padding\s*:/i.test(c)},{lb:'มี margin',ck:(d,c)=>/\.panel\s*{[^}]*margin\s*:/i.test(c)}]}
+]},
+
+{id:5,title:'การจัดรูปแบบตัวอักษร',icon:'fa-solid fa-font',
+desc:'เรียนรู้ font-family, font-size, font-weight, text-align',
+pts:['<code class="cf" style="color:#79c0ff;">font-family</code> กำหนดรูปแบบตัวอักษร','<code class="cf" style="color:#79c0ff;">font-size</code> ขนาด, <code class="cf" style="color:#79c0ff;">font-weight</code> ความหนา','<code class="cf" style="color:#79c0ff;">text-align</code> จัดแนวข้อความ (left/center/right)','<code class="cf" style="color:#79c0ff;">line-height</code> ระยะห่างบรรทัด'],
+code:'<style>\n  body {\n    font-family: "Kanit", sans-serif;\n  }\n  h1 {\n    font-size: 32px;\n    font-weight: 800;\n    text-align: center;\n  }\n  p {\n    line-height: 1.8;\n  }\n</style>\n<h1>หัวข้อสวยงาม</h1>\n<p>ย่อหน้าที่มีระยะบรรทัดพอดี อ่านง่ายสบายตา</p>',
+prac:{title:'จัดรูปแบบตัวอักษร',desc:'กำหนด font-size, font-weight ของ h1 และ text-align ของ .center',start:'<!DOCTYPE html>\n<html>\n<head>\n<style>\n\n</style>\n</head>\n<body>\n  <h1>หัวข้อ</h1>\n  <p class="center">ข้อความกึ่งกลาง</p>\n</body>\n</html>',cks:[{lb:'h1 กำหนด font-size',ck:(d,c)=>/h1\s*{[^}]*font-size\s*:/i.test(c)},{lb:'h1 กำหนด font-weight',ck:(d,c)=>/h1\s*{[^}]*font-weight\s*:/i.test(c)},{lb:'.center กำหนด text-align: center',ck:(d,c)=>/\.center\s*{[^}]*text-align\s*:\s*center/i.test(c)}],xp:25,gh:'text-align ใช้ค่า left, center, right หรือ justify'},
+tests:[
+{title:'กำหนดฟอนต์หลักของเว็บ',desc:'กำหนด font-family ให้ body',start:'<!DOCTYPE html>\n<html>\n<head>\n<style>\n\n</style>\n</head>\n<body>\n  <p>ข้อความ</p>\n</body>\n</html>',cks:[{lb:'body กำหนด font-family',ck:(d,c)=>/body\s*{[^}]*font-family\s*:/i.test(c)}]},
+{title:'จัดกึ่งกลางข้อความ',desc:'กำหนด text-align: center ให้ .title',start:'<!DOCTYPE html>\n<html>\n<head>\n<style>\n\n</style>\n</head>\n<body>\n  <h2 class="title">หัวข้อกึ่งกลาง</h2>\n</body>\n</html>',cks:[{lb:'.title กำหนด text-align: center',ck:(d,c)=>/\.title\s*{[^}]*text-align\s*:\s*center/i.test(c)}]},
+{title:'กำหนดระยะบรรทัด',desc:'กำหนด line-height ให้ .article',start:'<!DOCTYPE html>\n<html>\n<head>\n<style>\n\n</style>\n</head>\n<body>\n  <p class="article">บทความยาว...</p>\n</body>\n</html>',cks:[{lb:'.article กำหนด line-height',ck:(d,c)=>/\.article\s*{[^}]*line-height\s*:/i.test(c)}]}
+]},
+
+{id:6,title:'เส้นขอบและมุมโค้ง',icon:'fa-solid fa-vector-square',
+desc:'เรียนรู้ border, border-radius และ box-shadow',
+pts:['<code class="cf" style="color:#79c0ff;">border</code> เขียนรวด: width style color เช่น <code class="cf">2px solid #333</code>','<code class="cf" style="color:#79c0ff;">border-radius</code> ทำมุมโค้ง (px หรือ %)','<code class="cf" style="color:#79c0ff;">box-shadow</code> เงาของกล่อง','ทำวงกลมได้ด้วย <code class="cf">border-radius: 50%</code>'],
+code:'<style>\n  .card {\n    border: 2px solid #4dabf7;\n    border-radius: 12px;\n    box-shadow: 0 4px 20px rgba(0,0,0,.3);\n    padding: 16px;\n  }\n  .avatar {\n    width: 60px;\n    height: 60px;\n    border-radius: 50%;\n    background: #4dabf7;\n  }\n</style>\n<div class="card">การ์ดมุมโค้ง</div>\n<div class="avatar"></div>',
+prac:{title:'สร้างการ์ดมุมโค้ง',desc:'กำหนด border, border-radius และ box-shadow ให้ .card',start:'<!DOCTYPE html>\n<html>\n<head>\n<style>\n\n</style>\n</head>\n<body>\n  <div class="card">การ์ด</div>\n</body>\n</html>',cks:[{lb:'.card กำหนด border',ck:(d,c)=>/\.card\s*{[^}]*border\s*:/i.test(c)},{lb:'.card กำหนด border-radius',ck:(d,c)=>/\.card\s*{[^}]*border-radius\s*:/i.test(c)},{lb:'.card กำหนด box-shadow',ck:(d,c)=>/\.card\s*{[^}]*box-shadow\s*:/i.test(c)}],xp:25,gh:'border-radius: 50% กับกล่องสี่เหลี่ยมจตุรัสจะได้วงกลม'},
+tests:[
+{title:'ทำมุมโค้งเล็กน้อย',desc:'กำหนด border-radius ให้ .box',start:'<!DOCTYPE html>\n<html>\n<head>\n<style>\n\n</style>\n</head>\n<body>\n  <div class="box">กล่อง</div>\n</body>\n</html>',cks:[{lb:'.box กำหนด border-radius',ck:(d,c)=>/\.box\s*{[^}]*border-radius\s*:/i.test(c)}]},
+{title:'สร้างวงกลม',desc:'กำหนด width, height เท่ากัน และ border-radius: 50% ให้ .circle',start:'<!DOCTYPE html>\n<html>\n<head>\n<style>\n\n</style>\n</head>\n<body>\n  <div class="circle"></div>\n</body>\n</html>',cks:[{lb:'.circle กำหนด width และ height',ck:(d,c)=>/\.circle\s*{[^}]*width\s*:[^}]*height\s*:|\.circle\s*{[^}]*height\s*:[^}]*width\s*:/i.test(c)},{lb:'.circle กำหนด border-radius: 50%',ck:(d,c)=>/\.circle\s*{[^}]*border-radius\s*:\s*50%/i.test(c)}]},
+{title:'ใส่เงาให้กล่อง',desc:'กำหนด box-shadow ให้ .shadow-box',start:'<!DOCTYPE html>\n<html>\n<head>\n<style>\n\n</style>\n</head>\n<body>\n  <div class="shadow-box">กล่องมีเงา</div>\n</body>\n</html>',cks:[{lb:'.shadow-box กำหนด box-shadow',ck:(d,c)=>/\.shadow-box\s*{[^}]*box-shadow\s*:/i.test(c)}]}
+]},
+
+{id:7,title:'Display และการซ่อน',icon:'fa-solid fa-eye-slash',
+desc:'เรียนรู้ display และ visibility',
+pts:['<code class="cf" style="color:#79c0ff;">display: block</code> ขึ้นบรรทัดใหม่ กำหนดขนาดได้','<code class="cf" style="color:#79c0ff;">display: inline</code> อยู่ในบรรทัดเดียวกัน กำหนดขนาดไม่ได้','<code class="cf" style="color:#79c0ff;">display: inline-block</code> อยู่ในบรรทัดแต่กำหนดขนาดได้','<code class="cf" style="color:#79c0ff;">display: none</code> ซ่อนและไม่เว้นที่ว่างไว้'],
+code:'<style>\n  .a { display: inline-block; width: 100px; background: #4dabf7; }\n  .b { display: block; background: #ff6b6b; }\n  .c { display: none; }\n</style>\n<span class="a">กล่อง A</span>\n<span class="a">กล่อง B</span>\n<div class="b">บล็อก</div>\n<div class="c">ซ่อนอยู่</div>',
+prac:{title:'ควบคุมการแสดงผล',desc:'กำหนด .inline-item เป็น inline-block และ .hidden เป็น none',start:'<!DOCTYPE html>\n<html>\n<head>\n<style>\n\n</style>\n</head>\n<body>\n  <span class="inline-item">ไอเทม</span>\n  <div class="hidden">ซ่อนอยู่</div>\n</body>\n</html>',cks:[{lb:'.inline-item กำหนด display: inline-block',ck:(d,c)=>/\.inline-item\s*{[^}]*display\s*:\s*inline-block/i.test(c)},{lb:'.hidden กำหนด display: none',ck:(d,c)=>/\.hidden\s*{[^}]*display\s*:\s*none/i.test(c)}],xp:25,gh:'inline-block รวมข้อดีของ inline และ block เข้าด้วยกัน'},
+tests:[
+{title:'ทำ span ให้กำหนดขนาดได้',desc:'กำหนด display: inline-block และ width ให้ .tag',start:'<!DOCTYPE html>\n<html>\n<head>\n<style>\n\n</style>\n</head>\n<body>\n  <span class="tag">แท็ก</span>\n</body>\n</html>',cks:[{lb:'.tag กำหนด display: inline-block',ck:(d,c)=>/\.tag\s*{[^}]*display\s*:\s*inline-block/i.test(c)},{lb:'.tag กำหนด width',ck:(d,c)=>/\.tag\s*{[^}]*width\s*:/i.test(c)}]},
+{title:'ซ่อนองค์ประกอบ',desc:'กำหนด display: none ให้ .secret',start:'<!DOCTYPE html>\n<html>\n<head>\n<style>\n\n</style>\n</head>\n<body>\n  <p class="secret">ข้อความลับ</p>\n</body>\n</html>',cks:[{lb:'.secret กำหนด display: none',ck:(d,c)=>/\.secret\s*{[^}]*display\s*:\s*none/i.test(c)}]},
+{title:'เปลี่ยน div เป็น inline',desc:'กำหนด display: inline ให้ .row-item',start:'<!DOCTYPE html>\n<html>\n<head>\n<style>\n\n</style>\n</head>\n<body>\n  <div class="row-item">1</div>\n  <div class="row-item">2</div>\n</body>\n</html>',cks:[{lb:'.row-item กำหนด display: inline',ck:(d,c)=>/\.row-item\s*{[^}]*display\s*:\s*inline\b/i.test(c)}]}
+]},
+
+{id:8,title:'การจัดตำแหน่ง Position',icon:'fa-solid fa-map-pin',
+desc:'เรียนรู้ static, relative, absolute, fixed, sticky',
+pts:['<code class="cf" style="color:#79c0ff;">position: relative</code> ขยับจากตำแหน่งเดิมของตัวเอง','<code class="cf" style="color:#79c0ff;">position: absolute</code> อ้างอิงจาก parent ที่มี position','<code class="cf" style="color:#79c0ff;">position: fixed</code> ติดหน้าจอ ไม่เลื่อนตามสกอลล์','ใช้ <code class="cf" style="color:#79c0ff;">top/right/bottom/left</code> กำหนดระยะ, <code class="cf">z-index</code> ควบคุมการซ้อนทับ'],
+code:'<style>\n  .parent {\n    position: relative;\n    height: 150px;\n    background: #1c2333;\n  }\n  .badge {\n    position: absolute;\n    top: 10px;\n    right: 10px;\n    background: #ff6b6b;\n    z-index: 2;\n  }\n</style>\n<div class="parent">\n  <span class="badge">ใหม่</span>\n</div>',
+prac:{title:'ทำป้ายมุมบนขวา',desc:'กำหนด .parent เป็น relative และ .badge เป็น absolute พร้อม top, right',start:'<!DOCTYPE html>\n<html>\n<head>\n<style>\n\n</style>\n</head>\n<body>\n  <div class="parent">\n    <span class="badge">New</span>\n  </div>\n</body>\n</html>',cks:[{lb:'.parent กำหนด position: relative',ck:(d,c)=>/\.parent\s*{[^}]*position\s*:\s*relative/i.test(c)},{lb:'.badge กำหนด position: absolute',ck:(d,c)=>/\.badge\s*{[^}]*position\s*:\s*absolute/i.test(c)},{lb:'.badge กำหนด top หรือ right',ck:(d,c)=>/\.badge\s*{[^}]*(top|right)\s*:/i.test(c)}],xp:30,gh:'absolute จะอ้างอิงกับ parent ที่ใกล้ที่สุดที่มี position ไม่ใช่ static'},
+tests:[
+{title:'ทำแถบเมนูติดหน้าจอ',desc:'กำหนด position: fixed และ top: 0 ให้ .navbar',start:'<!DOCTYPE html>\n<html>\n<head>\n<style>\n\n</style>\n</head>\n<body>\n  <div class="navbar">เมนู</div>\n</body>\n</html>',cks:[{lb:'.navbar กำหนด position: fixed',ck:(d,c)=>/\.navbar\s*{[^}]*position\s*:\s*fixed/i.test(c)},{lb:'.navbar กำหนด top',ck:(d,c)=>/\.navbar\s*{[^}]*top\s*:/i.test(c)}]},
+{title:'ขยับตำแหน่งด้วย relative',desc:'กำหนด position: relative และ left ให้ .shift',start:'<!DOCTYPE html>\n<html>\n<head>\n<style>\n\n</style>\n</head>\n<body>\n  <div class="shift">เลื่อนตำแหน่ง</div>\n</body>\n</html>',cks:[{lb:'.shift กำหนด position: relative',ck:(d,c)=>/\.shift\s*{[^}]*position\s*:\s*relative/i.test(c)},{lb:'.shift กำหนด left',ck:(d,c)=>/\.shift\s*{[^}]*left\s*:/i.test(c)}]},
+{title:'ใช้ z-index ควบคุมการซ้อน',desc:'กำหนด position และ z-index ให้ .front',start:'<!DOCTYPE html>\n<html>\n<head>\n<style>\n\n</style>\n</head>\n<body>\n  <div class="front">อยู่ด้านหน้า</div>\n</body>\n</html>',cks:[{lb:'.front กำหนด position',ck:(d,c)=>/\.front\s*{[^}]*position\s*:/i.test(c)},{lb:'.front กำหนด z-index',ck:(d,c)=>/\.front\s*{[^}]*z-index\s*:/i.test(c)}]}
+]},
+
+{id:9,title:'Flexbox พื้นฐาน',icon:'fa-solid fa-bars-progress',
+desc:'เรียนรู้การจัดวางด้วย Flexbox',
+pts:['<code class="cf" style="color:#79c0ff;">display: flex</code> เปิดใช้งาน flexbox กับ container','<code class="cf" style="color:#79c0ff;">justify-content</code> จัดแนวตามแกนหลัก (แนวนอน)','<code class="cf" style="color:#79c0ff;">align-items</code> จัดแนวตามแกนตั้งฉาก','<code class="cf" style="color:#79c0ff;">gap</code> กำหนดระยะห่างระหว่างไอเทม'],
+code:'<style>\n  .row {\n    display: flex;\n    justify-content: center;\n    align-items: center;\n    gap: 12px;\n  }\n  .item {\n    background: #4dabf7;\n    padding: 12px 20px;\n    border-radius: 8px;\n  }\n</style>\n<div class="row">\n  <div class="item">1</div>\n  <div class="item">2</div>\n  <div class="item">3</div>\n</div>',
+prac:{title:'จัดวางแถวด้วย Flexbox',desc:'กำหนด .row เป็น flex และจัดกึ่งกลางทั้งสองแกน',start:'<!DOCTYPE html>\n<html>\n<head>\n<style>\n\n</style>\n</head>\n<body>\n  <div class="row">\n    <div class="item">A</div>\n    <div class="item">B</div>\n    <div class="item">C</div>\n  </div>\n</body>\n</html>',cks:[{lb:'.row กำหนด display: flex',ck:(d,c)=>/\.row\s*{[^}]*display\s*:\s*flex/i.test(c)},{lb:'.row กำหนด justify-content',ck:(d,c)=>/\.row\s*{[^}]*justify-content\s*:/i.test(c)},{lb:'.row กำหนด align-items',ck:(d,c)=>/\.row\s*{[^}]*align-items\s*:/i.test(c)},{lb:'.row เรนเดอร์เป็น flex จริง',ck:d=>{const el=d.querySelector('.row');return el&&d.defaultView.getComputedStyle(el).display==='flex';}}],xp:30,gh:'justify-content จัดแนวนอน, align-items จัดแนวตั้ง (เมื่อ flex-direction เป็น row)'},
+tests:[
+{title:'กระจายไอเทมให้ห่างกัน',desc:'กำหนด display: flex และ justify-content: space-between ให้ .toolbar',start:'<!DOCTYPE html>\n<html>\n<head>\n<style>\n\n</style>\n</head>\n<body>\n  <div class="toolbar">\n    <span>ซ้าย</span>\n    <span>ขวา</span>\n  </div>\n</body>\n</html>',cks:[{lb:'.toolbar กำหนด display: flex',ck:(d,c)=>/\.toolbar\s*{[^}]*display\s*:\s*flex/i.test(c)},{lb:'.toolbar กำหนด justify-content: space-between',ck:(d,c)=>/\.toolbar\s*{[^}]*justify-content\s*:\s*space-between/i.test(c)}]},
+{title:'จัดกึ่งกลางแนวตั้ง',desc:'กำหนด display: flex และ align-items: center ให้ .center-box',start:'<!DOCTYPE html>\n<html>\n<head>\n<style>\n\n</style>\n</head>\n<body>\n  <div class="center-box" style="height:120px;">\n    <span>กึ่งกลาง</span>\n  </div>\n</body>\n</html>',cks:[{lb:'.center-box กำหนด display: flex',ck:(d,c)=>/\.center-box\s*{[^}]*display\s*:\s*flex/i.test(c)},{lb:'.center-box กำหนด align-items: center',ck:(d,c)=>/\.center-box\s*{[^}]*align-items\s*:\s*center/i.test(c)}]},
+{title:'เว้นระยะด้วย gap',desc:'กำหนด display: flex และ gap ให้ .list',start:'<!DOCTYPE html>\n<html>\n<head>\n<style>\n\n</style>\n</head>\n<body>\n  <div class="list">\n    <div>A</div><div>B</div><div>C</div>\n  </div>\n</body>\n</html>',cks:[{lb:'.list กำหนด display: flex',ck:(d,c)=>/\.list\s*{[^}]*display\s*:\s*flex/i.test(c)},{lb:'.list กำหนด gap',ck:(d,c)=>/\.list\s*{[^}]*gap\s*:/i.test(c)}]}
+]},
+
+{id:10,title:'Flexbox ขั้นสูง',icon:'fa-solid fa-arrows-left-right-to-line',
+desc:'เรียนรู้ flex-direction, flex-wrap และ flex-grow',
+pts:['<code class="cf" style="color:#79c0ff;">flex-direction</code> เปลี่ยนแกนหลัก เป็น row หรือ column','<code class="cf" style="color:#79c0ff;">flex-wrap: wrap</code> ให้ไอเทมตัดขึ้นบรรทัดใหม่เมื่อไม่พอ','<code class="cf" style="color:#79c0ff;">flex-grow</code> ให้ไอเทมขยายเต็มพื้นที่ที่เหลือ','<code class="cf" style="color:#79c0ff;">flex-shrink</code>, <code class="cf" style="color:#79c0ff;">flex-basis</code> ควบคุมการหดและขนาดเริ่มต้น'],
+code:'<style>\n  .col {\n    display: flex;\n    flex-direction: column;\n    flex-wrap: wrap;\n    gap: 8px;\n  }\n  .grow {\n    flex-grow: 1;\n    background: #4dabf7;\n  }\n</style>\n<div class="col">\n  <div>บน</div>\n  <div class="grow">ขยายเต็ม</div>\n  <div>ล่าง</div>\n</div>',
+prac:{title:'จัดคอลัมน์แนวตั้ง',desc:'กำหนด .col เป็น flex-direction: column และ .grow ให้ flex-grow: 1',start:'<!DOCTYPE html>\n<html>\n<head>\n<style>\n\n</style>\n</head>\n<body>\n  <div class="col">\n    <div>บน</div>\n    <div class="grow">ขยาย</div>\n    <div>ล่าง</div>\n  </div>\n</body>\n</html>',cks:[{lb:'.col กำหนด display: flex',ck:(d,c)=>/\.col\s*{[^}]*display\s*:\s*flex/i.test(c)},{lb:'.col กำหนด flex-direction: column',ck:(d,c)=>/\.col\s*{[^}]*flex-direction\s*:\s*column/i.test(c)},{lb:'.grow กำหนด flex-grow',ck:(d,c)=>/\.grow\s*{[^}]*flex-grow\s*:/i.test(c)}],xp:30,gh:'flex-direction: column เปลี่ยนแกนหลักเป็นแนวตั้ง'},
+tests:[
+{title:'ทำแถวที่ตัดบรรทัดได้',desc:'กำหนด display: flex และ flex-wrap: wrap ให้ .gallery',start:'<!DOCTYPE html>\n<html>\n<head>\n<style>\n\n</style>\n</head>\n<body>\n  <div class="gallery">\n    <div>1</div><div>2</div><div>3</div>\n  </div>\n</body>\n</html>',cks:[{lb:'.gallery กำหนด display: flex',ck:(d,c)=>/\.gallery\s*{[^}]*display\s*:\s*flex/i.test(c)},{lb:'.gallery กำหนด flex-wrap: wrap',ck:(d,c)=>/\.gallery\s*{[^}]*flex-wrap\s*:\s*wrap/i.test(c)}]},
+{title:'ให้ไอเทมขยายเท่ากัน',desc:'กำหนด flex-grow: 1 ให้ .col-item',start:'<!DOCTYPE html>\n<html>\n<head>\n<style>\n\n</style>\n</head>\n<body>\n  <div style="display:flex;">\n    <div class="col-item">A</div>\n    <div class="col-item">B</div>\n  </div>\n</body>\n</html>',cks:[{lb:'.col-item กำหนด flex-grow',ck:(d,c)=>/\.col-item\s*{[^}]*flex-grow\s*:/i.test(c)}]},
+{title:'สลับแกนเป็นแนวตั้ง',desc:'กำหนด display: flex และ flex-direction: column ให้ .stack',start:'<!DOCTYPE html>\n<html>\n<head>\n<style>\n\n</style>\n</head>\n<body>\n  <div class="stack">\n    <div>1</div><div>2</div>\n  </div>\n</body>\n</html>',cks:[{lb:'.stack กำหนด display: flex',ck:(d,c)=>/\.stack\s*{[^}]*display\s*:\s*flex/i.test(c)},{lb:'.stack กำหนด flex-direction: column',ck:(d,c)=>/\.stack\s*{[^}]*flex-direction\s*:\s*column/i.test(c)}]}
+]},
+
+{id:11,title:'Grid พื้นฐาน',icon:'fa-solid fa-table-cells',
+desc:'เรียนรู้การจัดวางแบบตารางด้วย CSS Grid',
+pts:['<code class="cf" style="color:#79c0ff;">display: grid</code> เปิดใช้งาน grid layout','<code class="cf" style="color:#79c0ff;">grid-template-columns</code> กำหนดจำนวน/ขนาดคอลัมน์','หน่วย <code class="cf" style="color:#ffa657;">fr</code> แบ่งพื้นที่ตามสัดส่วน','<code class="cf" style="color:#79c0ff;">gap</code> เว้นระยะระหว่างช่อง grid'],
+code:'<style>\n  .grid {\n    display: grid;\n    grid-template-columns: 1fr 1fr 1fr;\n    gap: 10px;\n  }\n  .cell {\n    background: #4dabf7;\n    padding: 16px;\n    text-align: center;\n  }\n</style>\n<div class="grid">\n  <div class="cell">1</div>\n  <div class="cell">2</div>\n  <div class="cell">3</div>\n</div>',
+prac:{title:'สร้างตาราง 3 คอลัมน์',desc:'กำหนด .grid เป็น display: grid และ grid-template-columns 3 ช่อง',start:'<!DOCTYPE html>\n<html>\n<head>\n<style>\n\n</style>\n</head>\n<body>\n  <div class="grid">\n    <div>1</div><div>2</div><div>3</div>\n  </div>\n</body>\n</html>',cks:[{lb:'.grid กำหนด display: grid',ck:(d,c)=>/\.grid\s*{[^}]*display\s*:\s*grid/i.test(c)},{lb:'.grid กำหนด grid-template-columns',ck:(d,c)=>/\.grid\s*{[^}]*grid-template-columns\s*:/i.test(c)},{lb:'เรนเดอร์เป็น grid จริง',ck:d=>{const el=d.querySelector('.grid');return el&&d.defaultView.getComputedStyle(el).display==='grid';}}],xp:30,gh:'grid-template-columns: 1fr 1fr 1fr สร้าง 3 คอลัมน์ขนาดเท่ากัน'},
+tests:[
+{title:'สร้างตาราง 2 คอลัมน์',desc:'กำหนด grid-template-columns เป็น 2 คอลัมน์เท่ากัน',start:'<!DOCTYPE html>\n<html>\n<head>\n<style>\n\n</style>\n</head>\n<body>\n  <div class="two-col">\n    <div>ซ้าย</div><div>ขวา</div>\n  </div>\n</body>\n</html>',cks:[{lb:'.two-col กำหนด display: grid',ck:(d,c)=>/\.two-col\s*{[^}]*display\s*:\s*grid/i.test(c)},{lb:'.two-col กำหนด grid-template-columns',ck:(d,c)=>/\.two-col\s*{[^}]*grid-template-columns\s*:/i.test(c)}]},
+{title:'เว้นระยะช่อง grid',desc:'กำหนด gap ให้ .board',start:'<!DOCTYPE html>\n<html>\n<head>\n<style>\n\n</style>\n</head>\n<body>\n  <div class="board">\n    <div>A</div><div>B</div>\n  </div>\n</body>\n</html>',cks:[{lb:'.board กำหนด display: grid',ck:(d,c)=>/\.board\s*{[^}]*display\s*:\s*grid/i.test(c)},{lb:'.board กำหนด gap',ck:(d,c)=>/\.board\s*{[^}]*gap\s*:/i.test(c)}]},
+{title:'กำหนดแถวด้วย grid-template-rows',desc:'กำหนด grid-template-rows ให้ .layout',start:'<!DOCTYPE html>\n<html>\n<head>\n<style>\n\n</style>\n</head>\n<body>\n  <div class="layout">\n    <div>บน</div><div>ล่าง</div>\n  </div>\n</body>\n</html>',cks:[{lb:'.layout กำหนด display: grid',ck:(d,c)=>/\.layout\s*{[^}]*display\s*:\s*grid/i.test(c)},{lb:'.layout กำหนด grid-template-rows',ck:(d,c)=>/\.layout\s*{[^}]*grid-template-rows\s*:/i.test(c)}]}
+]},
+
+{id:12,title:'Grid ขั้นสูง',icon:'fa-solid fa-table-cells-large',
+desc:'เรียนรู้ grid-template-areas และการรวมช่อง',
+pts:['<code class="cf" style="color:#79c0ff;">grid-template-areas</code> ตั้งชื่อผังหน้าเว็บเป็นภาพ','<code class="cf" style="color:#79c0ff;">grid-area</code> กำหนดว่าองค์ประกอบอยู่ช่องไหน','<code class="cf" style="color:#79c0ff;">grid-column: span 2</code> รวมหลายคอลัมน์เป็นช่องเดียว','<code class="cf" style="color:#79c0ff;">grid-row</code> รวมหลายแถวเข้าด้วยกัน'],
+code:'<style>\n  .layout {\n    display: grid;\n    grid-template-columns: 1fr 3fr;\n    grid-template-areas:\n      "sidebar header"\n      "sidebar main";\n    gap: 8px;\n  }\n  .header { grid-area: header; }\n  .sidebar { grid-area: sidebar; }\n  .main { grid-area: main; }\n</style>\n<div class="layout">\n  <div class="header">หัว</div>\n  <div class="sidebar">เมนู</div>\n  <div class="main">เนื้อหา</div>\n</div>',
+prac:{title:'จัดผังด้วย grid-template-areas',desc:'สร้างผัง header/sidebar/main ด้วย grid-template-areas',start:'<!DOCTYPE html>\n<html>\n<head>\n<style>\n\n</style>\n</head>\n<body>\n  <div class="layout">\n    <div class="header">หัว</div>\n    <div class="sidebar">เมนู</div>\n    <div class="main">เนื้อหา</div>\n  </div>\n</body>\n</html>',cks:[{lb:'.layout กำหนด display: grid',ck:(d,c)=>/\.layout\s*{[^}]*display\s*:\s*grid/i.test(c)},{lb:'.layout กำหนด grid-template-areas',ck:(d,c)=>/\.layout\s*{[^}]*grid-template-areas\s*:/i.test(c)},{lb:'มี grid-area กำหนดให้ header หรือ sidebar',ck:(d,c)=>/grid-area\s*:/i.test(c)}],xp:35,gh:'ชื่อใน grid-template-areas ต้องตรงกับ grid-area ที่แต่ละองค์ประกอบใช้'},
+tests:[
+{title:'รวมคอลัมน์ด้วย span',desc:'กำหนด grid-column: span 2 ให้ .wide',start:'<!DOCTYPE html>\n<html>\n<head>\n<style>\n\n</style>\n</head>\n<body>\n  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;">\n    <div class="wide">กว้าง</div>\n    <div>3</div>\n  </div>\n</body>\n</html>',cks:[{lb:'.wide กำหนด grid-column',ck:(d,c)=>/\.wide\s*{[^}]*grid-column\s*:/i.test(c)}]},
+{title:'กำหนด grid-area ให้องค์ประกอบ',desc:'กำหนด grid-area ให้ .footer',start:'<!DOCTYPE html>\n<html>\n<head>\n<style>\n\n</style>\n</head>\n<body>\n  <div class="footer">ท้ายเว็บ</div>\n</body>\n</html>',cks:[{lb:'.footer กำหนด grid-area',ck:(d,c)=>/\.footer\s*{[^}]*grid-area\s*:/i.test(c)}]},
+{title:'รวมแถวด้วย grid-row',desc:'กำหนด grid-row: span 2 ให้ .tall',start:'<!DOCTYPE html>\n<html>\n<head>\n<style>\n\n</style>\n</head>\n<body>\n  <div style="display:grid;">\n    <div class="tall">สูง</div>\n  </div>\n</body>\n</html>',cks:[{lb:'.tall กำหนด grid-row',ck:(d,c)=>/\.tall\s*{[^}]*grid-row\s*:/i.test(c)}]}
+]},
+
+{id:13,title:'Pseudo-class และ Pseudo-element',icon:'fa-solid fa-wand-magic-sparkles',
+desc:'เรียนรู้การเลือกสถานะและส่วนพิเศษขององค์ประกอบ',
+pts:['<code class="cf" style="color:#d2a8ff;">:hover</code> สถานะเมื่อเมาส์ชี้','<code class="cf" style="color:#d2a8ff;">:nth-child()</code> เลือกตามลำดับลูก','<code class="cf" style="color:#d2a8ff;">::before</code> / <code class="cf" style="color:#d2a8ff;">::after</code> แทรกเนื้อหาก่อน/หลังองค์ประกอบ (ต้องมี <code class="cf">content</code>)','<code class="cf" style="color:#d2a8ff;">:first-child</code>, <code class="cf" style="color:#d2a8ff;">:last-child</code> เลือกลูกตัวแรก/สุดท้าย'],
+code:'<style>\n  .btn:hover {\n    background: #4dabf7;\n  }\n  li:nth-child(2) {\n    color: #ff6b6b;\n  }\n  .quote::before {\n    content: "\\201C";\n  }\n</style>\n<button class="btn">ลองชี้เมาส์</button>\n<ul><li>หนึ่ง</li><li>สอง</li><li>สาม</li></ul>\n<p class="quote">คำคม</p>',
+prac:{title:'ใช้ :hover และ ::before',desc:'กำหนด .btn:hover เปลี่ยนสี และ .tag::before ใส่ content',start:'<!DOCTYPE html>\n<html>\n<head>\n<style>\n\n</style>\n</head>\n<body>\n  <button class="btn">ปุ่ม</button>\n  <span class="tag">แท็ก</span>\n</body>\n</html>',cks:[{lb:'มี .btn:hover { }',ck:(d,c)=>/\.btn:hover\s*{/i.test(c)},{lb:'.btn:hover กำหนด background หรือ color',ck:(d,c)=>/\.btn:hover\s*{[^}]*(background|color)\s*:/i.test(c)},{lb:'มี .tag::before พร้อม content',ck:(d,c)=>/\.tag::before\s*{[^}]*content\s*:/i.test(c)}],xp:30,gh:'::before/::after ต้องมี content: "..." เสมอถึงจะแสดงผล'},
+tests:[
+{title:'เปลี่ยนสีลิงก์เมื่อชี้',desc:'กำหนด a:hover ให้เปลี่ยน color',start:'<!DOCTYPE html>\n<html>\n<head>\n<style>\n\n</style>\n</head>\n<body>\n  <a href="#">ลิงก์</a>\n</body>\n</html>',cks:[{lb:'มี a:hover { }',ck:(d,c)=>/a:hover\s*{/i.test(c)},{lb:'a:hover กำหนด color',ck:(d,c)=>/a:hover\s*{[^}]*color\s*:/i.test(c)}]},
+{title:'เลือกแถวคู่ในตาราง',desc:'ใช้ :nth-child(even) กำหนดสีพื้นหลังแถว li',start:'<!DOCTYPE html>\n<html>\n<head>\n<style>\n\n</style>\n</head>\n<body>\n  <ul><li>1</li><li>2</li><li>3</li><li>4</li></ul>\n</body>\n</html>',cks:[{lb:'มี li:nth-child(even) หรือคล้ายกัน',ck:(d,c)=>/li:nth-child\(/i.test(c)}]},
+{title:'แทรกไอคอนด้วย ::after',desc:'ใช้ .link::after ใส่ content ลูกศร',start:'<!DOCTYPE html>\n<html>\n<head>\n<style>\n\n</style>\n</head>\n<body>\n  <span class="link">ไปต่อ</span>\n</body>\n</html>',cks:[{lb:'มี .link::after { }',ck:(d,c)=>/\.link::after\s*{/i.test(c)},{lb:'.link::after กำหนด content',ck:(d,c)=>/\.link::after\s*{[^}]*content\s*:/i.test(c)}]}
+]},
+
+{id:14,title:'Transition และ Animation',icon:'fa-solid fa-wand-sparkles',
+desc:'เรียนรู้การทำเอฟเฟกต์เคลื่อนไหว',
+pts:['<code class="cf" style="color:#79c0ff;">transition</code> ทำให้การเปลี่ยนค่าค่อยๆ เปลี่ยนแบบนุ่มนวล','<code class="cf" style="color:#d2a8ff;">@keyframes</code> กำหนดขั้นตอนของแอนิเมชัน','<code class="cf" style="color:#79c0ff;">animation</code> เรียกใช้ keyframes กับองค์ประกอบ','ระบุระยะเวลาเป็นวินาที (s) เช่น <code class="cf">0.3s</code>'],
+code:'<style>\n  .btn {\n    background: #4dabf7;\n    transition: background 0.3s, transform 0.3s;\n  }\n  .btn:hover {\n    background: #ff6b6b;\n    transform: scale(1.1);\n  }\n  @keyframes bounce {\n    0%,100% { transform: translateY(0); }\n    50% { transform: translateY(-10px); }\n  }\n  .ball {\n    animation: bounce 1.2s infinite;\n  }\n</style>\n<button class="btn">ลองชี้เมาส์</button>\n<div class="ball">●</div>',
+prac:{title:'สร้างปุ่มที่มี transition',desc:'กำหนด transition ให้ .btn และเปลี่ยนสีเมื่อ hover',start:'<!DOCTYPE html>\n<html>\n<head>\n<style>\n\n</style>\n</head>\n<body>\n  <button class="btn">ปุ่ม</button>\n</body>\n</html>',cks:[{lb:'.btn กำหนด transition',ck:(d,c)=>/\.btn\s*{[^}]*transition\s*:/i.test(c)},{lb:'มี .btn:hover { }',ck:(d,c)=>/\.btn:hover\s*{/i.test(c)}],xp:30,gh:'transition ใส่ใน state ปกติ ไม่ใช่ใน :hover'},
+tests:[
+{title:'สร้าง keyframes',desc:'สร้าง @keyframes ชื่อ fade และนำไปใช้กับ .box',start:'<!DOCTYPE html>\n<html>\n<head>\n<style>\n\n</style>\n</head>\n<body>\n  <div class="box">กล่อง</div>\n</body>\n</html>',cks:[{lb:'มี @keyframes',ck:(d,c)=>/@keyframes\s+\w+/i.test(c)},{lb:'.box กำหนด animation',ck:(d,c)=>/\.box\s*{[^}]*animation\s*:/i.test(c)}]},
+{title:'ทำ transition ความโปร่งใส',desc:'กำหนด transition: opacity ให้ .fade-item',start:'<!DOCTYPE html>\n<html>\n<head>\n<style>\n\n</style>\n</head>\n<body>\n  <div class="fade-item">เนื้อหา</div>\n</body>\n</html>',cks:[{lb:'.fade-item กำหนด transition',ck:(d,c)=>/\.fade-item\s*{[^}]*transition\s*:/i.test(c)}]},
+{title:'แอนิเมชันวนซ้ำไม่สิ้นสุด',desc:'สร้าง animation ที่มี infinite ให้ .spin',start:'<!DOCTYPE html>\n<html>\n<head>\n<style>\n\n</style>\n</head>\n<body>\n  <div class="spin">⟳</div>\n</body>\n</html>',cks:[{lb:'มี @keyframes',ck:(d,c)=>/@keyframes\s+\w+/i.test(c)},{lb:'.spin กำหนด animation พร้อม infinite',ck:(d,c)=>/\.spin\s*{[^}]*animation\s*:[^}]*infinite/i.test(c)}]}
+]},
+
+{id:15,title:'Transform',icon:'fa-solid fa-arrows-spin',
+desc:'เรียนรู้การย้าย หมุน และย่อ/ขยายด้วย transform',
+pts:['<code class="cf" style="color:#79c0ff;">translate(x,y)</code> เลื่อนตำแหน่ง','<code class="cf" style="color:#79c0ff;">rotate(deg)</code> หมุนองค์ประกอบ','<code class="cf" style="color:#79c0ff;">scale(n)</code> ย่อ/ขยายขนาด','<code class="cf" style="color:#79c0ff;">skew(deg)</code> บิดเอียง, รวมหลายค่าคั่นด้วยช่องว่างได้'],
+code:'<style>\n  .box {\n    transform: translate(20px, 10px) rotate(10deg);\n    background: #4dabf7;\n  }\n  .zoom:hover {\n    transform: scale(1.2);\n  }\n</style>\n<div class="box">เลื่อน+หมุน</div>\n<div class="zoom">ลองชี้เมาส์</div>',
+prac:{title:'ใช้ transform หมุนและย่อขยาย',desc:'กำหนด transform: rotate ให้ .box และ transform: scale ให้ .zoom:hover',start:'<!DOCTYPE html>\n<html>\n<head>\n<style>\n\n</style>\n</head>\n<body>\n  <div class="box">กล่อง</div>\n  <div class="zoom">ซูม</div>\n</body>\n</html>',cks:[{lb:'.box กำหนด transform: rotate',ck:(d,c)=>/\.box\s*{[^}]*transform\s*:[^}]*rotate\(/i.test(c)},{lb:'.zoom:hover กำหนด transform: scale',ck:(d,c)=>/\.zoom:hover\s*{[^}]*transform\s*:[^}]*scale\(/i.test(c)}],xp:30,gh:'สามารถรวมหลาย transform ในกฎเดียว เช่น translate(...) rotate(...)'},
+tests:[
+{title:'เลื่อนตำแหน่งองค์ประกอบ',desc:'กำหนด transform: translate ให้ .move',start:'<!DOCTYPE html>\n<html>\n<head>\n<style>\n\n</style>\n</head>\n<body>\n  <div class="move">เลื่อน</div>\n</body>\n</html>',cks:[{lb:'.move กำหนด transform: translate',ck:(d,c)=>/\.move\s*{[^}]*transform\s*:[^}]*translate\(/i.test(c)}]},
+{title:'หมุนรูปภาพ',desc:'กำหนด transform: rotate ให้ .rotate-box',start:'<!DOCTYPE html>\n<html>\n<head>\n<style>\n\n</style>\n</head>\n<body>\n  <div class="rotate-box">หมุน</div>\n</body>\n</html>',cks:[{lb:'.rotate-box กำหนด transform: rotate',ck:(d,c)=>/\.rotate-box\s*{[^}]*transform\s*:[^}]*rotate\(/i.test(c)}]},
+{title:'ขยายขนาดเมื่อ hover',desc:'กำหนด .card:hover ให้ transform: scale',start:'<!DOCTYPE html>\n<html>\n<head>\n<style>\n\n</style>\n</head>\n<body>\n  <div class="card">การ์ด</div>\n</body>\n</html>',cks:[{lb:'มี .card:hover { }',ck:(d,c)=>/\.card:hover\s*{/i.test(c)},{lb:'.card:hover กำหนด transform: scale',ck:(d,c)=>/\.card:hover\s*{[^}]*transform\s*:[^}]*scale\(/i.test(c)}]}
+]},
+
+{id:16,title:'Responsive Design',icon:'fa-solid fa-mobile-screen-button',
+desc:'เรียนรู้การออกแบบเว็บให้รองรับทุกขนาดหน้าจอ',
+pts:['<code class="cf" style="color:#d2a8ff;">@media</code> เขียนกฎ CSS เฉพาะเงื่อนไขหน้าจอ','<code class="cf" style="color:#79c0ff;">max-width</code> ใช้กำหนดจุดเปลี่ยน (breakpoint) ทั่วไป','แนวคิด Mobile First: เขียน CSS มือถือก่อน แล้วขยายด้วย min-width','ปรับ Flexbox/Grid ให้เปลี่ยน column ตามขนาดจอได้'],
+code:'<style>\n  .grid {\n    display: grid;\n    grid-template-columns: 1fr 1fr 1fr;\n    gap: 10px;\n  }\n  @media (max-width: 600px) {\n    .grid {\n      grid-template-columns: 1fr;\n    }\n  }\n</style>\n<div class="grid">\n  <div>1</div><div>2</div><div>3</div>\n</div>',
+prac:{title:'ทำ Grid ให้ Responsive',desc:'ใช้ @media (max-width: 600px) เปลี่ยน .grid ให้เหลือ 1 คอลัมน์',start:'<!DOCTYPE html>\n<html>\n<head>\n<style>\n.grid {\n  display: grid;\n  grid-template-columns: 1fr 1fr 1fr;\n  gap: 10px;\n}\n\n</style>\n</head>\n<body>\n  <div class="grid">\n    <div>1</div><div>2</div><div>3</div>\n  </div>\n</body>\n</html>',cks:[{lb:'มี @media (max-width: ...)',ck:(d,c)=>/@media\s*\(\s*max-width\s*:/i.test(c)},{lb:'ใน @media กำหนด grid-template-columns ใหม่',ck:(d,c)=>{const m=c.match(/@media[^{]*{([\s\S]*)}\s*<\/style>/i);return m&&/grid-template-columns\s*:/i.test(m[1]);}}],xp:35,gh:'@media (max-width: 600px) { .grid { grid-template-columns: 1fr; } }'},
+tests:[
+{title:'ซ่อนเมนูในจอเล็ก',desc:'ใช้ @media ซ่อน .sidebar เมื่อหน้าจอแคบกว่า 768px',start:'<!DOCTYPE html>\n<html>\n<head>\n<style>\n\n</style>\n</head>\n<body>\n  <div class="sidebar">เมนู</div>\n</body>\n</html>',cks:[{lb:'มี @media (max-width: 768px)',ck:(d,c)=>/@media\s*\(\s*max-width\s*:\s*768px\s*\)/i.test(c)},{lb:'ใน @media กำหนด display: none ให้ .sidebar',ck:(d,c)=>{const m=c.match(/@media[^{]*{([\s\S]*)}\s*<\/style>/i);return m&&/\.sidebar\s*{[^}]*display\s*:\s*none/i.test(m[1]);}}]},
+{title:'ปรับขนาดตัวอักษรบนมือถือ',desc:'ใช้ @media ลด font-size ของ h1 บนจอเล็ก',start:'<!DOCTYPE html>\n<html>\n<head>\n<style>\nh1 { font-size: 40px; }\n\n</style>\n</head>\n<body>\n  <h1>หัวข้อใหญ่</h1>\n</body>\n</html>',cks:[{lb:'มี @media (max-width: ...)',ck:(d,c)=>/@media\s*\(\s*max-width\s*:/i.test(c)},{lb:'ใน @media กำหนด font-size ของ h1',ck:(d,c)=>{const m=c.match(/@media[^{]*{([\s\S]*)}\s*<\/style>/i);return m&&/h1\s*{[^}]*font-size\s*:/i.test(m[1]);}}]},
+{title:'เปลี่ยน Flex direction ตามจอ',desc:'ใช้ @media เปลี่ยน .row จาก row เป็น column บนจอเล็ก',start:'<!DOCTYPE html>\n<html>\n<head>\n<style>\n.row { display: flex; flex-direction: row; }\n\n</style>\n</head>\n<body>\n  <div class="row"><div>A</div><div>B</div></div>\n</body>\n</html>',cks:[{lb:'มี @media (max-width: ...)',ck:(d,c)=>/@media\s*\(\s*max-width\s*:/i.test(c)},{lb:'ใน @media กำหนด flex-direction: column',ck:(d,c)=>{const m=c.match(/@media[^{]*{([\s\S]*)}\s*<\/style>/i);return m&&/flex-direction\s*:\s*column/i.test(m[1]);}}]}
+]}
+];
+
+/* ================================================================
+   สถานะเกม - เก็บใน localStorage
+   ================================================================ */
+const SAVE_KEY='cssquest_v1';
+let S={screen:'map',levelId:null,testIdx:null,unlocked:1,pDone:{},tDone:{},tab:'learn'};
+
+function saveState(){
+  try{localStorage.setItem(SAVE_KEY,JSON.stringify({unlocked:S.unlocked,pDone:S.pDone,tDone:S.tDone}));}catch(e){}
+}
+function loadState(){
+  try{
+    const d=JSON.parse(localStorage.getItem(SAVE_KEY));
+    if(d){S.unlocked=d.unlocked||1;S.pDone=d.pDone||{};S.tDone=d.tDone||{};}
+  }catch(e){}
+}
+function resetState(){
+  S.unlocked=1;S.pDone={};S.tDone={};S.screen='map';saveState();render();toast('รีเซ็ตข้อมูลเรียบร้อย','info');
 }
 
-const contentTemplates = {
-  header:{label:"Header",icon:"H",tag:"<header>",when:"Use once per page, placed at the very top. Contains logo or site name.",fields:{title:"Your Website Name"},render:d=>`<div class="comp-header">${editSpan('title',d.title)}</div>`,html:d=>`  <header class="site-header">\n    <h1>${escapeHtml(d.title)}</h1>\n  </header>`,tip:"Header establishes visual hierarchy — tells users which site they're on."},
-  nav:{label:"Navbar",icon:"N",tag:"<nav>",when:"Use when you have 2+ navigation links. Usually placed inside or near the header.",fields:{item1:"Home",item2:"About",item3:"Contact"},render:d=>`<div class="comp-nav"><a href="#">${editSpan('item1',d.item1)}</a><a href="#">${editSpan('item2',d.item2)}</a><a href="#">${editSpan('item3',d.item3)}</a></div>`,html:d=>`  <nav class="site-nav">\n    <a href="#">${escapeHtml(d.item1)}</a>\n    <a href="#">${escapeHtml(d.item2)}</a>\n    <a href="#">${escapeHtml(d.item3)}</a>\n  </nav>`,tip:"Keep nav consistent across all pages for wayfinding."},
-  hero:{label:"Hero Section",icon:"★",tag:"<section>",when:"Primary message area, placed right after the header. First thing users see.",fields:{title:"Main Headline Here",subtitle:"A short description of what you offer"},render:d=>`<div class="comp-hero"><h2>${editSpan('title',d.title)}</h2><p>${editSpan('subtitle',d.subtitle)}</p></div>`,html:d=>`  <section class="hero">\n    <h2>${escapeHtml(d.title)}</h2>\n    <p>${escapeHtml(d.subtitle)}</p>\n  </section>`,tip:"Use large bold text with high contrast. This is your conversion moment."},
-  button:{label:"Button",icon:"Btn",tag:"<button>",when:"Triggers an action: submit form, confirm, navigate.",fields:{label:"Click Here"},render:d=>`<div class="comp-button"><button>${editSpan('label',d.label)}</button></div>`,html:d=>`  <button class="btn">${escapeHtml(d.label)}</button>`,tip:"CTA buttons should contrast with background. Make them impossible to miss."},
-  image:{label:"Image",icon:"IMG",tag:"<img>",when:"Displays an image. Always include alt text for accessibility and SEO.",fields:{alt:"Example image"},render:d=>`<div class="comp-image"><img src="https://picsum.photos/seed/layout42/600/280" alt="${escapeHtml(d.alt)}"><div style="text-align:center;font-size:0.7rem;color:#94a3b8;margin-top:4px;">alt: ${editSpan('alt',d.alt)}</div></div>`,html:d=>`  <img src="https://picsum.photos/seed/layout42/800/400" alt="${escapeHtml(d.alt)}" style="max-width:100%;border-radius:8px;">`,tip:"Images communicate faster than text. Always add alt text."},
-  card:{label:"Card",icon:"Card",tag:"<div class=\"card\">",when:"Groups related content in a bordered box. Ideal for product cards, profiles.",fields:{title:"Card Title",text:"Short description of this card."},render:d=>`<div class="comp-card"><h3>${editSpan('title',d.title)}</h3><p>${editSpan('text',d.text)}</p></div>`,html:d=>`  <div class="card">\n    <h3>${escapeHtml(d.title)}</h3>\n    <p>${escapeHtml(d.text)}</p>\n  </div>`,tip:"Cards enable chunking — place multiple cards in a Grid for scanning."},
-  input:{label:"Input Field",icon:"In",tag:"<input>",when:"Receives single-line user input: name, email, password.",fields:{placeholder:"Enter text..."},render:d=>`<div style="padding:4px 0;"><div class="fake-input">${editSpan('placeholder',d.placeholder)}</div></div>`,html:d=>`  <input type="text" placeholder="${escapeHtml(d.placeholder)}">`,tip:"Always pair with a visible label or clear placeholder."},
-  textarea:{label:"Textarea",icon:"Ta",tag:"<textarea>",when:"Multi-line input: reviews, comments, descriptions.",fields:{placeholder:"Type multiple lines..."},render:d=>`<div style="padding:4px 0;"><div class="fake-textarea">${editSpan('placeholder',d.placeholder)}</div></div>`,html:d=>`  <textarea rows="4" placeholder="${escapeHtml(d.placeholder)}"></textarea>`,tip:"Set appropriate rows. Provide placeholder guidance."},
-  select:{label:"Dropdown",icon:"Sel",tag:"<select>",when:"Single selection from predefined options. Best for 5+ choices.",fields:{opt1:"Choose...",opt2:"Option 1"},render:d=>`<div style="padding:4px 0;"><div class="fake-select">${editSpan('opt1',d.opt1)} <span>▾</span></div></div>`,html:d=>`  <select>\n    <option>${escapeHtml(d.opt1)}</option>\n    <option>${escapeHtml(d.opt2)}</option>\n  </select>`,tip:"For fewer than 5 options, consider radio buttons instead."},
-  checkbox:{label:"Checkbox",icon:"☑",tag:"<input type=\"checkbox\">",when:"Multi-select or terms acceptance.",fields:{label:"Accept terms and conditions"},render:d=>`<div class="comp-checkbox"><label><input type="checkbox" disabled> ${editSpan('label',d.label)}</label></div>`,html:d=>`  <label>\n    <input type="checkbox">\n    ${escapeHtml(d.label)}\n  </label>`,tip:"Wrap in a clickable label to increase touch target size."},
-  text:{label:"Text",icon:"T",tag:"<p>",when:"General paragraph text, descriptions, explanations.",fields:{content:"Editable paragraph text goes here."},render:d=>`<div class="comp-text"><p>${editSpan('content',d.content)}</p></div>`,html:d=>`  <p>${escapeHtml(d.content)}</p>`,tip:"Keep line-height at 1.6+ and font-size ≥ 16px for readability."},
-  link:{label:"Link",icon:"A",tag:"<a>",when:"Navigates to another page, site, or anchor. Requires href.",fields:{label:"Example link — click here"},render:d=>`<div class="comp-link"><a href="#">${editSpan('label',d.label)}</a></div>`,html:d=>`  <a href="#">${escapeHtml(d.label)}</a>`,tip:"Links should look different from plain text — use color or underline (affordance)."},
-  list:{label:"List",icon:"Li",tag:"<ul><li>",when:"Enumerated information: features, steps, menu items.",fields:{item1:"Item 1",item2:"Item 2",item3:"Item 3"},render:d=>`<div class="comp-list"><ul><li>${editSpan('item1',d.item1)}</li><li>${editSpan('item2',d.item2)}</li><li>${editSpan('item3',d.item3)}</li></ul></div>`,html:d=>`  <ul>\n    <li>${escapeHtml(d.item1)}</li>\n    <li>${escapeHtml(d.item2)}</li>\n    <li>${escapeHtml(d.item3)}</li>\n  </ul>`,tip:"Lists chunk information into scannable pieces."},
-  table:{label:"Table",icon:"Tbl",tag:"<table>",when:"Tabular data: pricing, comparisons. Never use for page layout.",fields:{h1:"Column 1",h2:"Column 2",c1:"Data 1",c2:"Data 2",c3:"Data 3",c4:"Data 4"},render:d=>`<div class="comp-table"><table><tr><th>${editSpan('h1',d.h1)}</th><th>${editSpan('h2',d.h2)}</th></tr><tr><td>${editSpan('c1',d.c1)}</td><td>${editSpan('c2',d.c2)}</td></tr><tr><td>${editSpan('c3',d.c3)}</td><td>${editSpan('c4',d.c4)}</td></tr></table></div>`,html:d=>`  <table>\n    <tr>\n      <th>${escapeHtml(d.h1)}</th>\n      <th>${escapeHtml(d.h2)}</th>\n    </tr>\n    <tr>\n      <td>${escapeHtml(d.c1)}</td>\n      <td>${escapeHtml(d.c2)}</td>\n    </tr>\n    <tr>\n      <td>${escapeHtml(d.c3)}</td>\n      <td>${escapeHtml(d.c4)}</td>\n    </tr>\n  </table>`,tip:"Tables are for data only. Use Grid/Flexbox for layout."},
-  video:{label:"Video",icon:"Vid",tag:"<video>",when:"Embedded video. Always include controls attribute.",fields:{caption:"Video placeholder"},render:d=>`<div class="comp-video"><div class="video-box">▶<small>${editSpan('caption',d.caption)}</small></div></div>`,html:d=>`  <video controls width="100%" style="border-radius:8px;">\n    <source src="video.mp4" type="video/mp4">\n    ${escapeHtml(d.caption)}\n  </video>`,tip:"Always provide controls. Optimize file size for web."},
-  quote:{label:"Blockquote",icon:"\"",tag:"<blockquote>",when:"Quoted text: testimonials, citations, reviews.",fields:{quote:"Quoted text from a customer or source",cite:"Author name"},render:d=>`<div class="comp-quote"><blockquote>"${editSpan('quote',d.quote)}"<cite>— ${editSpan('cite',d.cite)}</cite></blockquote></div>`,html:d=>`  <blockquote>\n    "${escapeHtml(d.quote)}"\n    <cite>— ${escapeHtml(d.cite)}</cite>\n  </blockquote>`,tip:"Always include <cite> for credibility."},
-  badge:{label:"Badge",icon:"Tag",tag:"<span class=\"badge\">",when:"Short status labels: 'New', 'Sale', 'Sold out'.",fields:{label1:"New",label2:"Recommended"},render:d=>`<div class="comp-badge"><span class="badge">${editSpan('label1',d.label1)}</span><span class="badge">${editSpan('label2',d.label2)}</span></div>`,html:d=>`  <span class="badge">${escapeHtml(d.label1)}</span>\n  <span class="badge badge-alt">${escapeHtml(d.label2)}</span>`,tip:"Keep badge text extremely short. Use contrasting colors."},
-  divider:{label:"Divider",icon:"—",tag:"<hr>",when:"Visual separator between unrelated content sections.",render:()=>`<div class="comp-divider"><hr></div>`,html:()=>`  <hr>`,tip:"Use sparingly — too many dividers create visual noise."},
-  codeblock:{label:"Code Block",icon:"</>",tag:"<pre><code>",when:"Displays code snippets. Use monospace font + syntax highlighting.",fields:{code:'<div class="hello">Hello World</div>'},render:d=>`<div class="comp-code"><pre><code class="editable" contenteditable="true" draggable="false" spellcheck="false" data-field="code">${escapeHtml(d.code)}</code></pre></div>`,html:d=>`  <pre><code>${escapeHtml(d.code)}</code></pre>`,tip:"Monospace font + syntax highlighting dramatically improve readability."},
-  footer:{label:"Footer",icon:"F",tag:"<footer>",when:"Once per page, at the very bottom. Contact info, copyright.",fields:{content:"© 2026 Your Company | Contact Us"},render:d=>`<div class="comp-footer">${editSpan('content',d.content)}</div>`,html:d=>`  <footer>\n    <p>${escapeHtml(d.content)}</p>\n  </footer>`,tip:"Signals end-of-page. Include essential links and legal info."}
-};
-
-/* ═══════════════════════════════════════════════
-   Container Templates
-   ═══════════════════════════════════════════════ */
-const containerTemplates={
-  section:{label:"Section",icon:"📦",cssClass:"layout-section",tag:"<section>",when:"Divides page into logical sections with padding and border.",html:()=>'  <section class="layout-section">\n    <!-- content -->\n  </section>',tip:"Sections create whitespace and visual rhythm."},
-  row:{label:"Row",icon:"↔",cssClass:"layout-row",tag:"<div class=\"layout-row\">",when:"Horizontal arrangement: menus, button groups, card rows.",html:()=>'  <div class="layout-row">\n    <!-- horizontal items -->\n  </div>',tip:"Flexbox row — ideal for side-by-side layouts."},
-  col:{label:"Column",icon:"↕",cssClass:"layout-col",tag:"<div class=\"layout-col\">",when:"Vertical stacking: forms, text blocks, step sequences.",html:()=>'  <div class="layout-col">\n    <!-- stacked items -->\n  </div>',tip:"Flexbox column — natural vertical flow."},
-  grid2:{label:"Grid 2-col",icon:"▦",cssClass:"layout-grid2",tag:"<div class=\"layout-grid2\">",when:"2-column grid: product pairs, feature comparisons.",html:()=>'  <div class="layout-grid2">\n    <!-- 2-column content -->\n  </div>',tip:"CSS Grid 2-col — perfect for card layouts."},
-  grid3:{label:"Grid 3-col",icon:"Ħ",cssClass:"layout-grid3",tag:"<div class=\"layout-grid3\">",when:"3-column grid: product catalogs, feature grids.",html:()=>'  <div class="layout-grid3">\n    <!-- 3-column content -->\n  </div>',tip:"CSS Grid 3-col — great for showcasing many items."}
-};
-
-const containerTypes=Object.keys(containerTemplates);
-const containerDirection={root:'vertical',section:'vertical',col:'vertical',row:'horizontal',grid2:'horizontal',grid3:'horizontal'};
-function getTemplate(type){return containerTemplates[type]||contentTemplates[type];}
-
-/* ═══════════════════════════════════════════════
-   State
-   ═══════════════════════════════════════════════ */
-let idCounter=0;
-const tree={id:'root',type:'root',children:[]};
-let draggedId=null;
-let rawCodeText='';
-
-const canvas=document.getElementById('canvas');
-const elCount=document.getElementById('elCount');
-const codeEditor=document.getElementById('codeEditor');
-const copyBtn=document.getElementById('copyBtn');
-const downloadBtn2=document.getElementById('downloadBtn2');
-const tipBox=document.querySelector('.tip-box');
-const toast=document.getElementById('toast');
-const guideBtn=document.getElementById('guideBtn');
-const guideModal=document.getElementById('guideModal');
-const guideList=document.getElementById('guideList');
-const closeGuide=document.getElementById('closeGuide');
-const clearBtn=document.getElementById('clearBtn');
-const refreshBtn=document.getElementById('refreshBtn');
-
-/* ═══════════════════════════════════════════════
-   Tree Operations
-   ═══════════════════════════════════════════════ */
-function createNode(type){idCounter++;const n={id:'n'+idCounter,type};if(containerTypes.includes(type))n.children=[];else{const t=contentTemplates[type];n.data=t&&t.fields?{...t.fields}:{};}return n;}
-function findNode(id,node=tree){if(node.id===id)return node;if(node.children)for(const c of node.children){const r=findNode(id,c);if(r)return r;}return null;}
-function findParentAndIndex(id,node=tree){if(node.children)for(let i=0;i<node.children.length;i++){if(node.children[i].id===id)return{parent:node,index:i};const r=findParentAndIndex(id,node.children[i]);if(r)return r;}return null;}
-function isDescendant(ancestorId,nodeId){const n=findNode(ancestorId);if(!n||!n.children)return false;for(const c of n.children)if(c.id===nodeId||isDescendant(c.id,nodeId))return true;return false;}
-function removeNodeById(id){const f=findParentAndIndex(id);if(f){f.parent.children.splice(f.index,1);renderAll();}}
-function countAll(n=tree){let c=0;if(n.children){c+=n.children.length;n.children.forEach(ch=>{c+=countAll(ch);});}return c;}
-
-/* ═══════════════════════════════════════════════
-   Render Canvas
-   ═══════════════════════════════════════════════ */
-function renderNode(node){
-  const tpl=getTemplate(node.type);
-  if(node.children){
-    const inner=node.children.length?node.children.map(renderNode).join(''):`<div class="empty-hint">Drop components here</div>`;
-    return `<div class="comp-node container node-${node.type}" draggable="true" data-id="${node.id}"><div class="node-label"><span>${tpl.icon} ${tpl.label}</span><button class="del-btn" data-del="${node.id}">✕</button></div><div class="dropzone" data-parent-id="${node.id}">${inner}</div></div>`;
-  }
-  return `<div class="comp-node leaf" draggable="true" data-id="${node.id}" data-type="${node.type}">${tpl.render(node.data||{})}<button class="del-btn" data-del="${node.id}">✕</button></div>`;
+/* คำนวณความคืบหน้า */
+function getProgress(){
+  let done=0,total=LS.length;
+  LS.forEach(l=>{if(S.pDone[l.id])done++;});
+  return{done,total,pct:Math.round((done/total)*100)};
 }
-
-function renderAll(){
-  canvas.innerHTML=tree.children.length?tree.children.map(renderNode).join(''):'<div class="canvas-placeholder">// Drag components here<br><span>from the Explorer panel on the left</span></div>';
-  elCount.textContent=countAll();
-  updateCode();
+function getLevelDone(lid){
+  let c=0;if(S.pDone[lid])c++;
+  for(let i=0;i<3;i++)if(S.tDone[lid+'-'+i])c++;
+  return c;
 }
-
-/* ═══════════════════════════════════════════════
-   Drag & Drop
-   ═══════════════════════════════════════════════ */
-document.querySelectorAll('.tree-item[data-type]').forEach(item=>{
-  item.addEventListener('dragstart',e=>{e.dataTransfer.setData('text/plain',JSON.stringify({source:'palette',type:item.dataset.type}));});
-});
-canvas.addEventListener('dragstart',e=>{const el=e.target.closest('.comp-node');if(!el)return;draggedId=el.dataset.id;e.dataTransfer.setData('text/plain',JSON.stringify({source:'canvas',id:el.dataset.id}));el.classList.add('dragging');});
-canvas.addEventListener('dragend',e=>{const el=e.target.closest('.comp-node');if(el)el.classList.remove('dragging');draggedId=null;document.querySelectorAll('.dropzone-hover').forEach(d=>d.classList.remove('dropzone-hover'));});
-canvas.addEventListener('dragover',e=>{e.preventDefault();document.querySelectorAll('.dropzone-hover').forEach(d=>d.classList.remove('dropzone-hover'));const dz=e.target.closest('.dropzone');if(dz)dz.classList.add('dropzone-hover');});
-canvas.addEventListener('drop',e=>{
-  e.preventDefault();document.querySelectorAll('.dropzone-hover').forEach(d=>d.classList.remove('dropzone-hover'));
-  const dz=e.target.closest('.dropzone');if(!dz)return;
-  const parentId=dz.dataset.parentId;const parentNode=findNode(parentId);if(!parentNode)return;
-  let data;try{data=JSON.parse(e.dataTransfer.getData('text/plain'));}catch(err){return;}
-  const directItems=Array.from(dz.children).filter(c=>c.classList.contains('comp-node'));
-  const dir=containerDirection[parentNode.type]||'vertical';
-  let insertIndex=directItems.length;
-  for(let i=0;i<directItems.length;i++){const r=directItems[i].getBoundingClientRect();if(dir==='horizontal'){if(e.clientX<r.left+r.width/2){insertIndex=i;break;}}else{if(e.clientY<r.top+r.height/2){insertIndex=i;break;}}}
-  if(data.source==='palette'){parentNode.children.splice(insertIndex,0,createNode(data.type));}
-  else if(data.source==='canvas'){
-    const dId=data.id;if(dId===parentId||isDescendant(dId,parentId)){showToast('Cannot nest inside itself','warning');return;}
-    const found=findParentAndIndex(dId);if(!found)return;const[moved]=found.parent.children.splice(found.index,1);
-    let idx=insertIndex;if(found.parent.id===parentNode.id&&found.index<insertIndex)idx-=1;parentNode.children.splice(idx,0,moved);
-  }
-  renderAll();
-});
-
-/* ═══════════════════════════════════════════════
-   Click: Delete / Inspect
-   ═══════════════════════════════════════════════ */
-canvas.addEventListener('click',e=>{
-  const del=e.target.closest('.del-btn');if(del){e.stopPropagation();removeNodeById(del.dataset.del);return;}
-  const leaf=e.target.closest('.comp-node.leaf');if(leaf){const n=findNode(leaf.dataset.id);showTip(leaf.dataset.type,n?n.data:null);return;}
-  const cont=e.target.closest('.comp-node.container');if(cont){const m=cont.className.match(/node-(\w+)/);if(m)showTip(m[1]);}
-});
-
-/* ═══════════════════════════════════════════════
-   Editable Text
-   ═══════════════════════════════════════════════ */
-let activeEditable=null,savedRange=null;
-function saveSel(e){const ed=e.target.closest&&e.target.closest('.editable');if(!ed)return;activeEditable=ed;const s=window.getSelection();if(s&&s.rangeCount>0)savedRange=s.getRangeAt(0).cloneRange();}
-canvas.addEventListener('focusin',saveSel);canvas.addEventListener('keyup',saveSel);canvas.addEventListener('mouseup',saveSel);
-canvas.addEventListener('input',e=>{
-  const ed=e.target.closest('.editable');if(!ed)return;const nel=ed.closest('.comp-node');if(!nel)return;const n=findNode(nel.dataset.id);if(!n)return;if(!n.data)n.data={};n.data[ed.dataset.field]=ed.textContent;updateCode();
-});
-
-function escapeHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
-
-function showTip(type,data){
-  const tpl=getTemplate(type);if(!tpl)return;
-  const ex=tpl.html?tpl.html(data||tpl.fields||{}):'';
-  tipBox.innerHTML=`<div style="margin-bottom:6px;">${tpl.icon} <b>${tpl.label}</b> — <code>${escapeHtml(tpl.tag||'')}</code></div><div style="margin-bottom:4px;">📌 <b>When to use:</b> ${tpl.when||'-'}</div><div>💡 <b>UX Tip:</b> ${tpl.tip}</div>${ex?`<pre>${escapeHtml(ex)}</pre>`:''}`;
-}
-
-/* ═══════════════════════════════════════════════
-   Guide Modal
-   ═══════════════════════════════════════════════ */
-function buildGuide(){const all={...containerTemplates,...contentTemplates};guideList.innerHTML=Object.values(all).map(t=>{const ex=t.html?t.html(t.fields||{}):'';return `<div class="guide-item"><div>${t.icon} <b>${t.label}</b> — <code>${escapeHtml(t.tag||'')}</code></div><div style="margin-top:4px;">📌 <b>When:</b> ${t.when||'-'}</div><div style="margin-top:4px;">💡 ${t.tip}</div>${ex?`<pre>${escapeHtml(ex)}</pre>`:''}</div>`;}).join('');}
-guideBtn.addEventListener('click',()=>{buildGuide();guideModal.classList.add('show');});
-document.getElementById('abGuide').addEventListener('click',()=>{buildGuide();guideModal.classList.add('show');});
-closeGuide.addEventListener('click',()=>guideModal.classList.remove('show'));
-guideModal.addEventListener('click',e=>{if(e.target===guideModal)guideModal.classList.remove('show');});
-
-/* ═══════════════════════════════════════════════
-   Emoji Modal
-   ═══════════════════════════════════════════════ */
-const emojiModal=document.getElementById('emojiModal');
-const emojiGroups=document.getElementById('emojiGroups');
-const closeEmoji=document.getElementById('closeEmoji');
-const emojiCats={
-  "Smileys":["😀","😃","😄","😁","😆","😅","😂","🙂","😉","😊","😍","🤩","🤔","😎","😴","😭","😡","👍","👎","👏","🙏","💪","✌️","🤝","🫡"],
-  "Symbols":["❤️","🧡","💛","💚","💙","💜","🖤","🤍","💯","✅","❌","⭐","🌟","✨","🔥","💡","⚡","🎯","📌","🔔","⚠️"],
-  "Arrows / UI":["➡️","⬅️","⬆️","⬇️","↔️","↕️","🔄","▶️","⏸️","🔍","🔗","📎","📋","📁","📂","🗂️","🧩","📊","📈","📉"],
-  "Tech":["💻","🖥️","📱","⌨️","🖱️","🛒","💳","📊","📈","📉","🗓️","⏰","🌐","🔒","🔓","📧","✉️","📞","🚀","🎮"],
-  "Nature":["🌈","☀️","🌙","🌸","🍀","🎉","🎁","🏆","📢","💬","👋","🤖","🎯","🧠","🎨"]
-};
-function buildEmoji(){emojiGroups.innerHTML=Object.entries(emojiCats).map(([l,list])=>`<div style="font-size:0.7rem;color:var(--overlay0);margin:10px 0 6px;text-transform:uppercase;letter-spacing:1px;">${l}</div><div class="emoji-grid">${list.map(em=>`<button type="button" class="emoji-btn" data-emoji="${em}">${em}</button>`).join('')}</div>`).join('');}
-function insertEmoji(em){
-  if(activeEditable&&document.contains(activeEditable)){
-    activeEditable.focus();const sel=window.getSelection();
-    if(savedRange&&activeEditable.contains(savedRange.startContainer)){sel.removeAllRanges();sel.addRange(savedRange);}
-    else{const r=document.createRange();r.selectNodeContents(activeEditable);r.collapse(false);sel.removeAllRanges();sel.addRange(r);}
-    document.execCommand('insertText',false,em);if(sel.rangeCount>0)savedRange=sel.getRangeAt(0).cloneRange();
-    const nel=activeEditable.closest('.comp-node');if(nel){const n=findNode(nel.dataset.id);if(n){if(!n.data)n.data={};n.data[activeEditable.dataset.field]=activeEditable.textContent;updateCode();}}
-    showToast(`Inserted ${em}`,'success');
-  }else{navigator.clipboard.writeText(em).catch(()=>{});showToast('Click text on canvas first (emoji copied to clipboard)','warning');}
-}
-document.getElementById('abEmoji').addEventListener('click',()=>{buildEmoji();emojiModal.classList.add('show');});
-closeEmoji.addEventListener('click',()=>emojiModal.classList.remove('show'));
-emojiModal.addEventListener('click',e=>{if(e.target===emojiModal){emojiModal.classList.remove('show');return;}const b=e.target.closest('.emoji-btn');if(b)insertEmoji(b.dataset.emoji);});
-
-/* ═══════════════════════════════════════════════
-   Tree Category Toggle
-   ═══════════════════════════════════════════════ */
-document.querySelectorAll('.tree-cat-head').forEach(h=>{h.addEventListener('click',()=>h.parentElement.classList.toggle('collapsed'));});
-
-/* ═══════════════════════════════════════════════
-   Activity Bar
-   ═══════════════════════════════════════════════ */
-const sidebar=document.getElementById('sidebar');
-document.getElementById('abPalette').addEventListener('click',function(){sidebar.classList.toggle('collapsed');this.classList.toggle('active');});
-
-/* ═══════════════════════════════════════════════
-   Clear / Refresh
-   ═══════════════════════════════════════════════ */
-clearBtn.addEventListener('click',()=>{if(!tree.children.length)return;if(confirm('Clear all components? This cannot be undone.')){tree.children=[];renderAll();showToast('Workspace cleared','success');}});
-refreshBtn.addEventListener('click',()=>{renderAll();showToast('Preview refreshed','success');});
-
-/* ═══════════════════════════════════════════════
-   Generate Full index.html
-   ═══════════════════════════════════════════════ */
-function nodeToHtml(node,indent){
-  const tpl=getTemplate(node.type);
-  if(node.children){
-    const inner=node.children.length?node.children.map(c=>nodeToHtml(c,indent+'    ')).join('\n\n'):indent+'    <!-- place content here -->';
-    const tag=tpl.cssClass.startsWith('layout-section')?'section':'div';
-    return `${indent}<${tag} class="${tpl.cssClass}">\n${inner}\n${indent}</${tag}>`;
-  }
-  return tpl.html(node.data||tpl.fields||{}).split('\n').map(l=>indent+l.trimStart()).join('\n');
-}
-
-function getExportCss(){return `    * { margin: 0; padding: 0; box-sizing: border-box; }
-
-    body {
-      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-      color: #1e293b;
-      line-height: 1.6;
-      background: #f8fafc;
-    }
-
-    .page {
-      max-width: 960px;
-      margin: 0 auto;
-      padding: 24px 16px;
-    }
-
-    .layout-section {
-      padding: 28px;
-      margin-bottom: 16px;
-      background: #ffffff;
-      border-radius: 10px;
-      border: 1px solid #e2e8f0;
-    }
-
-    .layout-row {
-      display: flex;
-      flex-direction: row;
-      gap: 16px;
-      flex-wrap: wrap;
-    }
-
-    .layout-col {
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
-
-    .layout-grid2 {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 16px;
-    }
-
-    .layout-grid3 {
-      display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      gap: 16px;
-    }
-
-    @media (max-width: 640px) {
-      .layout-grid2, .layout-grid3 { grid-template-columns: 1fr; }
-      .layout-row { flex-direction: column; }
-    }
-
-    .site-header {
-      background: linear-gradient(135deg, #4f46e5, #6366f1);
-      color: #fff;
-      padding: 20px 24px;
-      border-radius: 8px;
-    }
-    .site-header h1 { font-size: 1.5rem; font-weight: 700; }
-
-    .site-nav {
-      background: #0f172a;
-      color: #fff;
-      padding: 12px 20px;
-      border-radius: 8px;
-      display: flex;
-      gap: 24px;
-      flex-wrap: wrap;
-    }
-    .site-nav a { color: #cbd5e1; text-decoration: none; transition: color 0.2s; }
-    .site-nav a:hover { color: #fff; }
-
-    .hero {
-      background: linear-gradient(135deg, #818cf8, #c084fc, #f472b6);
-      color: #fff;
-      padding: 48px 28px;
-      border-radius: 12px;
-      text-align: center;
-    }
-    .hero h2 { font-size: 1.8rem; margin-bottom: 10px; font-weight: 800; }
-    .hero p { font-size: 1.05rem; opacity: 0.92; max-width: 540px; margin: 0 auto; }
-
-    .btn {
-      display: inline-block;
-      background: linear-gradient(135deg, #f59e0b, #f97316);
-      color: #fff;
-      border: none;
-      padding: 12px 28px;
-      border-radius: 8px;
-      font-weight: 700;
-      font-size: 1rem;
-      cursor: pointer;
-      transition: transform 0.2s, box-shadow 0.2s;
-    }
-    .btn:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(245,158,11,0.3); }
-
-    img { max-width: 100%; height: auto; border-radius: 8px; display: block; }
-
-    .card {
-      background: #fff;
-      border: 1px solid #e2e8f0;
-      border-radius: 10px;
-      padding: 20px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
-      transition: box-shadow 0.2s;
-    }
-    .card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
-    .card h3 { margin-bottom: 8px; color: #1e293b; }
-    .card p { color: #64748b; font-size: 0.93rem; }
-
-    input[type="text"], input[type="email"], textarea, select {
-      width: 100%;
-      padding: 10px 14px;
-      border: 1px solid #e2e8f0;
-      border-radius: 8px;
-      font-size: 0.95rem;
-      font-family: inherit;
-      transition: border-color 0.2s, box-shadow 0.2s;
-      background: #fff;
-      color: #1e293b;
-    }
-    input:focus, textarea:focus, select:focus {
-      outline: none;
-      border-color: #6366f1;
-      box-shadow: 0 0 0 3px rgba(99,102,241,0.12);
-    }
-    textarea { resize: vertical; min-height: 90px; }
-
-    label { display: flex; align-items: center; gap: 8px; font-size: 0.95rem; color: #334155; cursor: pointer; }
-
-    p { margin-bottom: 8px; color: #334155; }
-
-    a { color: #4f46e5; text-decoration: none; font-weight: 600; border-bottom: 2px solid rgba(79,70,229,0.15); padding-bottom: 1px; transition: border-color 0.2s; }
-    a:hover { border-color: #4f46e5; }
-
-    ul { padding-left: 24px; margin-bottom: 8px; }
-    li { margin: 5px 0; color: #334155; }
-
-    table { width: 100%; border-collapse: collapse; font-size: 0.92rem; }
-    th, td { border: 1px solid #e2e8f0; padding: 10px 14px; text-align: left; }
-    th { background: #f1f5f9; color: #1e293b; font-weight: 600; }
-    tr:nth-child(even) td { background: #f8fafc; }
-
-    video { border-radius: 8px; max-width: 100%; }
-
-    blockquote {
-      border-left: 4px solid #818cf8;
-      padding: 16px 20px;
-      font-style: italic;
-      color: #334155;
-      background: #f8fafc;
-      border-radius: 0 8px 8px 0;
-      margin-bottom: 8px;
-    }
-    blockquote cite { display: block; margin-top: 10px; font-size: 0.85rem; color: #64748b; font-style: normal; }
-
-    .badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 700; margin-right: 6px; margin-bottom: 4px; background: #e0e7ff; color: #4338ca; }
-    .badge-alt { background: #dcfce7; color: #15803d; }
-
-    hr { border: none; border-top: 2px solid #e2e8f0; margin: 20px 0; }
-
-    pre { background: #0f172a; color: #7dd3fc; padding: 18px; border-radius: 8px; font-size: 0.85rem; overflow-x: auto; margin-bottom: 8px; }
-    pre code { font-family: 'Courier New', monospace; }
-
-    footer { background: #0f172a; color: #64748b; text-align: center; padding: 20px; border-radius: 8px; }
-    footer p { color: #64748b; margin: 0; }`;}
-
-function highlightLine(line){
-  let e=escapeHtml(line);
-  if(/^\s*&lt;!--/.test(e))return`<span class="tok-comment">${e}</span>`;
-  if(/^&lt;!DOCTYPE/i.test(e))return`<span class="tok-doctype">${e}</span>`;
-  e=e.replace(/(&lt;\/?)([a-zA-Z][a-zA-Z0-9]*)/g,(m,p1,p2)=>`${p1}<span class="tok-tag">${p2}</span>`);
-  e=e.replace(/([a-zA-Z-]+)(=)("[^"]*")/g,(m,p1,p2,p3)=>`<span class="tok-attr">${p1}</span>${p2}<span class="tok-string">${p3}</span>`);
-  e=e.replace(/(&gt;)/g,`<span class="tok-tag">$1</span>`);
-  return e;
-}
-function renderCodeEditor(code){
-  const lines=code.split('\n');
-  codeEditor.innerHTML=lines.map((line,i)=>`<div class="line"><span class="ln">${i+1}</span><span class="code${line.trim()===''?' muted':''}">${highlightLine(line)||'&nbsp;'}</span></div>`).join('');
-}
-
-function updateCode(){
-  if(!tree.children.length){
-    rawCodeText=`<!DOCTYPE html>\n<html lang="th">\n<head>\n  <meta charset="UTF-8">\n  <meta name="viewport" content="width=device-width, initial-scale=1.0">\n  <title>My Page</title>\n</head>\n<body>\n  <!-- No components yet -->\n</body>\n</html>`;
-    renderCodeEditor(rawCodeText);return;
-  }
-  const body=tree.children.map(c=>nodeToHtml(c,'    ')).join('\n\n');
-  const css=getExportCss();
-  rawCodeText=`<!DOCTYPE html>\n<html lang="th">\n<head>\n  <meta charset="UTF-8">\n  <meta name="viewport" content="width=device-width, initial-scale=1.0">\n  <title>My Page</title>\n  <style>\n${css}\n  </style>\n</head>\n<body>\n  <div class="page">\n${body}\n  </div>\n</body>\n</html>`;
-  renderCodeEditor(rawCodeText);
-}
-
-/* ═══════════════════════════════════════════════
-   Copy / Download
-   ═══════════════════════════════════════════════ */
-copyBtn.addEventListener('click',()=>{
-  navigator.clipboard.writeText(rawCodeText).then(()=>{
-    copyBtn.innerHTML='✅ Copied!';copyBtn.classList.add('copied');
-    setTimeout(()=>{copyBtn.innerHTML='📋 Copy Full HTML';copyBtn.classList.remove('copied');},2000);
+function getTotalXP(){
+  let xp=0;
+  LS.forEach(l=>{
+    if(S.pDone[l.id])xp+=l.prac.xp;
+    for(let i=0;i<3;i++)if(S.tDone[l.id+'-'+i])xp+=15;
   });
-});
-function doDownload(){
-  if(!tree.children.length){showToast('No components to download','warning');return;}
-  const blob=new Blob([rawCodeText],{type:'text/html;charset=utf-8'});
-  const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='index.html';document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);showToast('Downloaded index.html','success');
-}
-downloadBtn2.addEventListener('click',doDownload);
-document.getElementById('abDownload').addEventListener('click',doDownload);
-
-function showToast(msg,type='success'){
-  toast.textContent=msg;toast.className='toast '+type;
-  requestAnimationFrame(()=>{toast.classList.add('show');});
-  setTimeout(()=>toast.classList.remove('show'),2500);
+  return xp;
 }
 
-/* ═══════════════════════════════════════════════
-   Init
-   ═══════════════════════════════════════════════ */
-renderAll();
+/* ================================================================
+   Toast และ Confetti
+   ================================================================ */
+function toast(msg,type='info'){
+  const tc=document.getElementById('tc');
+  const cls=type==='success'?'sb-s':type==='error'?'sb-e':'sb-i';
+  const ico=type==='success'?'fa-check-circle':type==='error'?'fa-times-circle':'fa-info-circle';
+  const el=document.createElement('div');
+  el.className='sb '+cls;el.innerHTML=`<i class="fa-solid ${ico}"></i><span>${msg}</span>`;
+  tc.appendChild(el);
+  setTimeout(()=>{el.classList.add('lv');setTimeout(()=>el.remove(),300);},3000);
+}
+function confetti(){
+  const colors=['#4dabf7','#ff6b6b','#e3b341','#79c0ff','#b794f4','#7ee787'];
+  for(let i=0;i<60;i++){
+    const el=document.createElement('div');el.className='confetti';
+    el.style.left=Math.random()*100+'vw';
+    el.style.background=colors[Math.floor(Math.random()*colors.length)];
+    el.style.width=(Math.random()*8+6)+'px';
+    el.style.height=(Math.random()*8+6)+'px';
+    el.style.borderRadius=Math.random()>.5?'50%':'2px';
+    el.style.animationDuration=(Math.random()*2+2)+'s';
+    el.style.animationDelay=(Math.random()*.8)+'s';
+    document.body.appendChild(el);
+    setTimeout(()=>el.remove(),5000);
+  }
+}
+
+/* ================================================================
+   Syntax Highlighting สำหรับแสดงโค้ดตัวอย่าง
+   ================================================================ */
+function hl(code){
+  let h=code.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  h=h.replace(/(\/\*[\s\S]*?\*\/)/g,'<span class="cmt">$1</span>');
+  h=h.replace(/(&lt;\/?)([\w-]+)/g,'$1<span class="tag">$2</span>');
+  h=h.replace(/([.#]?[\w-]+)(\s*{)/g,'<span class="sel">$1</span>$2');
+  h=h.replace(/([\w-]+)(\s*:)/g,'<span class="prop">$1</span>$2');
+  h=h.replace(/(".*?")/g,'<span class="val">$1</span>');
+  return h;
+}
+
+/* ================================================================
+   Background Animation - อนุภาคลอย
+   ================================================================ */
+const bgC=document.getElementById('bgCanvas');
+const bgCtx=bgC.getContext('2d');
+let particles=[];
+const SYMBOLS=['{','}','#','.','%','fr',':',';','em','px','flex'];
+function initBg(){
+  bgC.width=window.innerWidth;bgC.height=window.innerHeight;
+  particles=[];
+  for(let i=0;i<35;i++){
+    particles.push({
+      x:Math.random()*bgC.width,y:Math.random()*bgC.height,
+      vx:(Math.random()-.5)*.3,vy:Math.random()*.2+.1,
+      sym:SYMBOLS[Math.floor(Math.random()*SYMBOLS.length)],
+      size:Math.random()*10+10,alpha:Math.random()*.12+.03
+    });
+  }
+}
+function animBg(){
+  bgCtx.clearRect(0,0,bgC.width,bgC.height);
+  particles.forEach(p=>{
+    p.x+=p.vx;p.y+=p.vy;
+    if(p.y>bgC.height+30){p.y=-30;p.x=Math.random()*bgC.width;}
+    if(p.x<-30)p.x=bgC.width+30;if(p.x>bgC.width+30)p.x=-30;
+    bgCtx.font=p.size+'px Fira Code,monospace';
+    bgCtx.fillStyle=`rgba(77,171,247,${p.alpha})`;
+    bgCtx.fillText(p.sym,p.x,p.y);
+  });
+  requestAnimationFrame(animBg);
+}
+window.addEventListener('resize',initBg);
+initBg();animBg();
+
+/* ================================================================
+   สร้าง Line Numbers
+   ================================================================ */
+function makeLineNums(code){
+  const lines=code.split('\n');
+  return lines.map((_,i)=>i+1).join('\n');
+}
+
+/* ================================================================
+   ตรวจสอบโค้ด - สร้าง iframe แล้วรัน cks
+   ================================================================ */
+function runChecks(code,cks){
+  return new Promise(resolve=>{
+    const wrap=document.createElement('div');
+    wrap.style.cssText='position:fixed;left:-9999px;top:-9999px;width:400px;height:300px;';
+    const iframe=document.createElement('iframe');
+    iframe.sandbox='allow-scripts';
+    iframe.style.cssText='width:100%;height:100%;border:none;';
+    wrap.appendChild(iframe);
+    document.body.appendChild(wrap);
+    let resolved=false;
+    const finish=(results)=>{if(resolved)return;resolved=true;document.body.removeChild(wrap);resolve(results);};
+    iframe.onload=()=>{
+      try{
+        const doc=iframe.contentDocument||iframe.contentWindow.document;
+        const results=cks.map(c=>{
+          try{const pass=c.ck(doc,code);return{lb:c.lb,pass,ht:c.ht||''};}
+          catch(e){return{lb:c.lb,pass:false,ht:'เกิดข้อผิดพลาด: '+e.message};}
+        });
+        finish(results);
+      }catch(e){finish(cks.map(c=>({lb:c.lb,pass:false,ht:'ไม่สามารถเข้าถึง iframe'})));}
+    };
+    setTimeout(()=>finish(cks.map(c=>({lb:c.lb,pass:false,ht:'หมดเวลาโหลด'}))),3000);
+    iframe.srcdoc=code;
+  });
+}
+
+/* ================================================================
+   สร้าง Editor + Preview UI
+   ================================================================ */
+function buildEditorPreview(startCode,checkItems,onCheck){
+  const editorId='ed_'+Date.now()+'_'+Math.floor(Math.random()*1000);
+  const previewId='pv_'+Date.now()+'_'+Math.floor(Math.random()*1000);
+  let html=`
+  <div class="flex gap-4 editor-grid" style="flex-direction:row;">
+    <div class="flex-1 min-w-0">
+      <div class="text-xs font-semibold mb-2" style="color:var(--muted);"><i class="fa-solid fa-code mr-1"></i> โค้ดของคุณ</div>
+      <div class="ew" id="ew_${editorId}">
+        <div class="ln" id="ln_${editorId}">${makeLineNums(startCode)}</div>
+        <textarea class="ce" id="${editorId}" spellcheck="false">${startCode.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</textarea>
+      </div>
+    </div>
+    <div class="flex-1 min-w-0">
+      <div class="text-xs font-semibold mb-2" style="color:var(--muted);"><i class="fa-solid fa-eye mr-1"></i> ตัวอย่างผลลัพธ์</div>
+      <div class="pf">
+        <div class="pb"><div class="pd" style="background:#ff5f56;"></div><div class="pd" style="background:#ffbd2e;"></div><div class="pd" style="background:#27c93f;"></div><span class="ml-2 text-xs" style="color:var(--muted);">preview</span></div>
+        <iframe id="${previewId}" sandbox="allow-scripts" style="width:100%;height:200px;border:none;"></iframe>
+      </div>
+    </div>
+  </div>`;
+
+  if(checkItems){
+    html+=`<div class="mt-4 space-y-2" id="cks_${editorId}">`;
+    checkItems.forEach((c,i)=>{
+      html+=`<div class="ci pend" id="ck_${editorId}_${i}"><i class="fa-solid fa-circle" style="font-size:.5rem;"></i><span>${c.lb}</span><div class="ch">${c.ht||''}</div></div>`;
+    });
+    html+=`</div>`;
+    html+=`<div class="mt-4 flex gap-3 flex-wrap"><button class="bp" id="btn_ck_${editorId}"><i class="fa-solid fa-play"></i> ตรวจสอบ</button><button class="bs bsm" id="btn_rst_${editorId}"><i class="fa-solid fa-rotate-left"></i> รีเซ็ต</button></div>`;
+  }
+
+  /* หลัง render แล้วจะ init */
+  setTimeout(()=>{
+    const ta=document.getElementById(editorId);
+    const ln=document.getElementById(lnElId(editorId));
+    const pv=document.getElementById(previewId);
+    if(!ta)return;
+    const origStart=startCode;
+    function sync(){
+      const v=ta.value;
+      ln.textContent=makeLineNums(v);
+      pv.srcdoc=v;
+      const ew=document.getElementById('ew_'+editorId);
+      if(ew){ew.classList.remove('ok','err');}
+    }
+    ta.addEventListener('input',sync);
+    ta.addEventListener('keydown',function(e){
+      if(e.key==='Tab'){
+        e.preventDefault();
+        const s=ta.selectionStart,en=ta.selectionEnd;
+        ta.value=ta.value.substring(0,s)+'  '+ta.value.substring(en);
+        ta.selectionStart=ta.selectionEnd=s+2;
+        sync();
+      }
+    });
+    sync();
+
+    if(checkItems&&onCheck){
+      const btnCk=document.getElementById('btn_ck_'+editorId);
+      const btnRst=document.getElementById('btn_rst_'+editorId);
+      if(btnCk)btnCk.addEventListener('click',async()=>{
+        btnCk.disabled=true;btnCk.innerHTML='<i class="fa-solid fa-spinner fa-spin"></i> กำลังตรวจสอบ...';
+        const results=await runChecks(ta.value,checkItems);
+        const ew=document.getElementById('ew_'+editorId);
+        let allPass=true;
+        results.forEach((r,i)=>{
+          const el=document.getElementById('ck_'+editorId+'_'+i);
+          if(!el)return;
+          el.className='ci '+(r.pass?'pass':'fail');
+          el.querySelector('i').className='fa-solid '+(r.pass?'fa-check-circle':'fa-times-circle');
+          if(!r.pass)allPass=false;
+        });
+        if(ew){ew.classList.add(allPass?'ok':'err');}
+        btnCk.disabled=false;btnCk.innerHTML='<i class="fa-solid fa-play"></i> ตรวจสอบ';
+        onCheck(results,allPass);
+      });
+      if(btnRst)btnRst.addEventListener('click',()=>{
+        ta.value=origStart;sync();
+        checkItems.forEach((_,i)=>{
+          const el=document.getElementById('ck_'+editorId+'_'+i);
+          if(el){el.className='ci pend';el.querySelector('i').className='fa-solid fa-circle';}
+        });
+        const ew=document.getElementById('ew_'+editorId);
+        if(ew)ew.classList.remove('ok','err');
+      });
+    }
+  },50);
+
+  return html;
+}
+function lnElId(editorId){return 'ln_'+editorId;}
+
+/* ================================================================
+   Render: แผนที่ด่าน
+   ================================================================ */
+function renderMap(){
+  const prog=getProgress();
+  const xp=getTotalXP();
+  let html=`<div class="max-w-4xl mx-auto px-4 py-8 afiu">`;
+  /* หัว */
+  html+=`<div class="text-center mb-8 s1 afiu">
+    <div class="inline-flex items-center gap-3 mb-3">
+      <i class="fa-brands fa-css3-alt text-3xl" style="color:var(--accent);"></i>
+      <h1 class="text-3xl md:text-4xl font-extrabold agl">CSS Quest</h1>
+    </div>
+    <p style="color:var(--muted);" class="text-sm mb-4">เรียนรู้ CSS ผ่านการลงมือทำจริง - 16 ด่าน</p>
+    <div class="max-w-md mx-auto">
+      <div class="flex justify-between text-xs mb-1" style="color:var(--muted);"><span>ความคืบหน้า</span><span>${prog.done}/${prog.total} ด่าน</span></div>
+      <div class="xp-outer"><div class="xp-inner" style="width:${prog.pct}%;"></div></div>
+      <div class="flex justify-between text-xs mt-2"><span style="color:var(--gold);"><i class="fa-solid fa-coins mr-1"></i>${xp} XP</span>
+      <button onclick="resetState()" class="text-xs hover:underline" style="color:var(--danger);background:none;border:none;cursor:pointer;font-family:Kanit;">รีเซ็ตข้อมูล</button></div>
+    </div>
+  </div>`;
+
+  /* กริดด่าน */
+  html+=`<div class="grid grid-cols-1 sm:grid-cols-2 gap-3">`;
+  LS.forEach((l,idx)=>{
+    const locked=l.id>S.unlocked;
+    const done=!!S.pDone[l.id];
+    const ld=getLevelDone(l.id);
+    const cls=locked?'lc locked':done?'lc done':'lc'+(l.id===S.unlocked?' cur':'');
+    html+=`<div class="gc ${cls} p-4 s${Math.min(idx%4+1,5)} afiu" ${!locked?`onclick="openLevel(${l.id})"`:''}>`;
+    html+=`<div class="flex items-center gap-3">`;
+    html+=`<div class="lnum">${locked?'<i class="fa-solid fa-lock text-xs"></i>':l.id}</div>`;
+    html+=`<div class="flex-1 min-w-0">`;
+    html+=`<div class="font-bold text-sm flex items-center gap-2"><i class="${l.icon} text-xs" style="color:${done?'var(--accent)':'var(--muted)'}"></i>${l.id}. ${l.title}</div>`;
+    html+=`<div class="text-xs mt-1" style="color:var(--muted);">${locked?'ผ่านด่านก่อนหน้าก่อน':'แบบฝึกหัด + แบบทดสอบ 3 ข้อ'}</div>`;
+    if(!locked){
+      html+=`<div class="flex gap-1 mt-2">`;
+      for(let i=0;i<4;i++){
+        html+=`<div class="dot ${i<ld?'done':'no'}"></div>`;
+      }
+      html+=`<span class="text-xs ml-2" style="color:var(--muted);">${ld}/4</span>`;
+      html+=`</div>`;
+    }
+    html+=`</div></div></div>`;
+  });
+  html+=`</div>`;
+
+  /* จบเกม */
+  if(prog.done===prog.total){
+    html+=`<div class="gc p-6 mt-6 text-center afiu" style="border-color:var(--accent);background:rgba(77,171,247,.05);">
+      <i class="fa-solid fa-trophy text-4xl mb-3" style="color:var(--gold);"></i>
+      <h2 class="text-xl font-bold mb-2" style="color:var(--accent);">ยินดีด้วย! คุณผ่านทุกด่านแล้ว</h2>
+      <p style="color:var(--muted);" class="text-sm">คุณได้เรียนรู้ CSS ครบทุกหมวดหมู่ รวม ${xp} XP</p>
+    </div>`;
+  }
+  html+=`</div>`;
+  document.getElementById('app').innerHTML=html;
+}
+
+/* ================================================================
+   Render: หน้าด่าน (เรียนรู้ / ฝึกหัด / แบบทดสอบ)
+   ================================================================ */
+function renderLevel(){
+  const l=LS.find(x=>x.id===S.levelId);
+  if(!l){S.screen='map';render();return;}
+  const ld=getLevelDone(l.id);
+  let html=`<div class="max-w-5xl mx-auto px-4 py-6 afiu">`;
+  /* หัว */
+  html+=`<div class="flex items-center gap-3 mb-4">
+    <button class="bs bsm" onclick="goMap()"><i class="fa-solid fa-arrow-left"></i></button>
+    <div class="lnum apulse" style="width:40px;height:40px;font-size:.85rem;">${l.id}</div>
+    <div class="flex-1 min-w-0">
+      <div class="font-bold text-lg flex items-center gap-2"><i class="${l.icon}" style="color:var(--accent);"></i>${l.title}</div>
+      <div class="text-xs" style="color:var(--muted);">${l.desc} &mdash; ${ld}/4 เสร็จแล้ว</div>
+    </div>
+    <div class="flex gap-1">${[0,1,2,3].map(i=>`<div class="dot ${i<ld?'done':'no'}"></div>`).join('')}</div>
+  </div>`;
+
+  /* แท็บ */
+  html+=`<div class="flex mb-6" style="border-bottom:1px solid var(--border);">`;
+  const tabs=[{k:'learn',lb:'เรียนรู้',ico:'fa-book-open'},{k:'practice',lb:'ฝึกหัด',ico:'fa-pencil'},{k:'test',lb:'แบบทดสอบ',ico:'fa-clipboard-check'}];
+  tabs.forEach(t=>{
+    html+=`<div class="tab-btn ${S.tab===t.k?'active':''}" onclick="switchTab('${t.k}')"><i class="fa-solid ${t.ico} mr-1"></i>${t.lb}</div>`;
+  });
+  html+=`</div>`;
+
+  /* เนื้อหาแท็บ */
+  if(S.tab==='learn'){
+    html+=renderLearnTab(l);
+  }else if(S.tab==='practice'){
+    html+=renderPracticeTab(l);
+  }else{
+    html+=renderTestTab(l);
+  }
+
+  html+=`</div>`;
+  document.getElementById('app').innerHTML=html;
+}
+
+function renderLearnTab(l){
+  let h=`<div class="grid md:grid-cols-2 gap-6 afiu">`;
+  /* ซ้าย: คำอธิบาย */
+  h+=`<div>
+    <h3 class="font-bold text-lg mb-4" style="color:var(--accent);"><i class="fa-solid fa-lightbulb mr-2"></i>สิ่งที่จะเรียนรู้</h3>
+    <div class="space-y-3">`;
+  l.pts.forEach(p=>{
+    h+=`<div class="gc p-3 text-sm flex items-start gap-2"><i class="fa-solid fa-chevron-right mt-1 text-xs" style="color:var(--accent);"></i><span>${p}</span></div>`;
+  });
+  h+=`</div></div>`;
+  /* ขวา: โค้ดตัวอย่าง + พรีวิว */
+  h+=`<div>
+    <h3 class="font-bold text-lg mb-4" style="color:var(--info);"><i class="fa-solid fa-code mr-2"></i>ตัวอย่างโค้ด</h3>
+    <div class="code-block mb-4">${hl(l.code)}</div>
+    <div class="pf"><div class="pb"><div class="pd" style="background:#ff5f56;"></div><div class="pd" style="background:#ffbd2e;"></div><div class="pd" style="background:#27c93f;"></div><span class="ml-2 text-xs" style="color:var(--muted);">preview</span></div>
+    <iframe id="learn_preview" sandbox="allow-scripts" style="width:100%;height:200px;border:none;"></iframe></div>
+  </div>`;
+  h+=`</div>`;
+  setTimeout(()=>{const pv=document.getElementById('learn_preview');if(pv)pv.srcdoc=l.code;},50);
+  return h;
+}
+
+function renderPracticeTab(l){
+  const p=l.prac;
+  const alreadyDone=!!S.pDone[l.id];
+  let h=`<div class="afiu">`;
+  h+=`<div class="gc p-4 mb-4 flex items-start gap-3">
+    <i class="fa-solid fa-pencil mt-1" style="color:var(--gold);"></i>
+    <div><div class="font-bold">${p.title}</div><div class="text-sm" style="color:var(--muted);">${p.desc}</div></div>
+    <div class="ml-auto text-sm font-bold" style="color:var(--gold);">+${p.xp} XP</div>
+  </div>`;
+  if(alreadyDone){
+    h+=`<div class="gc p-4 mb-4 flex items-center gap-3" style="border-color:var(--accent);background:rgba(77,171,247,.05);">
+      <i class="fa-solid fa-check-circle text-xl" style="color:var(--accent);"></i>
+      <span class="font-semibold" style="color:var(--accent);">ผ่านแบบฝึกหัดนี้แล้ว</span>
+    </div>`;
+  }
+  h+=buildEditorPreview(p.start,p.cks,(results,allPass)=>{
+    if(allPass&&!S.pDone[l.id]){
+      S.pDone[l.id]=true;
+      if(l.id>=S.unlocked&&l.id<LS.length)S.unlocked=l.id+1;
+      saveState();confetti();
+      toast('ผ่านแบบฝึกหัด! +'+p.xp+' XP','success');
+      setTimeout(()=>renderLevel(),800);
+    }else if(!allPass){
+      toast('ยังผ่านไม่ครบ ลองอีกครั้ง','error');
+    }
+  });
+  h+=`<div class="gc p-3 mt-4 text-sm" style="border-left:3px solid var(--info);"><i class="fa-solid fa-circle-info mr-1" style="color:var(--info);"></i>${p.gh}</div>`;
+  h+=`</div>`;
+  return h;
+}
+
+function renderTestTab(l){
+  let h=`<div class="afiu">`;
+  h+=`<h3 class="font-bold mb-4"><i class="fa-solid fa-clipboard-check mr-2" style="color:var(--gold);"></i>แบบทดสอบ 3 ข้อ (+15 XP ต่อข้อ)</h3>`;
+  h+=`<div class="space-y-3">`;
+  l.tests.forEach((t,i)=>{
+    const done=!!S.tDone[l.id+'-'+i];
+    h+=`<div class="gc p-4 flex items-center gap-4 cursor-pointer ${done?'':'hover:border-[var(--accent)]'}" onclick="openTest(${l.id},${i})" style="${done?'border-color:var(--accent);background:rgba(77,171,247,.03);':''}">
+      <div class="lnum" style="width:36px;height:36px;font-size:.8rem;${done?'background:var(--accent);border-color:var(--accent);color:#0d1117;':''}">${done?'<i class="fa-solid fa-check text-xs"></i>':(i+1)}</div>
+      <div class="flex-1 min-w-0">
+        <div class="font-semibold text-sm">${t.title}</div>
+        <div class="text-xs" style="color:var(--muted);">${t.desc}</div>
+      </div>
+      <i class="fa-solid fa-chevron-right text-xs" style="color:var(--muted);"></i>
+    </div>`;
+  });
+  h+=`</div></div>`;
+  return h;
+}
+
+/* ================================================================
+   Render: หน้าแบบทดสอบ
+   ================================================================ */
+function renderTest(){
+  const l=LS.find(x=>x.id===S.levelId);
+  if(!l){S.screen='map';render();return;}
+  const t=l.tests[S.testIdx];
+  if(!t){S.screen='level';S.tab='test';render();return;}
+  const alreadyDone=!!S.tDone[l.id+'-'+S.testIdx];
+
+  let html=`<div class="max-w-5xl mx-auto px-4 py-6 afiu">`;
+  html+=`<div class="flex items-center gap-3 mb-4">
+    <button class="bs bsm" onclick="backToLevel()"><i class="fa-solid fa-arrow-left"></i></button>
+    <div class="flex-1 min-w-0">
+      <div class="font-bold">ข้อที่ ${S.testIdx+1}/3: ${t.title}</div>
+      <div class="text-xs" style="color:var(--muted);">${t.desc}</div>
+    </div>
+    <span class="text-sm font-bold" style="color:var(--gold);">+15 XP</span>
+  </div>`;
+
+  if(alreadyDone){
+    html+=`<div class="gc p-4 mb-4 flex items-center gap-3" style="border-color:var(--accent);background:rgba(77,171,247,.05);">
+      <i class="fa-solid fa-check-circle" style="color:var(--accent);"></i>
+      <span style="color:var(--accent);">ทำข้อนี้แล้ว</span>
+    </div>`;
+  }
+
+  html+=buildEditorPreview(t.start,t.cks,(results,allPass)=>{
+    if(allPass&&!S.tDone[l.id+'-'+S.testIdx]){
+      S.tDone[l.id+'-'+S.testIdx]=true;
+      saveState();confetti();
+      toast('ถูกต้อง! +15 XP','success');
+      setTimeout(()=>{
+        if(S.testIdx<2){S.testIdx++;render();}
+        else{S.screen='level';S.tab='test';render();}
+      },800);
+    }else if(!allPass){
+      toast('ยังไม่ถูกต้อง ลองอีกครั้ง','error');
+    }
+  });
+
+  /* นำทาง */
+  html+=`<div class="flex justify-between mt-4">`;
+  if(S.testIdx>0)html+=`<button class="bs bsm" onclick="S.testIdx--;render();"><i class="fa-solid fa-arrow-left mr-1"></i>ข้อก่อนหน้า</button>`;
+  else html+=`<div></div>`;
+  if(S.testIdx<2)html+=`<button class="bs bsm" onclick="S.testIdx++;render();">ข้อถัดไป<i class="fa-solid fa-arrow-right ml-1"></i></button>`;
+  else html+=`<button class="bs bsm" onclick="backToLevel()">กลับหน้าด่าน<i class="fa-solid fa-arrow-right ml-1"></i></button>`;
+  html+=`</div>`;
+
+  html+=`</div>`;
+  document.getElementById('app').innerHTML=html;
+}
+
+/* ================================================================
+   Navigation
+   ================================================================ */
+function goMap(){S.screen='map';render();}
+function openLevel(id){S.screen='level';S.levelId=id;S.tab='learn';render();}
+function switchTab(t){S.tab=t;renderLevel();}
+function openTest(lid,idx){S.screen='test';S.levelId=lid;S.testIdx=idx;render();}
+function backToLevel(){S.screen='level';S.tab='test';render();}
+
+/* ================================================================
+   Render Router
+   ================================================================ */
+function render(){
+  switch(S.screen){
+    case 'map':renderMap();break;
+    case 'level':renderLevel();break;
+    case 'test':renderTest();break;
+    default:S.screen='map';renderMap();
+  }
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* ================================================================
+   เริ่มต้น
+   ================================================================ */
+loadState();
+render();
 </script>
 </body>
 </html>
